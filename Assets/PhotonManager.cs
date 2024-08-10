@@ -5,12 +5,15 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 public class PhotonManager : MonoBehaviourPunCallbacks
 {
     private const string FirstTimeKey = "FirstTime";
     private const string LastEquippedCharacterKey = "LastEquippedCharacter";
     private string[] spawnPoints = { "SpawnPoint1", "SpawnPoint2", "SpawnPoint3", "SpawnPoint4" };
+    private Dictionary<int, string> playerSpawnPoints = new Dictionary<int, string>();
+    private HashSet<string> occupiedSpawnPoints = new HashSet<string>();
 
     public Button playButton;
     public GameObject loadingPanel;
@@ -54,8 +57,6 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     {
         if (PhotonNetwork.InRoom && PhotonNetwork.CurrentRoom.PlayerCount == PhotonNetwork.CurrentRoom.MaxPlayers)
         {
-            photonView.RPC("ShowLoadingPanel", RpcTarget.AllBuffered);
-            enabled = false;
             StartCountdown();
         }
     }
@@ -155,27 +156,74 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         {
             Debug.LogError("Cosmetics button is not assigned.");
         }
-
         string characterPrefabName = PlayerPrefs.GetString(LastEquippedCharacterKey, "DefaultCharacter");
-        Vector3 spawnPosition = GetSpawnPosition();
 
-        if (!string.IsNullOrEmpty(characterPrefabName) && spawnPosition != Vector3.zero)
+        string availableSpawnPointName = GetAvailableSpawnPoint();
+        if (!string.IsNullOrEmpty(characterPrefabName) && availableSpawnPointName != null)
         {
-            GameObject character = PhotonNetwork.Instantiate(characterPrefabName, spawnPosition, Quaternion.identity);
-            if (character != null)
+            GameObject spawnPoint = GameObject.Find(availableSpawnPointName);
+            if (spawnPoint != null)
             {
-                character.transform.rotation = Quaternion.Euler(0, -115, 0);
+                Vector3 spawnPosition = spawnPoint.transform.position;
+                GameObject character = PhotonNetwork.Instantiate(characterPrefabName, spawnPosition, Quaternion.identity);
                 character.transform.localScale = Vector3.one * 0.3f;
-            }
-            else
-            {
-                Debug.LogError("Failed to instantiate character.");
+                if (character != null)
+                {
+                    character.transform.rotation = Quaternion.Euler(0, -115, 0);
+
+                    // Oyuncu ile spawn noktasýný eþleþtir
+                    playerSpawnPoints[PhotonNetwork.LocalPlayer.ActorNumber] = availableSpawnPointName;
+                    occupiedSpawnPoints.Add(availableSpawnPointName);  // Spawn noktasýný meþgul olarak iþaretle
+                }
+                else
+                {
+                    Debug.LogError("Failed to instantiate character.");
+                }
             }
         }
         else
         {
-            Debug.LogError("Character prefab name is empty or spawn position is invalid.");
+            Debug.LogError("Character prefab name is empty or no available spawn points.");
         }
+    }
+    public override void OnPlayerLeftRoom(Player otherPlayer)
+    {
+        Debug.Log($"Player {otherPlayer.NickName} has left the room.");
+
+        // Eðer oyuncu ayrýldýysa, onun spawn noktasýný boþalt
+        if (playerSpawnPoints.ContainsKey(otherPlayer.ActorNumber))
+        {
+            string spawnPointName = playerSpawnPoints[otherPlayer.ActorNumber];
+
+            if (spawnPointName != null && occupiedSpawnPoints.Contains(spawnPointName))
+            {
+                occupiedSpawnPoints.Remove(spawnPointName);  // Spawn noktasýný tekrar kullanýlabilir hale getir
+                playerSpawnPoints.Remove(otherPlayer.ActorNumber);
+                Debug.Log($"Spawn point '{spawnPointName}' is now available.");
+            }
+        }
+    }
+    private string GetAvailableSpawnPoint()
+    {
+        List<string> availableSpawnPoints = new List<string>(spawnPoints);
+
+        // Eðer oyuncu odanýn kurucusu deðilse, ilk spawn noktasýný kullanýlamaz yap
+        if (!PhotonNetwork.IsMasterClient)
+        {
+            availableSpawnPoints.RemoveAt(0);  // Ýlk spawn noktasýný çýkar
+        }
+
+        foreach (string spawnPointName in availableSpawnPoints)
+        {
+            if (!occupiedSpawnPoints.Contains(spawnPointName))
+            {
+                Debug.Log($"Spawn point '{spawnPointName}' is available.");
+                return spawnPointName;
+            }
+        }
+
+        Debug.LogError("No available spawn points.");
+        return null;
     }
 
     private void StartCountdown()
@@ -193,7 +241,6 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         statusText.gameObject.SetActive(false); // Mesajý gizle
     }
 
-    [PunRPC]
     void ShowLoadingPanel()
     {
         if (loadingPanel != null)
@@ -215,49 +262,33 @@ public class PhotonManager : MonoBehaviourPunCallbacks
             seconds--;
         }
 
-        // Geri sayým bittiðinde yükleme panelini göstermek ve sahneyi deðiþtirmek için RPC çaðýr
-        photonView.RPC("ShowLoadingPanel", RpcTarget.AllBuffered);
+        ShowLoadingPanel();
 
         // Bekleme süresi eklemek gerekebilir (opsiyonel)
-        yield return new WaitForSeconds(1);
+        yield return new WaitForSeconds(3);
 
         // Sahneyi yükle
         PhotonNetwork.LoadLevel("TrapPG");
     }
-
-    private Vector3 GetSpawnPosition()
+    private string FindNearestSpawnPoint(Vector3 position)
     {
-        List<string> availableSpawnPoints = new List<string>(spawnPoints);
-        int playerIndex = PhotonNetwork.LocalPlayer.ActorNumber - 1; // PlayerIndex (0-based)
+        GameObject nearestSpawnPoint = null;
+        float minDistance = float.MaxValue;
 
-        if (playerIndex < availableSpawnPoints.Count)
+        foreach (string spawnPointName in spawnPoints)
         {
-            string spawnPointName = availableSpawnPoints[playerIndex];
             GameObject spawnPoint = GameObject.Find(spawnPointName);
-
             if (spawnPoint != null)
             {
-                if (spawnPoint.transform.childCount == 0)
+                float distance = Vector3.Distance(position, spawnPoint.transform.position);
+                if (distance < minDistance)
                 {
-                    Debug.Log($"Spawn point '{spawnPointName}' is empty and available.");
-                    return spawnPoint.transform.position;
-                }
-                else
-                {
-                    Debug.LogWarning($"Spawn point '{spawnPointName}' is not empty.");
+                    minDistance = distance;
+                    nearestSpawnPoint = spawnPoint;
                 }
             }
-            else
-            {
-                Debug.LogError($"Spawn point '{spawnPointName}' not found in the scene.");
-            }
-        }
-        else
-        {
-            Debug.LogError("Player index is out of bounds.");
         }
 
-        Debug.LogError("No available spawn points.");
-        return Vector3.zero;
+        return nearestSpawnPoint != null ? nearestSpawnPoint.name : null;
     }
 }
