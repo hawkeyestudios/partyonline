@@ -3,6 +3,8 @@ using Photon.Pun;
 using Photon.Realtime;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using System.Collections;
+using System.Collections.Generic;
 
 public class PhotonManager : MonoBehaviourPunCallbacks
 {
@@ -14,6 +16,8 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     public GameObject loadingPanel;
     public Text statusText;  // Maç arama ve geri sayým mesajý için Text
     private bool isCountingDown = false;
+    public Button leaveRoomButton;
+    public Button cosmeticsButton;
 
     private void Start()
     {
@@ -24,8 +28,6 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         else
         {
             Debug.Log("Already connected to Photon.");
-            ConnectToLobby();
-            OnJoinedRoom();
         }
 
         if (playButton != null)
@@ -35,6 +37,26 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         else
         {
             Debug.LogError("Play button is not assigned.");
+        }
+
+        if (leaveRoomButton != null)
+        {
+            leaveRoomButton.onClick.AddListener(OnLeaveRoomButtonClicked);
+            leaveRoomButton.gameObject.SetActive(false); // Baþlangýçta butonu pasif yap
+        }
+        else
+        {
+            Debug.LogError("Leave room button is not assigned.");
+        }
+    }
+
+    private void Update()
+    {
+        if (PhotonNetwork.InRoom && PhotonNetwork.CurrentRoom.PlayerCount == PhotonNetwork.CurrentRoom.MaxPlayers)
+        {
+            photonView.RPC("ShowLoadingPanel", RpcTarget.AllBuffered);
+            enabled = false;
+            StartCountdown();
         }
     }
 
@@ -54,6 +76,38 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         {
             ConnectToLobby();
         }
+    }
+
+    private void OnLeaveRoomButtonClicked()
+    {
+        LeaveRoom();
+    }
+
+    public void LeaveRoom()
+    {
+        if (PhotonNetwork.InRoom)
+        {
+            PhotonNetwork.LeaveRoom();
+        }
+        else
+        {
+            Debug.LogWarning("Not currently in a room to leave.");
+        }
+    }
+
+    public override void OnLeftRoom()
+    {
+        Debug.Log("Left room successfully.");
+        leaveRoomButton.gameObject.SetActive(false); // Odadan çýkýldýðýnda butonu pasif yap
+        statusText.text = "You have left the room."; // Oyuncuya odadan çýktýðýný bildir
+        statusText.gameObject.SetActive(true); // Mesajý göster
+
+        if (cosmeticsButton != null)
+        {
+            cosmeticsButton.interactable = true; // Odadan çýkýldýðýnda cosmetics butonunu tekrar aktif yap
+        }
+
+        StartCoroutine(HideStatusTextAfterDelay(1.5f));
     }
 
     private void ShowCharacterShop()
@@ -91,6 +145,16 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     public override void OnJoinedRoom()
     {
         Debug.Log("Joined Room.");
+        leaveRoomButton.gameObject.SetActive(true);
+
+        if (cosmeticsButton != null)
+        {
+            cosmeticsButton.interactable = false;
+        }
+        else
+        {
+            Debug.LogError("Cosmetics button is not assigned.");
+        }
 
         string characterPrefabName = PlayerPrefs.GetString(LastEquippedCharacterKey, "DefaultCharacter");
         Vector3 spawnPosition = GetSpawnPosition();
@@ -112,13 +176,6 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         {
             Debug.LogError("Character prefab name is empty or spawn position is invalid.");
         }
-
-        if (PhotonNetwork.CurrentRoom.PlayerCount == PhotonNetwork.CurrentRoom.MaxPlayers)
-        {
-            Debug.Log("Room is full. Starting game...");
-            loadingPanel.SetActive(true);
-            StartCountdown();
-        }
     }
 
     private void StartCountdown()
@@ -130,7 +187,26 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         }
     }
 
-    private System.Collections.IEnumerator CountdownCoroutine(int seconds)
+    private IEnumerator HideStatusTextAfterDelay(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        statusText.gameObject.SetActive(false); // Mesajý gizle
+    }
+
+    [PunRPC]
+    void ShowLoadingPanel()
+    {
+        if (loadingPanel != null)
+        {
+            loadingPanel.SetActive(true);
+        }
+        else
+        {
+            Debug.LogError("Loading panel is not assigned.");
+        }
+    }
+
+    private IEnumerator CountdownCoroutine(int seconds)
     {
         while (seconds > 0)
         {
@@ -138,21 +214,47 @@ public class PhotonManager : MonoBehaviourPunCallbacks
             yield return new WaitForSeconds(1);
             seconds--;
         }
+
+        // Geri sayým bittiðinde yükleme panelini göstermek ve sahneyi deðiþtirmek için RPC çaðýr
+        photonView.RPC("ShowLoadingPanel", RpcTarget.AllBuffered);
+
+        // Bekleme süresi eklemek gerekebilir (opsiyonel)
+        yield return new WaitForSeconds(1);
+
+        // Sahneyi yükle
         PhotonNetwork.LoadLevel("TrapPG");
     }
 
     private Vector3 GetSpawnPosition()
     {
-        int playerIndex = PhotonNetwork.LocalPlayer.ActorNumber - 1;
+        List<string> availableSpawnPoints = new List<string>(spawnPoints);
+        int playerIndex = PhotonNetwork.LocalPlayer.ActorNumber - 1; // PlayerIndex (0-based)
 
-        if (playerIndex >= 0 && playerIndex < spawnPoints.Length)
+        if (playerIndex < availableSpawnPoints.Count)
         {
-            string spawnPointName = spawnPoints[playerIndex];
+            string spawnPointName = availableSpawnPoints[playerIndex];
             GameObject spawnPoint = GameObject.Find(spawnPointName);
-            if (spawnPoint != null && spawnPoint.transform.childCount == 0)
+
+            if (spawnPoint != null)
             {
-                return spawnPoint.transform.position;
+                if (spawnPoint.transform.childCount == 0)
+                {
+                    Debug.Log($"Spawn point '{spawnPointName}' is empty and available.");
+                    return spawnPoint.transform.position;
+                }
+                else
+                {
+                    Debug.LogWarning($"Spawn point '{spawnPointName}' is not empty.");
+                }
             }
+            else
+            {
+                Debug.LogError($"Spawn point '{spawnPointName}' not found in the scene.");
+            }
+        }
+        else
+        {
+            Debug.LogError("Player index is out of bounds.");
         }
 
         Debug.LogError("No available spawn points.");

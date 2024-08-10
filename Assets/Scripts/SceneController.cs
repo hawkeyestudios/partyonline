@@ -26,6 +26,10 @@ public class SceneController : MonoBehaviour
     public Image itemsImage;
     public Color blueColor;
     public Color whiteColor;
+    private void Start()
+    {
+        characterImage.color = blueColor;
+    }
     public static void LoadScene(string name)
     { 
         SceneManager.LoadScene(name);

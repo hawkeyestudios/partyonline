@@ -8,31 +8,58 @@ public class TrapPGSpawnSystem : MonoBehaviourPunCallbacks
 
     private void Start()
     {
-        SpawnCharacter();
+        if (PhotonNetwork.IsConnectedAndReady)
+        {
+            SpawnCharacter();
+        }
+        else
+        {
+            Debug.LogError("PhotonNetwork is not connected.");
+        }
     }
 
     private void SpawnCharacter()
     {
-        // Her oyuncunun kendine ait bir spawn noktasý olmasý gerekiyor
-        int spawnIndex = PhotonNetwork.LocalPlayer.ActorNumber - 1;
+        // Oyuncularýn lobiye giriþ yaptýklarýndan emin olmak için PhotonNetwork.PlayerList'i kullanýn
+        int localPlayerIndex = GetLocalPlayerIndex();
 
-        if (spawnIndex < spawnPoints.Length)
+        if (localPlayerIndex >= 0 && localPlayerIndex < spawnPoints.Length)
         {
-            string lastEquippedCharacter = PhotonNetwork.LocalPlayer.CustomProperties["LastEquippedCharacter"] as string ?? "DefaultCharacterPrefabName";
+            // "LastEquippedCharacter" özelliðini doðru ayarladýðýnýzdan emin olun
+            string lastEquippedCharacter = PhotonNetwork.LocalPlayer.CustomProperties.ContainsKey("LastEquippedCharacter")
+                ? PhotonNetwork.LocalPlayer.CustomProperties["LastEquippedCharacter"] as string
+                : "DefaultCharacterPrefabName";
 
             GameObject characterPrefab = Resources.Load<GameObject>(lastEquippedCharacter);
+
             if (characterPrefab != null)
             {
-                GameObject characterInstance = PhotonNetwork.Instantiate(characterPrefab.name, spawnPoints[spawnIndex].position, Quaternion.identity);
+                // `PhotonNetwork.Instantiate` kullanarak karakteri oluþturun
+                GameObject characterInstance = PhotonNetwork.Instantiate(characterPrefab.name, spawnPoints[localPlayerIndex].position, Quaternion.identity);
+                Debug.Log($"Character instantiated at spawn point {localPlayerIndex}.");
             }
             else
             {
-                Debug.LogError("Character prefab not found.");
+                Debug.LogError($"Character prefab '{lastEquippedCharacter}' not found.");
             }
         }
         else
         {
-            Debug.LogError("Spawn point index out of range.");
+            Debug.LogError("Spawn point index out of range or invalid player index.");
         }
+    }
+
+    // Lokal oyuncunun indeksini almak için yardýmcý fonksiyon
+    private int GetLocalPlayerIndex()
+    {
+        Player[] players = PhotonNetwork.PlayerList;
+        for (int i = 0; i < players.Length; i++)
+        {
+            if (players[i].IsLocal)
+            {
+                return i; // Lokal oyuncunun indeksini döndür
+            }
+        }
+        return -1; // Lokal oyuncu bulunamadý
     }
 }
