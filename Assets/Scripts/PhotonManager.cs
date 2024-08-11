@@ -35,6 +35,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
 
         if (playButton != null)
         {
+            playButton.interactable = true;
             playButton.onClick.AddListener(OnPlayButtonClicked);
         }
         else
@@ -57,6 +58,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     {
         if (PhotonNetwork.InRoom && PhotonNetwork.CurrentRoom.PlayerCount == PhotonNetwork.CurrentRoom.MaxPlayers)
         {
+            playButton.interactable = false;
             StartCountdown();
         }
     }
@@ -100,6 +102,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     {
         Debug.Log("Left room successfully.");
         leaveRoomButton.gameObject.SetActive(false); // Odadan çýkýldýðýnda butonu pasif yap
+        playButton.interactable = true;
         statusText.text = "You have left the room."; // Oyuncuya odadan çýktýðýný bildir
         statusText.gameObject.SetActive(true); // Mesajý göster
 
@@ -109,6 +112,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         }
 
         StartCoroutine(HideStatusTextAfterDelay(1.5f));
+
     }
 
     private void ShowCharacterShop()
@@ -147,6 +151,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     {
         Debug.Log("Joined Room.");
         leaveRoomButton.gameObject.SetActive(true);
+        playButton.interactable = false;
 
         if (cosmeticsButton != null)
         {
@@ -166,10 +171,9 @@ public class PhotonManager : MonoBehaviourPunCallbacks
             {
                 Vector3 spawnPosition = spawnPoint.transform.position;
                 GameObject character = PhotonNetwork.Instantiate(characterPrefabName, spawnPosition, Quaternion.identity);
-                character.transform.localScale = Vector3.one * 0.3f;
                 if (character != null)
                 {
-                    character.transform.rotation = Quaternion.Euler(0, -115, 0);
+                    character.transform.rotation = Quaternion.Euler(0, 10, 0);
 
                     // Oyuncu ile spawn noktasýný eþleþtir
                     playerSpawnPoints[PhotonNetwork.LocalPlayer.ActorNumber] = availableSpawnPointName;
