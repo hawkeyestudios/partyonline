@@ -16,6 +16,7 @@ namespace KnoxGameStudios
         public GameObject LoadingText;
         public GameObject LoadingImage;
         public Animator animator;
+        public Animator loginCameraAnim;
 
         private string username;
         private string email;
@@ -45,6 +46,7 @@ namespace KnoxGameStudios
                 email = PlayerPrefs.GetString(EMAIL_PREF_KEY);
                 password = PlayerPrefs.GetString(PASSWORD_PREF_KEY);
                 LoginWithEmail();
+                loginCameraAnim.SetTrigger("LoginCamera");
             }
             else
             {

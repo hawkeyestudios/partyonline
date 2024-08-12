@@ -49,8 +49,10 @@ public class Hazard : MonoBehaviour
         player.SetActive(false);
 
         player.transform.position = deadPoint.position;
+        player.transform.rotation = Quaternion.Euler(0, 0, 0);
         gameUI.SetActive(true);
         player.SetActive(true);
+        boomEffect.Stop();
 
         yield return new WaitForSeconds(deathAnimationCooldown - 2.16f); // Kalan süre için bekle
 

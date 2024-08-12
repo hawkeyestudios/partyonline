@@ -4,7 +4,7 @@ public class ParticleController : MonoBehaviour
 {
     public ParticleSystem particleSystem;
 
-    void Start()
+    void Awake()
     {
         if (particleSystem != null)
         {
