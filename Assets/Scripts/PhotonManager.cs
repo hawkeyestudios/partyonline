@@ -165,6 +165,19 @@ public class PhotonManager : MonoBehaviourPunCallbacks
             if (character != null)
             {
                 character.transform.rotation = Quaternion.Euler(0, 10, 0);
+
+                if (PhotonNetwork.IsMasterClient)
+                {
+                    Transform crown = character.transform.Find("Crown"); // Tacýn adýný burada belirttiðiniz adla deðiþtirin
+                    if (crown != null)
+                    {
+                        crown.gameObject.SetActive(true);
+                    }
+                    else
+                    {
+                        Debug.LogError("Crown object not found on character.");
+                    }
+                }
             }
             else
             {

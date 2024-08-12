@@ -13,17 +13,12 @@ public class SpawnManager : MonoBehaviourPunCallbacks
 
     private void SpawnPlayers()
     {
-        Player[] players = PhotonNetwork.PlayerList;
-        int spawnPointIndex = 0;
-        foreach (Player player in players)
-        {
-            Transform spawnPoint = spawnPoints[spawnPointIndex];
-            Vector3 spawnPosition = spawnPoint.position;
-            Quaternion spawnRotation = spawnPoint.rotation;
+        int spawnPointIndex = PhotonNetwork.LocalPlayer.ActorNumber % spawnPoints.Length;
+        Transform spawnPoint = spawnPoints[spawnPointIndex];
+        Vector3 spawnPosition = spawnPoint.position;
+        Quaternion spawnRotation = spawnPoint.rotation;
 
-            // Oyuncu prefab'ýný baþlatýn
-            PhotonNetwork.Instantiate(PlayerPrefs.GetString("LastEquippedCharacter"), spawnPosition, spawnRotation);
-            spawnPointIndex = (spawnPointIndex + 1) % spawnPoints.Length;
-        }
+        // Oyuncu prefab'ýný baþlatýn
+        PhotonNetwork.Instantiate(PlayerPrefs.GetString("LastEquippedCharacter"), spawnPosition, spawnRotation);
     }
 }
