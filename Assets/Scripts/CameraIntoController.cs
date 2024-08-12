@@ -7,17 +7,25 @@ public class CameraIntroController : MonoBehaviour
     public GameObject gameUI;
     public float animationDuration = 5f;
     public CameraFollow cameraFollow;
+    private PlayerMovement[] playerMovements; // PlayerMovement referanslarýný saklayacak dizi
 
     private float timer;
 
     void Start()
     {
-        gameUI.SetActive(false);
         timer = 0f;
 
         if (cameraAnimator != null)
         {
             cameraAnimator.SetTrigger("StartGame");
+        }
+
+        // Joystick ve Jump butonlarýný devre dýþý býrak
+        playerMovements = FindObjectsOfType<PlayerMovement>();
+        foreach (PlayerMovement pm in playerMovements)
+        {
+            pm.SetJoystickActive(false);
+            pm.SetJumpButtonActive(false);
         }
     }
 
@@ -35,7 +43,6 @@ public class CameraIntroController : MonoBehaviour
 
     public void OnAnimationComplete()
     {
-        // Hazard.IsPlayerDead() methodunu kontrol ederek gameUI'yi aktif hale getir
         if (gameUI != null && !Hazard.IsPlayerDead())
         {
             gameUI.SetActive(true);
@@ -44,6 +51,13 @@ public class CameraIntroController : MonoBehaviour
         if (cameraFollow != null)
         {
             cameraFollow.StartCameraFollow();
+        }
+
+        // Joystick ve Jump butonlarýný aktif hale getirin
+        foreach (PlayerMovement pm in playerMovements)
+        {
+            pm.SetJoystickActive(true);
+            pm.SetJumpButtonActive(true);
         }
 
         StartGame();

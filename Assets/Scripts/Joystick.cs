@@ -6,6 +6,7 @@ public class Joystick : MonoBehaviour, IDragHandler, IPointerUpHandler, IPointer
     private RectTransform background;
     private RectTransform handle;
     private Vector2 inputVector;
+    private bool isActive = true; // Joystick'in aktif olup olmadýðýný kontrol etmek için eklenen deðiþken
 
     private void Start()
     {
@@ -15,6 +16,8 @@ public class Joystick : MonoBehaviour, IDragHandler, IPointerUpHandler, IPointer
 
     public void OnDrag(PointerEventData eventData)
     {
+        if (!isActive) return; // Joystick aktif deðilse hareket etmeye izin verme
+
         Vector2 pos;
         RectTransformUtility.ScreenPointToLocalPointInRectangle(background, eventData.position, eventData.pressEventCamera, out pos);
         pos.x = (pos.x / background.sizeDelta.x);
@@ -46,10 +49,14 @@ public class Joystick : MonoBehaviour, IDragHandler, IPointerUpHandler, IPointer
         return inputVector.y;
     }
 
-    // Joystick'in handle pozisyonunu sýfýrlayan method
     public void ResetHandlePosition()
     {
         inputVector = Vector2.zero;
         handle.anchoredPosition = Vector2.zero;
+    }
+
+    public void SetActive(bool active) // Joystick'in aktif olup olmadýðýný ayarlayan method
+    {
+        isActive = active;
     }
 }

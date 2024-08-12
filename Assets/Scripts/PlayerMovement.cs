@@ -13,9 +13,7 @@ public class PlayerMovement : MonoBehaviour
     private bool isGrounded;
 
     private PhotonView photonView;
-
     private Animator animator;
-    private bool isDead = false;
 
     private void Start()
     {
@@ -27,7 +25,6 @@ public class PlayerMovement : MonoBehaviour
         joystick = FindObjectOfType<Joystick>();
         jumpButton = GameObject.Find("JumpButton")?.GetComponent<Button>();
 
-        // Jump butonuna týklama olayýný baðla
         if (jumpButton != null)
         {
             jumpButton.onClick.AddListener(OnJumpButtonClicked);
@@ -36,11 +33,19 @@ public class PlayerMovement : MonoBehaviour
         {
             Debug.LogError("JumpButton not found in the scene.");
         }
+
+        if (joystick != null)
+        {
+            Debug.Log("Joystick bulundu");
+        }
+        else
+        {
+            Debug.LogError("Joystick not found in the scene.");
+        }
     }
 
     private void Update()
     {
-        // Sadece kendi karakterimiz için kontrolleri yap
         if (photonView.IsMine)
         {
             if (joystick != null)
@@ -49,23 +54,18 @@ public class PlayerMovement : MonoBehaviour
                 Vector3 moveDirection = new Vector3(joystick.Horizontal(), 0, joystick.Vertical()).normalized;
                 if (moveDirection != Vector3.zero)
                 {
-                    // Karakterin yönünü döndür
                     Quaternion toRotation = Quaternion.LookRotation(moveDirection, Vector3.up);
                     transform.rotation = Quaternion.Lerp(transform.rotation, toRotation, Time.deltaTime * 10f);
-
-                    // Yürüyüþ animasyonunu tetikle
                     animator.SetBool("Walking", true);
                 }
                 else
                 {
-                    // Yürüyüþ animasyonunu durdur
                     animator.SetBool("Walking", false);
                 }
 
                 rb.velocity = new Vector3(moveDirection.x * moveSpeed, rb.velocity.y, moveDirection.z * moveSpeed);
             }
 
-            // Jump butonuna týklanýp týklanmadýðýný kontrol et
             if (Input.GetButtonDown("Jump") && isGrounded)
             {
                 Jump();
@@ -77,8 +77,6 @@ public class PlayerMovement : MonoBehaviour
     {
         rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
         isGrounded = false;
-
-        // Zýplama animasyonunu tetikle
         animator.SetTrigger("Jump");
     }
 
@@ -90,12 +88,27 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    // Jump butonuna týklama iþlemini iþleyen metod
     private void OnJumpButtonClicked()
     {
         if (isGrounded)
         {
             Jump();
+        }
+    }
+
+    public void SetJoystickActive(bool active)
+    {
+        if (joystick != null)
+        {
+            joystick.gameObject.SetActive(active);
+        }
+    }
+
+    public void SetJumpButtonActive(bool active)
+    {
+        if (jumpButton != null)
+        {
+            jumpButton.interactable = active;
         }
     }
 }

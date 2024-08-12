@@ -21,6 +21,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     private bool isCountingDown = false;
     public Button leaveRoomButton;
     public Button cosmeticsButton;
+    public GridManager gridManager; // GridManager referansý
 
     private void Start()
     {
@@ -103,7 +104,6 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         }
 
         StartCoroutine(HideStatusTextAfterDelay(1.5f));
-
     }
 
     private void ShowCharacterShop()
@@ -134,7 +134,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     {
         Debug.Log("Joined Lobby.");
 
-        RoomOptions roomOptions = new RoomOptions { MaxPlayers = 4 };
+        RoomOptions roomOptions = new RoomOptions { MaxPlayers = 2 };
         PhotonNetwork.JoinOrCreateRoom("LobbyRoom", roomOptions, TypedLobby.Default);
     }
 
@@ -155,31 +155,31 @@ public class PhotonManager : MonoBehaviourPunCallbacks
 
         string characterPrefabName = PlayerPrefs.GetString(LastEquippedCharacterKey, "DefaultCharacter");
 
-        // Spawn point seçimi ve atama
-        string assignedSpawnPoint = GetAssignedSpawnPoint();
-        if (!string.IsNullOrEmpty(characterPrefabName) && assignedSpawnPoint != null)
+        if (!string.IsNullOrEmpty(characterPrefabName))
         {
-            GameObject spawnPoint = GameObject.Find(assignedSpawnPoint);
-            if (spawnPoint != null)
-            {
-                Vector3 spawnPosition = spawnPoint.transform.position;
-                GameObject character = PhotonNetwork.Instantiate(characterPrefabName, spawnPosition, Quaternion.identity);
-                if (character != null)
-                {
-                    character.transform.rotation = Quaternion.Euler(0, 10, 0);
+            // GridManager'dan spawn pozisyonu al
+            Vector3 spawnPosition = gridManager.GetNextSpawnPosition(PhotonNetwork.LocalPlayer.ActorNumber - 1);
 
-                    playerSpawnPoints[PhotonNetwork.LocalPlayer.ActorNumber] = assignedSpawnPoint;
-                    occupiedSpawnPoints.Add(assignedSpawnPoint);
-                }
-                else
-                {
-                    Debug.LogError("Failed to instantiate character.");
-                }
+            GameObject character = PhotonNetwork.Instantiate(characterPrefabName, spawnPosition, Quaternion.identity);
+
+            if (character != null)
+            {
+                character.transform.rotation = Quaternion.Euler(0, 10, 0);
+            }
+            else
+            {
+                Debug.LogError("Failed to instantiate character.");
             }
         }
         else
         {
-            Debug.LogError("Character prefab name is empty or no available spawn points.");
+            Debug.LogError("Character prefab name is empty.");
+        }
+
+        // Oyun için geri sayým baþlat
+        if (PhotonNetwork.CurrentRoom.PlayerCount == PhotonNetwork.CurrentRoom.MaxPlayers)
+        {
+            StartCountdown();
         }
     }
 
@@ -192,7 +192,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         {
             string spawnPointName = playerSpawnPoints[otherPlayer.ActorNumber];
 
-            if (spawnPointName != null && occupiedSpawnPoints.Contains(spawnPointName))
+            if (!string.IsNullOrEmpty(spawnPointName) && occupiedSpawnPoints.Contains(spawnPointName))
             {
                 occupiedSpawnPoints.Remove(spawnPointName);
                 playerSpawnPoints.Remove(otherPlayer.ActorNumber);
@@ -201,38 +201,19 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         }
 
         // Tüm oyunculara spawn point durumunu güncelle
-        photonView.RPC("UpdateSpawnPointsRPC", RpcTarget.AllBuffered, occupiedSpawnPoints.ToArray());
-    }
+        photonView.RPC("UpdateSpawnPointsRPC", RpcTarget.AllBuffered, string.Join(",", occupiedSpawnPoints.ToArray()));
 
-    private string GetAssignedSpawnPoint()
-    {
-        // Daha önce atanmýþ bir spawn point varsa, onu tekrar kullan
-        if (playerSpawnPoints.ContainsKey(PhotonNetwork.LocalPlayer.ActorNumber))
+        // Eðer geri sayým baþladýysa, geri sayýmý durdur
+        if (isCountingDown && PhotonNetwork.CurrentRoom.PlayerCount < PhotonNetwork.CurrentRoom.MaxPlayers)
         {
-            string previousSpawnPoint = playerSpawnPoints[PhotonNetwork.LocalPlayer.ActorNumber];
-            if (!occupiedSpawnPoints.Contains(previousSpawnPoint))
-            {
-                return previousSpawnPoint;
-            }
+            StopCountdown();
         }
-
-        // Boþ bir spawn point bul ve ata
-        foreach (string spawnPointName in spawnPoints)
-        {
-            if (!occupiedSpawnPoints.Contains(spawnPointName))
-            {
-                return spawnPointName;
-            }
-        }
-
-        Debug.LogError("No available spawn points.");
-        return null;
     }
 
     [PunRPC]
-    private void UpdateSpawnPointsRPC(string[] occupiedPoints)
+    private void UpdateSpawnPointsRPC(string occupiedPoints)
     {
-        occupiedSpawnPoints = new HashSet<string>(occupiedPoints);
+        occupiedSpawnPoints = new HashSet<string>(occupiedPoints.Split(','));
     }
 
     private void StartCountdown()
@@ -244,28 +225,17 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         }
     }
 
+    private void StopCountdown()
+    {
+        isCountingDown = false;
+        StopAllCoroutines();
+        statusText.text = "Waiting for more players...";
+    }
+
     [PunRPC]
     private void StartCountdownRPC(int seconds)
     {
         StartCoroutine(CountdownCoroutine(seconds));
-    }
-
-    private IEnumerator HideStatusTextAfterDelay(float delay)
-    {
-        yield return new WaitForSeconds(delay);
-        statusText.gameObject.SetActive(false);
-    }
-
-    void ShowLoadingPanel()
-    {
-        if (loadingPanel != null)
-        {
-            loadingPanel.SetActive(true);
-        }
-        else
-        {
-            Debug.LogError("Loading panel is not assigned.");
-        }
     }
 
     private IEnumerator CountdownCoroutine(int seconds)
@@ -280,5 +250,17 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         ShowLoadingPanel();
         yield return new WaitForSeconds(3);
         PhotonNetwork.LoadLevel("TrapPG");
+    }
+
+    private IEnumerator HideStatusTextAfterDelay(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        statusText.gameObject.SetActive(false);
+    }
+
+    void ShowLoadingPanel()
+    {
+        loadingPanel.SetActive(true);
+        statusText.gameObject.SetActive(false);
     }
 }
