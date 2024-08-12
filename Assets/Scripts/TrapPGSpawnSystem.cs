@@ -1,6 +1,7 @@
 using UnityEngine;
 using Photon.Pun;
 using Photon.Realtime;
+using System.Collections.Generic;
 
 public class TrapPGSpawnSystem : MonoBehaviourPunCallbacks
 {
@@ -13,7 +14,12 @@ public class TrapPGSpawnSystem : MonoBehaviourPunCallbacks
 
         if (PhotonNetwork.IsConnectedAndReady)
         {
-            SpawnCharacter();
+            if (PhotonNetwork.IsMasterClient)
+            {
+                // Ana sunucu sahne yüklendiðinde tüm oyuncularý bekliyor
+                PhotonNetwork.CurrentRoom.SetCustomProperties(new ExitGames.Client.Photon.Hashtable { { "AllPlayersReady", false } });
+                photonView.RPC("CheckAllPlayersReady", RpcTarget.AllBuffered);
+            }
         }
         else
         {
@@ -21,73 +27,64 @@ public class TrapPGSpawnSystem : MonoBehaviourPunCallbacks
         }
     }
 
+    [PunRPC]
+    private void CheckAllPlayersReady()
+    {
+        if (PhotonNetwork.CurrentRoom.PlayerCount == PhotonNetwork.PlayerListOthers.Length + 1)
+        {
+            // Herkes sahneye geçti, karakterleri spawn et
+            PhotonNetwork.CurrentRoom.SetCustomProperties(new ExitGames.Client.Photon.Hashtable { { "AllPlayersReady", true } });
+            SpawnCharacter();
+        }
+    }
+
     private void SpawnCharacter()
     {
-        int localPlayerIndex = GetLocalPlayerIndex();
+        int spawnIndex = GetRandomAvailableSpawnPoint();
 
-        if (localPlayerIndex >= 0 && localPlayerIndex < spawnPoints.Length)
+        if (spawnIndex != -1)
         {
-            int spawnIndex = GetAvailableSpawnPoint(localPlayerIndex);
+            string lastEquippedCharacter = PhotonNetwork.LocalPlayer.CustomProperties.ContainsKey("LastEquippedCharacter")
+                ? PhotonNetwork.LocalPlayer.CustomProperties["LastEquippedCharacter"] as string
+                : "DefaultCharacterPrefabName";
 
-            if (spawnIndex != -1)
+            GameObject characterPrefab = Resources.Load<GameObject>(lastEquippedCharacter);
+
+            if (characterPrefab != null)
             {
-                string lastEquippedCharacter = PhotonNetwork.LocalPlayer.CustomProperties.ContainsKey("LastEquippedCharacter")
-                    ? PhotonNetwork.LocalPlayer.CustomProperties["LastEquippedCharacter"] as string
-                    : "DefaultCharacterPrefabName";
-
-                GameObject characterPrefab = Resources.Load<GameObject>(lastEquippedCharacter);
-
-                if (characterPrefab != null)
-                {
-                    GameObject characterInstance = PhotonNetwork.Instantiate(characterPrefab.name, spawnPoints[spawnIndex].position, Quaternion.identity);
-                    Debug.Log($"Character instantiated at spawn point {spawnIndex}.");
-                }
-                else
-                {
-                    Debug.LogError($"Character prefab '{lastEquippedCharacter}' not found.");
-                }
+                GameObject characterInstance = PhotonNetwork.Instantiate(characterPrefab.name, spawnPoints[spawnIndex].position, Quaternion.identity);
+                Debug.Log($"Character instantiated at spawn point {spawnIndex}.");
             }
             else
             {
-                Debug.LogError("No available spawn points.");
+                Debug.LogError($"Character prefab '{lastEquippedCharacter}' not found.");
             }
         }
         else
         {
-            Debug.LogError("Spawn point index out of range or invalid player index.");
+            Debug.LogError("No available spawn points.");
         }
     }
 
-    // Mevcut oyuncunun indeksini almak için yardýmcý fonksiyon
-    private int GetLocalPlayerIndex()
+    // Uygun bir rastgele spawn noktasý seçmek için yardýmcý fonksiyon
+    private int GetRandomAvailableSpawnPoint()
     {
-        Player[] players = PhotonNetwork.PlayerList;
-        for (int i = 0; i < players.Length; i++)
-        {
-            if (players[i].IsLocal)
-            {
-                return i;
-            }
-        }
-        return -1;
-    }
-
-    // Uygun bir spawn noktasý seçmek için yardýmcý fonksiyon
-    private int GetAvailableSpawnPoint(int preferredIndex)
-    {
-        if (!occupiedSpawnPoints[preferredIndex])
-        {
-            occupiedSpawnPoints[preferredIndex] = true;
-            return preferredIndex;
-        }
+        List<int> availableSpawnIndices = new List<int>();
 
         for (int i = 0; i < occupiedSpawnPoints.Length; i++)
         {
             if (!occupiedSpawnPoints[i])
             {
-                occupiedSpawnPoints[i] = true;
-                return i;
+                availableSpawnIndices.Add(i);
             }
+        }
+
+        if (availableSpawnIndices.Count > 0)
+        {
+            int randomIndex = Random.Range(0, availableSpawnIndices.Count);
+            int chosenSpawnIndex = availableSpawnIndices[randomIndex];
+            occupiedSpawnPoints[chosenSpawnIndex] = true;
+            return chosenSpawnIndex;
         }
 
         return -1; // Uygun bir spawn point bulunamadý

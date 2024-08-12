@@ -17,7 +17,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
 
     public Button playButton;
     public GameObject loadingPanel;
-    public Text statusText;  // Maç arama ve geri sayým mesajý için Text
+    public Text statusText;
     private bool isCountingDown = false;
     public Button leaveRoomButton;
     public Button cosmeticsButton;
@@ -46,20 +46,11 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         if (leaveRoomButton != null)
         {
             leaveRoomButton.onClick.AddListener(OnLeaveRoomButtonClicked);
-            leaveRoomButton.gameObject.SetActive(false); // Baþlangýçta butonu pasif yap
+            leaveRoomButton.gameObject.SetActive(false);
         }
         else
         {
             Debug.LogError("Leave room button is not assigned.");
-        }
-    }
-
-    private void Update()
-    {
-        if (PhotonNetwork.InRoom && PhotonNetwork.CurrentRoom.PlayerCount == PhotonNetwork.CurrentRoom.MaxPlayers)
-        {
-            playButton.interactable = false;
-            StartCountdown();
         }
     }
 
@@ -101,14 +92,14 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     public override void OnLeftRoom()
     {
         Debug.Log("Left room successfully.");
-        leaveRoomButton.gameObject.SetActive(false); // Odadan çýkýldýðýnda butonu pasif yap
+        leaveRoomButton.gameObject.SetActive(false);
         playButton.interactable = true;
-        statusText.text = "You have left the room."; // Oyuncuya odadan çýktýðýný bildir
-        statusText.gameObject.SetActive(true); // Mesajý göster
+        statusText.text = "You have left the room.";
+        statusText.gameObject.SetActive(true);
 
         if (cosmeticsButton != null)
         {
-            cosmeticsButton.interactable = true; // Odadan çýkýldýðýnda cosmetics butonunu tekrar aktif yap
+            cosmeticsButton.interactable = true;
         }
 
         StartCoroutine(HideStatusTextAfterDelay(1.5f));
@@ -161,12 +152,14 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         {
             Debug.LogError("Cosmetics button is not assigned.");
         }
+
         string characterPrefabName = PlayerPrefs.GetString(LastEquippedCharacterKey, "DefaultCharacter");
 
-        string availableSpawnPointName = GetAvailableSpawnPoint();
-        if (!string.IsNullOrEmpty(characterPrefabName) && availableSpawnPointName != null)
+        // Spawn point seçimi ve atama
+        string assignedSpawnPoint = GetAssignedSpawnPoint();
+        if (!string.IsNullOrEmpty(characterPrefabName) && assignedSpawnPoint != null)
         {
-            GameObject spawnPoint = GameObject.Find(availableSpawnPointName);
+            GameObject spawnPoint = GameObject.Find(assignedSpawnPoint);
             if (spawnPoint != null)
             {
                 Vector3 spawnPosition = spawnPoint.transform.position;
@@ -175,9 +168,8 @@ public class PhotonManager : MonoBehaviourPunCallbacks
                 {
                     character.transform.rotation = Quaternion.Euler(0, 10, 0);
 
-                    // Oyuncu ile spawn noktasýný eþleþtir
-                    playerSpawnPoints[PhotonNetwork.LocalPlayer.ActorNumber] = availableSpawnPointName;
-                    occupiedSpawnPoints.Add(availableSpawnPointName);  // Spawn noktasýný meþgul olarak iþaretle
+                    playerSpawnPoints[PhotonNetwork.LocalPlayer.ActorNumber] = assignedSpawnPoint;
+                    occupiedSpawnPoints.Add(assignedSpawnPoint);
                 }
                 else
                 {
@@ -190,38 +182,45 @@ public class PhotonManager : MonoBehaviourPunCallbacks
             Debug.LogError("Character prefab name is empty or no available spawn points.");
         }
     }
+
     public override void OnPlayerLeftRoom(Player otherPlayer)
     {
         Debug.Log($"Player {otherPlayer.NickName} has left the room.");
 
-        // Eðer oyuncu ayrýldýysa, onun spawn noktasýný boþalt
+        // Ayrýlan oyuncunun spawn noktasýný serbest býrak
         if (playerSpawnPoints.ContainsKey(otherPlayer.ActorNumber))
         {
             string spawnPointName = playerSpawnPoints[otherPlayer.ActorNumber];
 
             if (spawnPointName != null && occupiedSpawnPoints.Contains(spawnPointName))
             {
-                occupiedSpawnPoints.Remove(spawnPointName);  // Spawn noktasýný tekrar kullanýlabilir hale getir
+                occupiedSpawnPoints.Remove(spawnPointName);
                 playerSpawnPoints.Remove(otherPlayer.ActorNumber);
                 Debug.Log($"Spawn point '{spawnPointName}' is now available.");
             }
         }
-    }
-    private string GetAvailableSpawnPoint()
-    {
-        List<string> availableSpawnPoints = new List<string>(spawnPoints);
 
-        // Eðer oyuncu odanýn kurucusu deðilse, ilk spawn noktasýný kullanýlamaz yap
-        if (!PhotonNetwork.IsMasterClient)
+        // Tüm oyunculara spawn point durumunu güncelle
+        photonView.RPC("UpdateSpawnPointsRPC", RpcTarget.AllBuffered, occupiedSpawnPoints.ToArray());
+    }
+
+    private string GetAssignedSpawnPoint()
+    {
+        // Daha önce atanmýþ bir spawn point varsa, onu tekrar kullan
+        if (playerSpawnPoints.ContainsKey(PhotonNetwork.LocalPlayer.ActorNumber))
         {
-            availableSpawnPoints.RemoveAt(0);  // Ýlk spawn noktasýný çýkar
+            string previousSpawnPoint = playerSpawnPoints[PhotonNetwork.LocalPlayer.ActorNumber];
+            if (!occupiedSpawnPoints.Contains(previousSpawnPoint))
+            {
+                return previousSpawnPoint;
+            }
         }
 
-        foreach (string spawnPointName in availableSpawnPoints)
+        // Boþ bir spawn point bul ve ata
+        foreach (string spawnPointName in spawnPoints)
         {
             if (!occupiedSpawnPoints.Contains(spawnPointName))
             {
-                Debug.Log($"Spawn point '{spawnPointName}' is available.");
                 return spawnPointName;
             }
         }
@@ -230,19 +229,31 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         return null;
     }
 
+    [PunRPC]
+    private void UpdateSpawnPointsRPC(string[] occupiedPoints)
+    {
+        occupiedSpawnPoints = new HashSet<string>(occupiedPoints);
+    }
+
     private void StartCountdown()
     {
         if (!isCountingDown)
         {
             isCountingDown = true;
-            StartCoroutine(CountdownCoroutine(10));
+            photonView.RPC("StartCountdownRPC", RpcTarget.AllBuffered, 10);
         }
+    }
+
+    [PunRPC]
+    private void StartCountdownRPC(int seconds)
+    {
+        StartCoroutine(CountdownCoroutine(seconds));
     }
 
     private IEnumerator HideStatusTextAfterDelay(float delay)
     {
         yield return new WaitForSeconds(delay);
-        statusText.gameObject.SetActive(false); // Mesajý gizle
+        statusText.gameObject.SetActive(false);
     }
 
     void ShowLoadingPanel()
@@ -267,32 +278,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         }
 
         ShowLoadingPanel();
-
-        // Bekleme süresi eklemek gerekebilir (opsiyonel)
         yield return new WaitForSeconds(3);
-
-        // Sahneyi yükle
         PhotonNetwork.LoadLevel("TrapPG");
-    }
-    private string FindNearestSpawnPoint(Vector3 position)
-    {
-        GameObject nearestSpawnPoint = null;
-        float minDistance = float.MaxValue;
-
-        foreach (string spawnPointName in spawnPoints)
-        {
-            GameObject spawnPoint = GameObject.Find(spawnPointName);
-            if (spawnPoint != null)
-            {
-                float distance = Vector3.Distance(position, spawnPoint.transform.position);
-                if (distance < minDistance)
-                {
-                    minDistance = distance;
-                    nearestSpawnPoint = spawnPoint;
-                }
-            }
-        }
-
-        return nearestSpawnPoint != null ? nearestSpawnPoint.name : null;
     }
 }

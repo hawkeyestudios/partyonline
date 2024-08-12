@@ -5,11 +5,12 @@ using UnityEngine;
 public class MainMenuCamera : MonoBehaviour
 {
     public Animator mainmenucameraAnim;
+    public Animator leftgate;
+    public Animator rightgate;
 
     // Start is called before the first frame update
-    void Awake()
+    void Start()
     {
-        mainmenucameraAnim.SetTrigger("MainMenuCamera");
     }
 
     // Update is called once per frame
