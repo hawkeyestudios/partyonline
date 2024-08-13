@@ -20,12 +20,11 @@ public class CameraIntroController : MonoBehaviour
             cameraAnimator.SetTrigger("StartGame");
         }
 
-        // Joystick ve Jump butonlarýný devre dýþý býrak
+        // Joystick ve Jump butonlarýný devre dýþý býrak ve Rigidbody'yi kýsýtla
         playerMovements = FindObjectsOfType<PlayerMovement>();
         foreach (PlayerMovement pm in playerMovements)
         {
-            pm.SetJoystickActive(false);
-            pm.SetJumpButtonActive(false);
+            pm.DisableMovement(); // Hareketi tamamen devre dýþý býrak
         }
     }
 
@@ -53,11 +52,10 @@ public class CameraIntroController : MonoBehaviour
             cameraFollow.StartCameraFollow();
         }
 
-        // Joystick ve Jump butonlarýný aktif hale getirin
+        // Joystick ve Jump butonlarýný tekrar aktif hale getir ve hareketi etkinleþtir
         foreach (PlayerMovement pm in playerMovements)
         {
-            pm.SetJoystickActive(true);
-            pm.SetJumpButtonActive(true);
+            pm.EnableMovement(); // Hareketi tekrar etkinleþtir
         }
 
         StartGame();

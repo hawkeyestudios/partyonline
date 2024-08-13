@@ -14,6 +14,7 @@ public class PlayerMovement : MonoBehaviour
 
     private PhotonView photonView;
     private Animator animator;
+    private bool isMovementEnabled = true;
 
     private void Start()
     {
@@ -29,42 +30,33 @@ public class PlayerMovement : MonoBehaviour
         {
             jumpButton.onClick.AddListener(OnJumpButtonClicked);
         }
-        else
-        {
-            Debug.LogError("JumpButton not found in the scene.");
-        }
 
-        if (joystick != null)
+        if (photonView.IsMine)
         {
-            Debug.Log("Joystick bulundu");
-        }
-        else
-        {
-            Debug.LogError("Joystick not found in the scene.");
+            // Sadece yerel oyuncu joystick ve jump butonunu kullanabilir
         }
     }
 
     private void Update()
     {
-        if (photonView.IsMine)
+        if (photonView.IsMine && isMovementEnabled)
         {
-            if (joystick != null)
-            {
-                // Karakterin yönünü smooth þekilde döndür
-                Vector3 moveDirection = new Vector3(joystick.Horizontal(), 0, joystick.Vertical()).normalized;
-                if (moveDirection != Vector3.zero)
-                {
-                    Quaternion toRotation = Quaternion.LookRotation(moveDirection, Vector3.up);
-                    transform.rotation = Quaternion.Lerp(transform.rotation, toRotation, Time.deltaTime * 10f);
-                    animator.SetBool("Walking", true);
-                }
-                else
-                {
-                    animator.SetBool("Walking", false);
-                }
+            Vector3 moveDirection = new Vector3(joystick.Horizontal(), 0, joystick.Vertical()).normalized;
 
-                rb.velocity = new Vector3(moveDirection.x * moveSpeed, rb.velocity.y, moveDirection.z * moveSpeed);
+            if (moveDirection != Vector3.zero)
+            {
+                Quaternion toRotation = Quaternion.LookRotation(moveDirection, Vector3.up);
+                transform.rotation = Quaternion.Lerp(transform.rotation, toRotation, Time.deltaTime * 10f);
+                animator.SetBool("Walking", true);
+                photonView.RPC("SyncWalking", RpcTarget.Others, true);
             }
+            else
+            {
+                animator.SetBool("Walking", false);
+                photonView.RPC("SyncWalking", RpcTarget.Others, false);
+            }
+
+            rb.velocity = new Vector3(moveDirection.x * moveSpeed, rb.velocity.y, moveDirection.z * moveSpeed);
 
             if (Input.GetButtonDown("Jump") && isGrounded)
             {
@@ -72,12 +64,26 @@ public class PlayerMovement : MonoBehaviour
             }
         }
     }
+    public void DisableMovement()
+    {
+        isMovementEnabled = false;
+        rb.velocity = Vector3.zero; // Herhangi bir hareketi durdur
+        rb.isKinematic = true; // Fiziði devre dýþý býrak
+    }
+    public void EnableMovement()
+    {
+        isMovementEnabled = true;
+        rb.isKinematic = false; // Fiziði tekrar etkinleþtir
+    }
 
     private void Jump()
     {
+        if (!photonView.IsMine) return; 
+
         rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
         isGrounded = false;
         animator.SetTrigger("Jump");
+        photonView.RPC("SyncJump", RpcTarget.Others); 
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -90,25 +96,21 @@ public class PlayerMovement : MonoBehaviour
 
     private void OnJumpButtonClicked()
     {
-        if (isGrounded)
+        if (photonView.IsMine && isGrounded) 
         {
             Jump();
         }
     }
 
-    public void SetJoystickActive(bool active)
+    [PunRPC]
+    private void SyncWalking(bool isWalking)
     {
-        if (joystick != null)
-        {
-            joystick.gameObject.SetActive(active);
-        }
+        animator.SetBool("Walking", isWalking);
     }
 
-    public void SetJumpButtonActive(bool active)
+    [PunRPC]
+    private void SyncJump()
     {
-        if (jumpButton != null)
-        {
-            jumpButton.interactable = active;
-        }
+        animator.SetTrigger("Jump");
     }
 }

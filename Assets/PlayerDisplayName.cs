@@ -1,21 +1,28 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using Photon.Pun;
 using TMPro;
 
 public class PlayerDisplayName : MonoBehaviour
 {
     public TMP_Text playerDisplayName;
-    // Start is called before the first frame update
-    void Start()
+
+    private void Start()
     {
-        string displayName = PlayerPrefs.GetString("DISPLAYNAME", "Guest");
-        playerDisplayName.text = displayName;
+        // PlayerPrefs'ten DisplayName'i çek
+        string displayName = PlayerPrefs.GetString("DISPLAYNAME", "Unknown Player");
+
+        // Photon RPC ile diðer oyunculara adýný gönder
+        PhotonView photonView = GetComponent<PhotonView>();
+        if (photonView.IsMine)
+        {
+            photonView.RPC("SetPlayerName", RpcTarget.AllBuffered, displayName);
+        }
     }
 
-    // Update is called once per frame
-    void Update()
+    [PunRPC]
+    public void SetPlayerName(string name)
     {
-        
+        // Gelen ismi ekranda göster
+        playerDisplayName.text = name;
     }
 }
