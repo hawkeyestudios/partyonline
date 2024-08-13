@@ -19,6 +19,10 @@ public class PlayerDisplayName : MonoBehaviour
         {
             photonView.RPC("SetPlayerName", RpcTarget.AllBuffered, displayName);
         }
+        else
+        {
+            playerDisplayName.text = displayName;
+        }
 
         // Ana kamerayý bul
         mainCamera = Camera.main;
