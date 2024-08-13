@@ -22,9 +22,12 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     public Button leaveRoomButton;
     public Button cosmeticsButton;
     public GridManager gridManager; // GridManager referansý
+    private GameObject currentCharacter;
 
     private void Start()
     {
+        ShowLastEquippedCharacter();
+
         if (!PhotonNetwork.IsConnected)
         {
             PhotonNetwork.ConnectUsingSettings();
@@ -52,6 +55,39 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         else
         {
             Debug.LogError("Leave room button is not assigned.");
+        }
+    }
+    private void ShowLastEquippedCharacter()
+    {
+        string characterPrefabName = PlayerPrefs.GetString(LastEquippedCharacterKey, "DefaultCharacter");
+
+        if (!string.IsNullOrEmpty(characterPrefabName))
+        {
+            GameObject characterPrefab = Resources.Load<GameObject>(characterPrefabName);
+            if (characterPrefab != null)
+            {
+                Vector3 spawnPosition = new Vector3(19.7f, -4.75f, 79.25f); // Sahneye göre pozisyonu ayarlayýn
+                currentCharacter = Instantiate(characterPrefab, spawnPosition, Quaternion.identity);
+
+                if (currentCharacter != null)
+                {
+                    currentCharacter.transform.rotation = Quaternion.Euler(0, 10, 0);
+
+                    // Eðer bu oyunda oyuncu karakteri için özel ayarlar yapmanýz gerekiyorsa, buraya ekleyin
+                }
+                else
+                {
+                    Debug.LogError("Failed to instantiate character.");
+                }
+            }
+            else
+            {
+                Debug.LogError("Character prefab not found in Resources.");
+            }
+        }
+        else
+        {
+            Debug.LogError("Character prefab name is empty.");
         }
     }
 
@@ -92,6 +128,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
 
     public override void OnLeftRoom()
     {
+        ShowLastEquippedCharacter();
         Debug.Log("Left room successfully.");
         leaveRoomButton.gameObject.SetActive(false);
         playButton.interactable = true;
@@ -103,7 +140,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
             cosmeticsButton.interactable = true;
         }
 
-        StartCoroutine(HideStatusTextAfterDelay(1.5f));
+        StartCoroutine(HideStatusTextAfterDelay(1f));
     }
 
     private void ShowCharacterShop()
@@ -115,6 +152,10 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     {
         if (PhotonNetwork.IsConnected)
         {
+            if (currentCharacter != null)
+            {
+                Destroy(currentCharacter);
+            }
             PhotonNetwork.JoinLobby();
             statusText.text = "Searching for matchmaking...";
             statusText.gameObject.SetActive(true);
@@ -276,4 +317,5 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         loadingPanel.SetActive(true);
         statusText.gameObject.SetActive(false);
     }
+    
 }
