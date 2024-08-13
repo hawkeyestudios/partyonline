@@ -42,7 +42,7 @@ public class CameraIntroController : MonoBehaviour
 
     public void OnAnimationComplete()
     {
-        if (gameUI != null && !Hazard.IsPlayerDead())
+        if (gameUI != null)
         {
             gameUI.SetActive(true);
         }
