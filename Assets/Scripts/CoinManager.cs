@@ -24,7 +24,7 @@ public class CoinManager : MonoBehaviour
 
     private void Start()
     {
-        currentCoins = PlayerPrefs.GetInt("Coins", 10000);
+        currentCoins = PlayerPrefs.GetInt("Coins", 1000000);
         UpdateCoinUI();
     }
 

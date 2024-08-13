@@ -24,7 +24,7 @@ public class GemManager : MonoBehaviour
 
     private void Start()
     {
-        currentGems = PlayerPrefs.GetInt("Gems", 50); // Varsayýlan gem miktarý 100
+        currentGems = PlayerPrefs.GetInt("Gems", 5000); // Varsayýlan gem miktarý 100
         UpdateGemUI();
     }
 
