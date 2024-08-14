@@ -35,6 +35,10 @@ public class PlayerMovement : MonoBehaviour
         {
             // Sadece yerel oyuncu joystick ve jump butonunu kullanabilir
         }
+        if (!photonView.IsMine)
+        {
+            GetComponent<GhostController>().enabled = false; // Hayalet kontrolünü sadece kendi sahibi olan oyuncu kontrol edebilir
+        }
     }
 
     private void Update()
@@ -67,7 +71,6 @@ public class PlayerMovement : MonoBehaviour
     public void DisableMovement()
     {
         isMovementEnabled = false;
-        rb.velocity = Vector3.zero; // Herhangi bir hareketi durdur
         rb.isKinematic = true; // Fiziði devre dýþý býrak
     }
     public void EnableMovement()

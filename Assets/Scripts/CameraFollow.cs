@@ -5,7 +5,9 @@ public class CameraFollow : MonoBehaviour
 {
     public float smoothSpeed = 0.125f;
     public Vector3 offset; // Kamera ile karakter arasýndaki mesafe
-    public float fixedXRotation = 36f; // Sabit X rotasyonu
+    public float xrotation = 66.4f; // Sabit X rotasyonu
+    public float yrotation = 102.4f;
+    public float zrotation = 0f;
 
     private Transform target;
     private bool followStarted = false; // Kamera takip sisteminin baþlatýlýp baþlatýlmadýðýný kontrol etmek için
@@ -24,7 +26,7 @@ public class CameraFollow : MonoBehaviour
             // Kamerayý hedefe bakacak þekilde ayarla
             // Ancak X rotasyonunu sabit tut
             Vector3 currentRotation = transform.eulerAngles;
-            transform.eulerAngles = new Vector3(fixedXRotation, currentRotation.y, currentRotation.z);
+            transform.eulerAngles = new Vector3(xrotation, yrotation, zrotation);
         }
     }
 
@@ -40,10 +42,14 @@ public class CameraFollow : MonoBehaviour
 
                 // Kamera'nýn X rotasyonunu sabit tut
                 Vector3 currentRotation = transform.eulerAngles;
-                transform.eulerAngles = new Vector3(fixedXRotation, currentRotation.y, currentRotation.z);
+                transform.eulerAngles = new Vector3(xrotation, yrotation, zrotation);
 
                 followStarted = true; // Takip sistemini baþlat
                 break;
+            }
+            else
+            {
+                Debug.Log("Player not found in the scene");
             }
         }
 
