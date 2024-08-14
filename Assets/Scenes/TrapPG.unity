@@ -15524,8 +15524,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   smoothSpeed: 1
   offset: {x: 0, y: 3.5, z: -2.5}
-  xrotation: 66.4
-  yrotation: 102.4
+  xrotation: 36
+  yrotation: 0
   zrotation: 0
 --- !u!1001 &964377193
 PrefabInstance:

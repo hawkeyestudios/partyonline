@@ -8,6 +8,7 @@ public class CameraIntroController : MonoBehaviour
     public float animationDuration = 5f;
     public CameraFollow cameraFollow;
     private PlayerMovement[] playerMovements; // PlayerMovement referanslarýný saklayacak dizi
+    public GhostController ghostController; // GhostController referansý
 
     private float timer;
 
@@ -25,6 +26,12 @@ public class CameraIntroController : MonoBehaviour
         foreach (PlayerMovement pm in playerMovements)
         {
             pm.DisableMovement(); // Hareketi tamamen devre dýþý býrak
+        }
+
+        // Ghost'un hareketini baþlangýçta durdur
+        if (ghostController != null)
+        {
+            ghostController.enabled = false;
         }
     }
 
@@ -56,6 +63,12 @@ public class CameraIntroController : MonoBehaviour
         foreach (PlayerMovement pm in playerMovements)
         {
             pm.EnableMovement(); // Hareketi tekrar etkinleþtir
+        }
+
+        // Ghost hareketini baþlat
+        if (ghostController != null)
+        {
+            ghostController.enabled = true;
         }
 
         StartGame();

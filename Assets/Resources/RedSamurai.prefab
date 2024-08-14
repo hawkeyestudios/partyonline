@@ -479,6 +479,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 5436349941917787941}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: cc84453842bbdfc4389c4dca8b4125ef,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2415739464394290143}
   m_SourcePrefab: {fileID: 100100000, guid: cc84453842bbdfc4389c4dca8b4125ef, type: 3}
 --- !u!4 &7337444473709121513 stripped
 Transform:
@@ -631,5 +635,30 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShowLayerWeightsInspector: 1
   ShowParameterInspector: 1
-  m_SynchronizeParameters: []
-  m_SynchronizeLayers: []
+  m_SynchronizeParameters:
+  - Type: 4
+    SynchronizeType: 0
+    Name: Walking
+  - Type: 9
+    SynchronizeType: 0
+    Name: Jump
+  - Type: 9
+    SynchronizeType: 0
+    Name: Die
+  m_SynchronizeLayers:
+  - SynchronizeType: 0
+    LayerIndex: 0
+--- !u!114 &2415739464394290143
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7969126631826888019}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7545ae9adf2e7984e9f64d48278e09b3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ghostPrefab: {fileID: 8555421485844250906, guid: f28f7b115a46a2a4aadd51143d3131d3,
+    type: 3}

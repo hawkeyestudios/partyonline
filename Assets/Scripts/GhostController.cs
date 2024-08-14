@@ -4,11 +4,22 @@ using UnityEngine;
 public class GhostController : MonoBehaviourPun
 {
     public float speed = 5f;
+    public float startDelay = 3f;  // Ghost'un harekete baþlamadan önce bekleyeceði süre
+
     private Transform targetPlayer;
+    private bool canMove = false;
+
+    void Start()
+    {
+        if (photonView.IsMine)
+        {
+            Invoke("StartMoving", startDelay); // Ghost'un hareketini geciktir
+        }
+    }
 
     void Update()
     {
-        if (!photonView.IsMine)
+        if (!photonView.IsMine || !canMove)
             return;
 
         FindClosestPlayer();
@@ -45,13 +56,16 @@ public class GhostController : MonoBehaviourPun
     {
         if (other.CompareTag("Player"))
         {
-            // Burada oyuncuyu hayalete çevirme iþlemi yapýlacak
             PhotonView playerPhotonView = other.GetComponent<PhotonView>();
             if (playerPhotonView.IsMine)
             {
-                // Hayalete dönüþme iþlemi
                 other.gameObject.GetComponent<PlayerController>().BecomeGhost();
             }
         }
+    }
+
+    void StartMoving()
+    {
+        canMove = true; // 3 saniye sonra hareket etmeye baþla
     }
 }
