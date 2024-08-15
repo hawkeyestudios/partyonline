@@ -233,6 +233,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         // Oyun için geri sayým baþlat
         if (PhotonNetwork.CurrentRoom.PlayerCount == PhotonNetwork.CurrentRoom.MaxPlayers)
         {
+            leaveRoomButton.interactable = false;
             StartCountdown();
         }
     }
