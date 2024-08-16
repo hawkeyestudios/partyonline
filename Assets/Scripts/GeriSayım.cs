@@ -1,18 +1,29 @@
 using UnityEngine;
 using UnityEngine.UI;
+using Photon.Pun;
 using System.Collections;
 
-public class GeriSayım : MonoBehaviour
+public class GeriSayım : MonoBehaviourPunCallbacks
 {
     public Text countdownText; // Geri sayımın gösterileceği Text
     public GameObject gameOverPanel; // Game Over paneli
     public float preparationTime = 10f; // Hazırlık süresi (saniye)
     public float gameDuration = 120f; // Oyun süresi (saniye)
     public bool isGameStarted = false;
+    private GameOverManager gameOverManager;
 
     private void Start()
     {
         gameOverPanel.SetActive(false);
+
+        // GameOverManager'ı gameOverPanel içindeki bileşen olarak buluyoruz
+        gameOverManager = gameOverPanel.GetComponent<GameOverManager>();
+
+        if (gameOverManager == null)
+        {
+            Debug.LogError("GameOverManager bulunamadı!");
+        }
+
         StartCoroutine(StartCountdown());
     }
 
@@ -39,14 +50,34 @@ public class GeriSayım : MonoBehaviour
             yield return null;
         }
 
-        // Oyun bittiğinde "Game Over" panelini göster
+        // Oyun bittiğinde "Game Over" panelini göster ve sonuçları güncelle
         GameOver();
     }
 
     private void GameOver()
     {
         countdownText.text = "00:00";
-        gameOverPanel.SetActive(true);
         isGameStarted = false;
+
+        // GameOverManager'e oyunun bittiğini bildir
+        if (gameOverManager != null)
+        {
+            gameOverManager.OnGameOver();
+        }
+        else
+        {
+            Debug.LogError("GameOverManager bulunamadı!");
+        }
+
+        // Game Over panelini göster ve diğer oyunculara bildir
+        gameOverPanel.SetActive(true);
+        photonView.RPC("ShowGameOverPanel", RpcTarget.All);
+    }
+
+    [PunRPC]
+    private void ShowGameOverPanel()
+    {
+        // Game Over panelini göster
+        gameOverPanel.SetActive(true);
     }
 }

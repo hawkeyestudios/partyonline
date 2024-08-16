@@ -23,7 +23,10 @@ public class GameOverManager : MonoBehaviourPunCallbacks
         public string nickname;
         public int coins;
         public Sprite profileImage;
+        public int rank; // Oyuncunun bitiþ çizgisinden geçiþ sýrasý
     }
+
+    private List<string> finishOrder = new List<string>(); // Bitiþ sýrasý
 
     void Start()
     {
@@ -31,33 +34,61 @@ public class GameOverManager : MonoBehaviourPunCallbacks
     }
 
     [PunRPC]
-    public void SyncPlayerData(string nickname, int coins, string profileImageName)
+    public void SyncPlayerData(string playerId, int coins, string profileImageName, int rank)
     {
+        // PlayerPrefs'ten nickname'i al
+        string nickname = PlayerPrefs.GetString("DISPLAYNAME", "Guest");
+
         Sprite profileImage = Resources.Load<Sprite>("ProfileImages/" + profileImageName);
 
         PlayerData playerData = new PlayerData
         {
             nickname = nickname,
             coins = coins,
-            profileImage = profileImage
+            profileImage = profileImage,
+            rank = rank
         };
 
-        if (!allPlayerData.ContainsKey(nickname))
+        if (!allPlayerData.ContainsKey(playerId))
         {
-            allPlayerData.Add(nickname, playerData);
+            allPlayerData.Add(playerId, playerData);
         }
 
         // Update UI
         UpdateGameOverPanel();
     }
 
-    public void OnGameOver()
+    public void OnPlayerFinish(string playerId)
     {
-        int earnedCoins = CoinManager.Instance.GetCurrentCoins();
-        string playerNickname = PlayerPrefs.GetString("DISPLAYNAME"); // PlayFab'den çekilen nickname
-        string profileImageName = "defaultProfileImage"; // Kullanýcýnýn profil görüntüsünün adýný buraya ekleyin
+        if (finishOrder.Contains(playerId)) return; // Oyuncu zaten bitiþ çizgisini geçtiyse tekrar eklenmez
 
-        photonView.RPC("SyncPlayerData", RpcTarget.All, playerNickname, earnedCoins, profileImageName);
+        finishOrder.Add(playerId);
+
+        int earnedCoins = CalculateCoins(finishOrder.Count); // Bitiþ sýrasýna göre coins hesapla
+        string profileImageName = "defaultProfileImage"; // Profil resminin adýný buradan belirleyin
+
+        photonView.RPC("SyncPlayerData", RpcTarget.All, playerId, earnedCoins, profileImageName, finishOrder.Count);
+
+        // Oyuncunun kazandýðý coinleri güncelle
+        CoinManager.Instance.AddCoins(earnedCoins);
+
+        // Eðer tüm oyuncular bitiþ çizgisine ulaþtýysa, oyunu bitir
+        if (finishOrder.Count == PhotonNetwork.PlayerList.Length)
+        {
+            OnGameOver();
+        }
+    }
+
+    private int CalculateCoins(int rank)
+    {
+        switch (rank)
+        {
+            case 1: return 3000;
+            case 2: return 1500;
+            case 3: return 1000;
+            case 4: return 500;
+            default: return 0; // 4. sýradan sonrasý veya hiç bitiþ çizgisine ulaþamayanlar için 0 coins
+        }
     }
 
     void UpdateGameOverPanel()
@@ -68,15 +99,13 @@ public class GameOverManager : MonoBehaviourPunCallbacks
             Destroy(child.gameObject);
         }
 
-        int index = 1;
-
         // Yeni verileri ekle
         foreach (var data in allPlayerData.Values)
         {
             GameObject playerDataObj;
 
-            // Prefab seçiminde index'e göre arka plan belirleniyor
-            switch (index)
+            // Prefab seçiminde oyuncunun sýrasýna göre arka plan belirleniyor
+            switch (data.rank)
             {
                 case 1:
                     playerDataObj = Instantiate(playerDataPrefab1, playerDataContainer);
@@ -96,14 +125,32 @@ public class GameOverManager : MonoBehaviourPunCallbacks
             }
 
             // Prefab içerisindeki UI elemanlarýný doldur
-            playerDataObj.transform.Find("NicknameText").GetComponent<Text>().text = data.nickname;
-            playerDataObj.transform.Find("CoinsText").GetComponent<Text>().text = data.coins.ToString();
-            playerDataObj.transform.Find("ProfileImage").GetComponent<Image>().sprite = data.profileImage;
+            Text nicknameText = playerDataObj.transform.Find("NicknameText").GetComponent<Text>();
+            Text coinsText = playerDataObj.transform.Find("CoinsText").GetComponent<Text>();
+            Image profileImage = playerDataObj.transform.Find("ProfileImage").GetComponent<Image>();
 
-            index++;
+            nicknameText.text = data.nickname;
+            coinsText.text = data.coins.ToString();
+            profileImage.sprite = data.profileImage;
         }
 
         // Game Over panelini göster
         gameOverPanel.SetActive(true);
+    }
+
+    public void OnGameOver()
+    {
+        // Bitiþ çizgisine ulaþamayan oyuncular için coins deðerini 0 olarak belirleyin
+        foreach (Player player in PhotonNetwork.PlayerList)
+        {
+            string playerId = player.UserId; // Oyuncu ID'sini alýn
+            if (!finishOrder.Contains(playerId))
+            {
+                photonView.RPC("SyncPlayerData", RpcTarget.All, playerId, 0, "defaultProfileImage", 0);
+            }
+        }
+
+        // Game Over panelini güncelle ve göster
+        UpdateGameOverPanel();
     }
 }

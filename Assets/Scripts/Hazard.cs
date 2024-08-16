@@ -1,24 +1,32 @@
 using UnityEngine;
+using Photon.Pun;
 using System.Collections;
 
-public class Hazard : MonoBehaviour
+public class Hazard : MonoBehaviourPunCallbacks
 {
-    private static bool isPlayerDead = false;
     public Transform deadPoint; // Dead point transform
-    public GameObject gameUI;
+    public GameObject gameUI; // Bu UI, oyuncunun kendi UI'sý olmalý
     public Joystick joystick;
     public float deathAnimationCooldown = 3f; // Animasyonun tekrar çalýþabileceði süre
 
-    private void Start()
-    {
-        
-    }
+    private bool isPlayerDead = false; // Bu, her oyuncu için ayrý olarak yönetilecek
 
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Player") && !isPlayerDead) // Oyuncu ile temas ve animasyon tekrar çalýþabilir durumda
         {
-            StartCoroutine(HandlePlayerDeath(other.gameObject));
+            // Bu RPC'yi çaðýrarak diðer oyunculara oyuncunun öldüðünü bildiriyoruz
+            photonView.RPC("HandlePlayerDeathRPC", RpcTarget.All, other.gameObject.GetPhotonView().ViewID);
+        }
+    }
+
+    [PunRPC]
+    private void HandlePlayerDeathRPC(int playerViewID)
+    {
+        GameObject player = PhotonView.Find(playerViewID).gameObject;
+        if (player != null && !isPlayerDead)
+        {
+            StartCoroutine(HandlePlayerDeath(player));
         }
     }
 
@@ -57,11 +65,5 @@ public class Hazard : MonoBehaviour
         yield return new WaitForSeconds(deathAnimationCooldown - 2.16f); // Kalan süre için bekle
 
         isPlayerDead = false;
-    }
-
-    // Bu methodu static olarak tanýmlýyoruz
-    public static bool IsPlayerDead()
-    {
-        return isPlayerDead;
     }
 }

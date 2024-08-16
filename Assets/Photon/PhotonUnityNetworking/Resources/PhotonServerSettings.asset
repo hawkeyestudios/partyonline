@@ -50,6 +50,8 @@ MonoBehaviour:
   - PlayBoomEffect
   - PlayDieAnimation
   - SyncPlayerData
+  - HandlePlayerDeathRPC
+  - ShowGameOverPanel
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1
