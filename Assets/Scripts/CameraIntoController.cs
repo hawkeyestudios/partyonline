@@ -11,6 +11,7 @@ public class CameraIntroController : MonoBehaviour
     public GhostController ghostController; // GhostController referansý
 
     private float timer;
+    private bool hasAnimationCompleted = false; // Animasyonun tamamlanýp tamamlanmadýðýný kontrol etmek için
 
     void Start()
     {
@@ -37,12 +38,16 @@ public class CameraIntroController : MonoBehaviour
 
     void Update()
     {
-        if (cameraAnimator.GetCurrentAnimatorStateInfo(0).IsName("TrapPGStartAnim"))
+        if (!hasAnimationCompleted)
         {
-            timer += Time.deltaTime;
-            if (timer >= animationDuration)
+            if (cameraAnimator.GetCurrentAnimatorStateInfo(0).IsName("TrapPGStartAnim"))
             {
-                OnAnimationComplete();
+                timer += Time.deltaTime;
+                if (timer >= animationDuration)
+                {
+                    OnAnimationComplete();
+                    hasAnimationCompleted = true; // Animasyon tamamlandýðýnda bunu iþaretle
+                }
             }
         }
     }

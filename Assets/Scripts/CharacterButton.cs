@@ -279,6 +279,7 @@ public class CharacterButton : MonoBehaviour
         PlayerPrefs.SetString("LastEquippedCharacter", characterPrefabName); // En son ekip edilen karakter
         PlayerPrefs.Save();
 
+        
         UpdateCharacterPurchaseStatus(); // PlayFab'de güncelle
     }
 

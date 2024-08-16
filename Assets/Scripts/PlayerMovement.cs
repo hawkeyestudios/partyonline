@@ -1,6 +1,7 @@
 using UnityEngine;
 using Photon.Pun;
 using UnityEngine.UI;
+using System.Collections;
 
 public class PlayerMovement : MonoBehaviour
 {
@@ -16,12 +17,15 @@ public class PlayerMovement : MonoBehaviour
     private Animator animator;
     private bool isMovementEnabled = true;
 
+    private CameraIntroController cameraIntroController;
+
     private void Start()
     {
         rb = GetComponent<Rigidbody>();
         photonView = GetComponent<PhotonView>();
         animator = GetComponent<Animator>();
 
+        cameraIntroController = FindObjectOfType<CameraIntroController>();
         // Sahnedeki joystick ve jump butonunu bul
         joystick = FindObjectOfType<Joystick>();
         jumpButton = GameObject.Find("JumpButton")?.GetComponent<Button>();
@@ -71,12 +75,13 @@ public class PlayerMovement : MonoBehaviour
     public void DisableMovement()
     {
         isMovementEnabled = false;
-        rb.isKinematic = true; // Fiziði devre dýþý býrak
+        rb.velocity = Vector3.zero;
+        rb.isKinematic = true;
     }
     public void EnableMovement()
     {
         isMovementEnabled = true;
-        rb.isKinematic = false; // Fiziði tekrar etkinleþtir
+        rb.isKinematic = false; 
     }
 
     private void Jump()
@@ -96,7 +101,21 @@ public class PlayerMovement : MonoBehaviour
             isGrounded = true;
         }
     }
-
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Finish"))
+        {
+            Debug.Log("Finish noktasýna çarpýldý.");
+            StartCoroutine(DisableMovementAfterDelay(2f));
+        }
+    }
+    private IEnumerator DisableMovementAfterDelay(float delay)
+    {
+        yield return new WaitForSeconds(delay); 
+        DisableMovement(); // Hareketi devre dýþý býrak
+        animator.SetBool("Walking", false); // Yürüme animasyonunu durdur
+        photonView.RPC("SyncWalking", RpcTarget.Others, false);
+    }
     private void OnJumpButtonClicked()
     {
         if (photonView.IsMine && isGrounded) 
