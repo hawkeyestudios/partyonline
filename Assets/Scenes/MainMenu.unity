@@ -87822,6 +87822,8 @@ MonoBehaviour:
   leaveRoomButton: {fileID: 303302859}
   cosmeticsButton: {fileID: 1453409177}
   gridManager: {fileID: 1627611113}
+  crownPrefab: {fileID: 7091542277816529902, guid: 5d8f1118ea3b24b439a3c353c9553ccd,
+    type: 3}
 --- !u!4 &2051914204
 Transform:
   m_ObjectHideFlags: 0

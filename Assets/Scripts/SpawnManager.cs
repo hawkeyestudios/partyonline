@@ -4,30 +4,32 @@ using Photon.Realtime;
 
 public class SpawnManager : MonoBehaviourPunCallbacks
 {
-    public Transform[] spawnPoints; // TrapPG sahnesindeki baþlangýç noktalarý
+    public Transform[] spawnPoints;
 
     private void Start()
     {
-        if (PhotonNetwork.IsMasterClient)
-        {
-            // Master Client, oyuncularý spawn eder
-            SpawnPlayers();
-        }
+        // Karakterleri spawn etme iþlemini her oyuncunun kendi tarafýnda yapacaðýz
+        SpawnPlayer();
     }
 
-    private void SpawnPlayers()
+    private void SpawnPlayer()
     {
-        foreach (Player player in PhotonNetwork.PlayerList)
+        if (PhotonNetwork.IsConnectedAndReady)
         {
-            int spawnPointIndex = player.ActorNumber % spawnPoints.Length;
+            // Sadece bu oyuncu için spawn iþlemini yapacaðýz
+            Player localPlayer = PhotonNetwork.LocalPlayer;
+
+            // Spawn point belirleme
+            int spawnPointIndex = localPlayer.ActorNumber % spawnPoints.Length;
             Transform spawnPoint = spawnPoints[spawnPointIndex];
             Vector3 spawnPosition = spawnPoint.position;
             Quaternion spawnRotation = spawnPoint.rotation;
 
-            // Oyuncu prefab'ýný baþlatýn
+            // Karakter prefab adýný PlayerPrefs'ten al
             string characterPrefab = PlayerPrefs.GetString("LastEquippedCharacter");
             if (!string.IsNullOrEmpty(characterPrefab))
             {
+                // Oyuncunun karakterini instantiate et
                 PhotonNetwork.Instantiate(characterPrefab, spawnPosition, spawnRotation);
             }
             else

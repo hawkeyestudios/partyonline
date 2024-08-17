@@ -10,21 +10,20 @@ public class PlayerDisplayName : MonoBehaviour
 
     private void Start()
     {
-        // PlayerPrefs'ten DisplayName'i çek
-        string displayName = PlayerPrefs.GetString("DISPLAYNAME", "Unknown Player");
+        string displayName = PlayerPrefs.GetString("DISPLAYNAME", "Guest");
+        playerDisplayName.text = displayName;
 
-        // Photon RPC ile diðer oyunculara adýný gönder
         PhotonView photonView = GetComponent<PhotonView>();
+
         if (photonView.IsMine)
         {
-            photonView.RPC("SetPlayerName", RpcTarget.AllBuffered, displayName);
+            playerDisplayName.text = PhotonNetwork.NickName;
         }
         else
         {
-            playerDisplayName.text = displayName;
+            playerDisplayName.text = photonView.Owner.NickName;
         }
 
-        // Ana kamerayý bul
         mainCamera = Camera.main;
     }
 
@@ -38,12 +37,5 @@ public class PlayerDisplayName : MonoBehaviour
             // Y eksenindeki dönüþü sýfýrla
             transform.eulerAngles = new Vector3(0, transform.eulerAngles.y + 180f, 0);
         }
-    }
-
-    [PunRPC]
-    public void SetPlayerName(string name)
-    {
-        // Gelen ismi ekranda göster
-        playerDisplayName.text = name;
     }
 }

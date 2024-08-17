@@ -52,6 +52,18 @@ MonoBehaviour:
   - SyncPlayerData
   - HandlePlayerDeathRPC
   - ShowGameOverPanel
+  - UpdateCrownStatusRPC
+  - SpawnPlayersRPC
+  - SpawnPlayers
+  - SetCrownActive
+  - LoadGameScene
+  - StopCountdownRPC
+  - UpdateCountdown
+  - HandleDeathRPC
+  - StartGame
+  - StopCountdown
+  - UpdateResults
+  - NotifyFinishLineCrossed
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

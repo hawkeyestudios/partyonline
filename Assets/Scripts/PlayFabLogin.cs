@@ -1,4 +1,6 @@
 using System;
+using Photon.Pun;
+using Photon.Realtime;
 using PlayFab;
 using PlayFab.ClientModels;
 using UnityEngine;
@@ -235,6 +237,7 @@ namespace KnoxGameStudios
             if (result.AccountInfo != null)
             {
                 string displayName = result.AccountInfo.TitleInfo.DisplayName;
+                PhotonNetwork.NickName = displayName;
                 PlayerPrefs.SetString("DISPLAYNAME", displayName);
                 PlayerPrefs.Save();
 

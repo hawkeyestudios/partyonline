@@ -18,14 +18,20 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     public Button playButton;
     public GameObject loadingPanel;
     public Text statusText;
-    private bool isCountingDown = false;
     public Button leaveRoomButton;
     public Button cosmeticsButton;
     public GridManager gridManager; // GridManager referansý
     private GameObject currentCharacter;
+    public GameObject crownPrefab;
+    private GameObject currentCrown; // Taç objesini takip etmek için
+    private int countdownTime = 10; // Geri sayým süresi
+    private Coroutine countdownCoroutine;
+    private bool isCountdownActive = false;
 
     private void Start()
     {
+        PhotonNetwork.AutomaticallySyncScene = true;
+        Debug.Log($"{PhotonNetwork.NickName}");
         ShowLastEquippedCharacter();
 
         if (!PhotonNetwork.IsConnected)
@@ -57,6 +63,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
             Debug.LogError("Leave room button is not assigned.");
         }
     }
+
     private void ShowLastEquippedCharacter()
     {
         string characterPrefabName = PlayerPrefs.GetString(LastEquippedCharacterKey, "DefaultCharacter");
@@ -72,8 +79,6 @@ public class PhotonManager : MonoBehaviourPunCallbacks
                 if (currentCharacter != null)
                 {
                     currentCharacter.transform.rotation = Quaternion.Euler(0, 10, 0);
-
-                    // Eðer bu oyunda oyuncu karakteri için özel ayarlar yapmanýz gerekiyorsa, buraya ekleyin
                 }
                 else
                 {
@@ -198,26 +203,17 @@ public class PhotonManager : MonoBehaviourPunCallbacks
 
         if (!string.IsNullOrEmpty(characterPrefabName))
         {
-            // GridManager'dan spawn pozisyonu al
             Vector3 spawnPosition = gridManager.GetNextSpawnPosition(PhotonNetwork.LocalPlayer.ActorNumber - 1);
-
             GameObject character = PhotonNetwork.Instantiate(characterPrefabName, spawnPosition, Quaternion.identity);
 
             if (character != null)
             {
                 character.transform.rotation = Quaternion.Euler(0, 10, 0);
+                PhotonNetwork.LocalPlayer.TagObject = character;
 
                 if (PhotonNetwork.IsMasterClient)
                 {
-                    Transform crown = character.transform.Find("Crown"); // Tacýn adýný burada belirttiðiniz adla deðiþtirin
-                    if (crown != null)
-                    {
-                        crown.gameObject.SetActive(true);
-                    }
-                    else
-                    {
-                        Debug.LogError("Crown object not found on character.");
-                    }
+                    AssignCrownToMasterClient(character);
                 }
             }
             else
@@ -230,11 +226,15 @@ public class PhotonManager : MonoBehaviourPunCallbacks
             Debug.LogError("Character prefab name is empty.");
         }
 
-        // Oyun için geri sayým baþlat
+        Debug.Log($"{PhotonNetwork.CurrentRoom.PlayerCount}");
         if (PhotonNetwork.CurrentRoom.PlayerCount == PhotonNetwork.CurrentRoom.MaxPlayers)
         {
-            leaveRoomButton.interactable = false;
-            StartCountdown();
+            if (!isCountdownActive)
+            {
+                leaveRoomButton.interactable = false;
+                countdownCoroutine = StartCoroutine(StartCountdown());
+            }
+
         }
     }
 
@@ -242,7 +242,6 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     {
         Debug.Log($"Player {otherPlayer.NickName} has left the room.");
 
-        // Ayrýlan oyuncunun spawn noktasýný serbest býrak
         if (playerSpawnPoints.ContainsKey(otherPlayer.ActorNumber))
         {
             string spawnPointName = playerSpawnPoints[otherPlayer.ActorNumber];
@@ -255,13 +254,14 @@ public class PhotonManager : MonoBehaviourPunCallbacks
             }
         }
 
-        // Tüm oyunculara spawn point durumunu güncelle
         photonView.RPC("UpdateSpawnPointsRPC", RpcTarget.AllBuffered, string.Join(",", occupiedSpawnPoints.ToArray()));
 
-        // Eðer geri sayým baþladýysa, geri sayýmý durdur
-        if (isCountingDown && PhotonNetwork.CurrentRoom.PlayerCount < PhotonNetwork.CurrentRoom.MaxPlayers)
+        if (PhotonNetwork.CurrentRoom.PlayerCount < PhotonNetwork.CurrentRoom.MaxPlayers)
         {
-            StopCountdown();
+            if (isCountdownActive && PhotonNetwork.IsMasterClient)
+            {
+                StopCountdown();
+            }
         }
     }
 
@@ -271,52 +271,122 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         occupiedSpawnPoints = new HashSet<string>(occupiedPoints.Split(','));
     }
 
-    private void StartCountdown()
+    IEnumerator StartCountdown()
     {
-        if (!isCountingDown)
+        isCountdownActive = true;
+        // Geri sayýmý baþlat
+        while (countdownTime > 0)
         {
-            isCountingDown = true;
-            photonView.RPC("StartCountdownRPC", RpcTarget.AllBuffered, 10);
-        }
-    }
+            // Geri sayým süresini tüm oyunculara gönder
+            photonView.RPC("UpdateCountdown", RpcTarget.All, countdownTime);
 
-    private void StopCountdown()
-    {
-        isCountingDown = false;
-        StopAllCoroutines();
-        statusText.text = "Waiting for more players...";
+            yield return new WaitForSeconds(1f);
+            countdownTime--;
+        }
+
+        photonView.RPC("ShowLoadingPanel", RpcTarget.All);
+
+        yield return new WaitForSeconds(3f);
+        // Geri sayým bittiðinde oyunu baþlat
+        photonView.RPC("StartGame", RpcTarget.All);
     }
 
     [PunRPC]
-    private void StartCountdownRPC(int seconds)
+    void StopCountdown()
     {
-        StartCoroutine(CountdownCoroutine(seconds));
-    }
-
-    private IEnumerator CountdownCoroutine(int seconds)
-    {
-        while (seconds > 0)
+        // Geri sayýmý durdur
+        if (countdownCoroutine != null)
         {
-            statusText.text = $"Match found! Starting in {seconds}...";
-            yield return new WaitForSeconds(1);
-            seconds--;
+            StopCoroutine(countdownCoroutine);
         }
 
-        ShowLoadingPanel();
-        yield return new WaitForSeconds(3);
-        PhotonNetwork.LoadLevel("TrapPG");
+        // Geri sayým durumunu ve zamanlayýcýyý sýfýrla
+        isCountdownActive = false;
+        countdownTime = 10;
+
+        // Geri sayýmý durdurduðunuzu tüm oyunculara bildirin
+        photonView.RPC("UpdateCountdown", RpcTarget.All, 0);
     }
 
-    private IEnumerator HideStatusTextAfterDelay(float delay)
+    [PunRPC]
+    void UpdateCountdown(int time)
+    {
+        if (time > 0)
+        {
+            statusText.text = $"Starting game in {time} seconds...";
+        }
+        else
+        {
+            statusText.text = "Waiting for more players...";
+        }
+    }
+
+    [PunRPC]
+    void ShowLoadingPanel()
+    {
+        if (loadingPanel != null)
+        {
+            loadingPanel.SetActive(true);
+        }
+    }
+
+    [PunRPC]
+    void StartGame()
+    {
+        PhotonNetwork.LoadLevel("TrapPG"); // Oyununuzu baþlatacak sahneyi yükleyin
+    }
+
+    public override void OnMasterClientSwitched(Player newMasterClient)
+    {
+        Debug.Log($"New Master Client: {newMasterClient.NickName}");
+
+        if (PhotonNetwork.LocalPlayer.ActorNumber == newMasterClient.ActorNumber)
+        {
+            // Yeni lobi kurucusu (Master Client) siz oldunuz
+            Debug.Log("I am the new Master Client.");
+
+            // Tacý yeni lobi kurucusuna ata
+            AssignCrownToMasterClient((GameObject)newMasterClient.TagObject);
+
+            // Geri sayým baþlatýlmamýþsa ve odadaki oyuncu sayýsý maksimum kapasiteye ulaþmýþsa geri sayýmý baþlat
+            if (PhotonNetwork.CurrentRoom.PlayerCount == PhotonNetwork.CurrentRoom.MaxPlayers)
+            {
+                if (!isCountdownActive)
+                {
+                    leaveRoomButton.interactable = false;
+                    countdownCoroutine = StartCoroutine(StartCountdown());
+                }
+            }
+            else
+            {
+                leaveRoomButton.interactable = true;
+                StopCountdown();
+            }
+        }
+    }
+
+    private void AssignCrownToMasterClient(GameObject masterClientCharacter)
+    {
+        if (currentCrown != null)
+        {
+            Destroy(currentCrown); // Mevcut tacý yok et
+        }
+
+        if (masterClientCharacter != null)
+        {
+            Vector3 crownPosition = masterClientCharacter.transform.position + new Vector3(0, 2.5f, 0); // Tacý karakterin üzerinde konumlandýr
+            currentCrown = Instantiate(crownPrefab, crownPosition, Quaternion.identity);
+            currentCrown.transform.SetParent(masterClientCharacter.transform); // Tacý karaktere baðla
+        }
+        if(masterClientCharacter == null)
+        {
+            Destroy(crownPrefab);
+        }
+    }
+
+    IEnumerator HideStatusTextAfterDelay(float delay)
     {
         yield return new WaitForSeconds(delay);
         statusText.gameObject.SetActive(false);
     }
-
-    void ShowLoadingPanel()
-    {
-        loadingPanel.SetActive(true);
-        statusText.gameObject.SetActive(false);
-    }
-    
 }
