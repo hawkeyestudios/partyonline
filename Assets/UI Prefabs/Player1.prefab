@@ -88,7 +88,7 @@ GameObject:
   - component: {fileID: 7355963132315811843}
   - component: {fileID: 8074767948936774274}
   m_Layer: 5
-  m_Name: CoinsText
+  m_Name: ScoreText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -168,7 +168,7 @@ GameObject:
   - component: {fileID: 4847328965196826362}
   - component: {fileID: 85877861814073718}
   m_Layer: 5
-  m_Name: NicknameText
+  m_Name: PlayerNameText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

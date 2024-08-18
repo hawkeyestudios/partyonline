@@ -378,10 +378,6 @@ public class PhotonManager : MonoBehaviourPunCallbacks
             currentCrown = Instantiate(crownPrefab, crownPosition, Quaternion.identity);
             currentCrown.transform.SetParent(masterClientCharacter.transform); // Tacý karaktere baðla
         }
-        if(masterClientCharacter == null)
-        {
-            Destroy(crownPrefab);
-        }
     }
 
     IEnumerator HideStatusTextAfterDelay(float delay)

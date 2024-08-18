@@ -5,18 +5,20 @@ public class Joystick : MonoBehaviour, IDragHandler, IPointerUpHandler, IPointer
 {
     private RectTransform background;
     private RectTransform handle;
+    private RectTransform highlight; // Highlight nesnesi
     private Vector2 inputVector;
-    private bool isActive = true; // Joystick'in aktif olup olmadýðýný kontrol etmek için eklenen deðiþken
+    private bool isActive = true;
 
     private void Start()
     {
         background = GetComponent<RectTransform>();
-        handle = transform.GetChild(0).GetComponent<RectTransform>();
+        handle = transform.GetChild(1).GetComponent<RectTransform>();
+        highlight = transform.GetChild(0).GetComponent<RectTransform>(); // Highlight nesnesini al
     }
 
     public void OnDrag(PointerEventData eventData)
     {
-        if (!isActive) return; // Joystick aktif deðilse hareket etmeye izin verme
+        if (!isActive) return;
 
         Vector2 pos;
         RectTransformUtility.ScreenPointToLocalPointInRectangle(background, eventData.position, eventData.pressEventCamera, out pos);
@@ -27,6 +29,9 @@ public class Joystick : MonoBehaviour, IDragHandler, IPointerUpHandler, IPointer
         inputVector = (inputVector.magnitude > 1.0f) ? inputVector.normalized : inputVector;
 
         handle.anchoredPosition = new Vector2(inputVector.x * (background.sizeDelta.x / 3), inputVector.y * (background.sizeDelta.y / 3));
+
+        // Highlight'ý güncelle
+        UpdateHighlight();
     }
 
     public void OnPointerDown(PointerEventData eventData)
@@ -53,10 +58,28 @@ public class Joystick : MonoBehaviour, IDragHandler, IPointerUpHandler, IPointer
     {
         inputVector = Vector2.zero;
         handle.anchoredPosition = Vector2.zero;
+        UpdateHighlight(); // Highlight'ý sýfýrla
     }
 
-    public void SetActive(bool active) // Joystick'in aktif olup olmadýðýný ayarlayan method
+    public void SetActive(bool active)
     {
         isActive = active;
+    }
+
+    private void UpdateHighlight()
+    {
+        if (inputVector == Vector2.zero)
+        {
+            highlight.gameObject.SetActive(false); // Joystick ortada ise highlight'ý gizle
+            return;
+        }
+
+        highlight.gameObject.SetActive(true);
+
+        // Açýyý hesapla
+        float angle = Mathf.Atan2(inputVector.y, inputVector.x) * Mathf.Rad2Deg;
+
+        // Highlight'ýn açýsýný güncelle
+        highlight.localEulerAngles = new Vector3(0, 0, angle-45);
     }
 }

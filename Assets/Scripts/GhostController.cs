@@ -1,23 +1,22 @@
 using Photon.Pun;
+using System.Collections;
 using UnityEngine;
 
 public class GhostController : MonoBehaviourPun
 {
     public float speed = 5f;
-    public float startDelay = 3f;  // Ghost'un harekete baþlamadan önce bekleyeceði süre
 
     private Transform targetPlayer;
 
     void Start()
     {
-        if (photonView.IsMine)
-        {
-            //Invoke("StartMoving", startDelay); // Ghost'un hareketini geciktir
-        }
+
     }
 
     void Update()
     {
+        WaitForGhost(10);
+
         if (!photonView.IsMine)
             return;
 
@@ -63,8 +62,8 @@ public class GhostController : MonoBehaviourPun
         }
     }
 
-    void StartMoving()
+    IEnumerator WaitForGhost(int seconds)
     {
-        //canMove = true; // 3 saniye sonra hareket etmeye baþla
+        yield return new WaitForSeconds(seconds);
     }
 }

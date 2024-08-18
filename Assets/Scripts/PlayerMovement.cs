@@ -24,7 +24,6 @@ public class PlayerMovement : MonoBehaviour
     private RectTransform joystickHandle;
     public GameObject boomEffect;
     private bool hasFinished = false;
-    private GameOverManager gameOverManager;
 
     private void Start()
     {
@@ -53,12 +52,6 @@ public class PlayerMovement : MonoBehaviour
         if (!photonView.IsMine)
         {
             GetComponent<GhostController>().enabled = false;
-        }
-
-        gameOverManager = FindObjectOfType<GameOverManager>();
-        if( gameOverManager != null )
-        {
-            Debug.Log("gamovermanager bulundu");
         }
     }
 
@@ -112,33 +105,9 @@ public class PlayerMovement : MonoBehaviour
         // Diðer oyunculara zýplama bilgisini ilet
         photonView.RPC("SyncJump", RpcTarget.Others);
     }
-    private void OnTriggerEnter(Collider other)
+    IEnumerator WaitForSeconds(int seconds)
     {
-        if (other.CompareTag("Finish"))
-        {
-            if (!hasFinished)
-            {
-                hasFinished = true;
-                OnFinishLineCrossed();
-            }
-        }
-    }
-    public void OnFinishLineCrossed()
-    {
-        if (photonView.IsMine)
-        {
-            // Finish çizgisini geçtiðinde yapýlacak iþlemler
-            photonView.RPC("NotifyFinishLineCrossed", RpcTarget.All);
-        }
-    }
-    [PunRPC]
-    private void NotifyFinishLineCrossed()
-    {
-        // GameOverManager referansýný kullanarak finish bilgilerini güncelle
-        if (gameOverManager != null)
-        {
-            gameOverManager.OnPlayerFinish(PhotonNetwork.LocalPlayer.UserId);
-        }
+        yield return new WaitForSeconds(seconds);
     }
     private void OnCollisionEnter(Collision collision)
     {

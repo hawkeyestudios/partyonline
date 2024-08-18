@@ -64,6 +64,8 @@ MonoBehaviour:
   - StopCountdown
   - UpdateResults
   - NotifyFinishLineCrossed
+  - SendResultsToAllPlayers
+  - PlayerFinished
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

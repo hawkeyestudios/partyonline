@@ -349,7 +349,7 @@ Animator:
   m_Enabled: 1
   m_Avatar: {fileID: 0}
   m_Controller: {fileID: 9100000, guid: ff0d741f2dfd4b847bc9d30f20402d58, type: 2}
-  m_CullingMode: 0
+  m_CullingMode: 1
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
   m_LinearVelocityBlending: 0
@@ -380,6 +380,7 @@ MonoBehaviour:
   ObservedComponents:
   - {fileID: 7399142470338568870}
   - {fileID: 4404477537486160237}
+  - {fileID: -2819016180006318657}
   sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
