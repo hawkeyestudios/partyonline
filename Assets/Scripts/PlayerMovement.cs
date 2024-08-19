@@ -18,12 +18,16 @@ public class PlayerMovement : MonoBehaviour
     private Animator animator;
     private bool isMovementEnabled = true;
 
-    private Transform deadPoint; 
+    private Transform deadPoint;
 
-    
+
     private RectTransform joystickHandle;
     public GameObject boomEffect;
     private bool hasFinished = false;
+
+    public GameObject ghostPrefab;
+    private bool isGhost = false;
+    private GhostController ghostController;
 
     private void Start()
     {
@@ -31,14 +35,14 @@ public class PlayerMovement : MonoBehaviour
         photonView = GetComponent<PhotonView>();
         animator = GetComponent<Animator>();
 
-        
+
         deadPoint = GameObject.Find("DeadPoint")?.transform;
 
-        
+
         joystick = FindObjectOfType<Joystick>();
         jumpButton = GameObject.Find("JumpButton")?.GetComponent<Button>();
 
-        
+
         if (joystick != null)
         {
             joystickHandle = joystick.transform.Find("Handle")?.GetComponent<RectTransform>();
@@ -80,7 +84,17 @@ public class PlayerMovement : MonoBehaviour
             }
         }
     }
+    public void BecomeGhost()
+    {
+        Vector3 currentPosition = transform.position;
+        Quaternion currentRotation = transform.rotation;
 
+
+        GameObject ghost = PhotonNetwork.Instantiate(ghostPrefab.name, currentPosition, currentRotation);
+
+
+        PhotonNetwork.Destroy(gameObject);
+    }
     public void DisableMovement()
     {
         isMovementEnabled = false;
@@ -115,9 +129,9 @@ public class PlayerMovement : MonoBehaviour
         {
             isGrounded = true;
         }
-        else if (collision.gameObject.CompareTag("Obstacle")) 
+        else if (collision.gameObject.CompareTag("Obstacle"))
         {
-            
+
             photonView.RPC("HandleDeathRPC", RpcTarget.All);
         }
     }
@@ -134,7 +148,7 @@ public class PlayerMovement : MonoBehaviour
 
         if (photonView.IsMine)
         {
-            
+
             if (joystick != null)
             {
                 joystick.gameObject.SetActive(false);

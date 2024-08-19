@@ -4,7 +4,7 @@ using Photon.Realtime;
 using UnityEngine.UI;
 using System.Collections.Generic;
 
-public class SpawnManager : MonoBehaviourPunCallbacks
+public class GhostManager : MonoBehaviourPunCallbacks
 {
     public Transform[] spawnPoints;
     public Image[] profileImages;
@@ -43,6 +43,7 @@ public class SpawnManager : MonoBehaviourPunCallbacks
             }
         }
     }
+
     private void SetPlayerProfileImage()
     {
         string playerImageName = PlayerPrefs.GetString("LastEquippedCharacter", "defaultProfileImage");
@@ -50,6 +51,7 @@ public class SpawnManager : MonoBehaviourPunCallbacks
         playerProperties["profileImage"] = playerImageName;
         PhotonNetwork.LocalPlayer.SetCustomProperties(playerProperties);
     }
+
     private void OnTriggerEnter(Collider other)
     {
         if (raceFinished)
@@ -59,15 +61,12 @@ public class SpawnManager : MonoBehaviourPunCallbacks
         {
             Player player = other.GetComponent<PhotonView>().Owner;
 
-            // Eðer oyuncu zaten finish sýrasýna eklenmiþse, tekrar ekleme
             if (!finishOrder.Contains(player))
             {
                 finishOrder.Add(player);
 
-                // Oyuncu sýrasýný belirleme ve ödülleri verme
                 UpdatePlayerUI(player);
 
-                // Eðer tüm oyuncular bitirdiyse yarýþý sonlandýr
                 if (finishOrder.Count == PhotonNetwork.PlayerList.Length)
                 {
                     gameOverPanel.SetActive(true);
@@ -84,10 +83,12 @@ public class SpawnManager : MonoBehaviourPunCallbacks
         {
             profileImages[playerIndex].sprite = GetProfileSprite(player);
 
-            int[] rewards = { 3000, 1500, 1000, 500 };
-            if (playerIndex < rewards.Length)
+            int[] rewards = { 500, 1000, 1500, 3000 };
+            int rewardIndex = (finishOrder.Count - 1) - playerIndex;
+
+            if (rewardIndex >= 0 && rewardIndex < rewards.Length)
             {
-                rewardTexts[playerIndex].text = $"{rewards[playerIndex]}";
+                rewardTexts[playerIndex].text = $"{rewards[rewardIndex]}";
             }
 
             nickNames[playerIndex].text = player.NickName;

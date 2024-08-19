@@ -3,11 +3,15 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using Photon.Pun;
+using Photon.Realtime;
 
 public class MapGecisGeriSayım : MonoBehaviour
 {
     public Text countdownText; // Geri sayım için UI Text bileşeni
     private float timeRemaining = 15f; // 15 saniye geri sayım
+    public string levelName;
+    private bool hasLoaded = false; // Sahne yüklendi mi kontrolü
 
     void Start()
     {
@@ -22,10 +26,11 @@ public class MapGecisGeriSayım : MonoBehaviour
             timeRemaining -= Time.deltaTime;
             UpdateCountdownText();
         }
-        else
+        else if (!hasLoaded)
         {
-            // Süre bittiğinde GhostPG sahnesine geçiş yap
-            SceneManager.LoadScene("GhostPG");
+            // Zaman sıfıra ulaştığında ve sahne henüz yüklenmediyse sahneyi yükle
+            NextSceneLoading();
+            hasLoaded = true; // Sahnenin sadece bir kez yüklenmesini sağla
         }
     }
 
@@ -33,5 +38,11 @@ public class MapGecisGeriSayım : MonoBehaviour
     {
         // UI Text bileşenini güncelle
         countdownText.text = Mathf.Ceil(timeRemaining).ToString() + " seconds";
+    }
+
+    private void NextSceneLoading()
+    {
+        // Sahneyi yükle
+        PhotonNetwork.LoadLevel(levelName);
     }
 }

@@ -1,13 +1,14 @@
 using Photon.Pun;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class GhostController : MonoBehaviourPun
 {
     public float speed = 5f;
+    public float rotationSpeed = 5f; // Rotasyon hýzýný belirleyen parametre
 
     private Transform targetPlayer;
-
     void Start()
     {
 
@@ -23,7 +24,8 @@ public class GhostController : MonoBehaviourPun
         FindClosestPlayer();
         if (targetPlayer != null)
         {
-            MoveTowardsPlayer();
+            RotateTowardsPlayer();  // Yüzü hedefe doðru döndür
+            MoveTowardsPlayer();    // Hedefe doðru ilerle
         }
     }
 
@@ -50,6 +52,14 @@ public class GhostController : MonoBehaviourPun
         transform.position = Vector3.MoveTowards(transform.position, targetPlayer.position, speed * Time.deltaTime);
     }
 
+    void RotateTowardsPlayer()
+    {
+        // Hedef oyuncuya doðru yönelme
+        Vector3 direction = (targetPlayer.position - transform.position).normalized;
+        Quaternion lookRotation = Quaternion.LookRotation(new Vector3(direction.x, 0, direction.z));
+        transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * rotationSpeed);
+    }
+
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Player"))
@@ -57,7 +67,7 @@ public class GhostController : MonoBehaviourPun
             PhotonView playerPhotonView = other.GetComponent<PhotonView>();
             if (playerPhotonView.IsMine)
             {
-                other.gameObject.GetComponent<PlayerController>().BecomeGhost();
+                other.gameObject.GetComponent<PlayerMovement>().BecomeGhost();
             }
         }
     }
