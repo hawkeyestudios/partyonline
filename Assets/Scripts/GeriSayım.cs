@@ -1,23 +1,28 @@
 using UnityEngine;
 using UnityEngine.UI;
-using Photon.Pun;
 using System.Collections;
 
-public class GeriSayım : MonoBehaviourPunCallbacks
+public class GeriSayım : MonoBehaviour
 {
     public Text countdownText; // Geri sayımın gösterileceği Text
-    public GameObject gameOverPanel; // Game Over paneli
     public float preparationTime = 10f; // Hazırlık süresi (saniye)
     public float gameDuration = 120f; // Oyun süresi (saniye)
     public bool isGameStarted = false;
 
+    public delegate void GameOverAction();
+    public static event GameOverAction OnGameOver;
+
     private void Start()
     {
-        gameOverPanel.SetActive(false);
-        StartCoroutine(StartCountdown());
+        // Geri sayım başlatılmadan önce bir işlem yapılacaksa buraya eklenebilir
     }
 
-    private IEnumerator StartCountdown()
+    public void StartCountdown()
+    {
+        StartCoroutine(CountdownRoutine());
+    }
+
+    private IEnumerator CountdownRoutine()
     {
         // 10 saniyelik hazırlık geri sayımı
         while (preparationTime > 0)
@@ -33,14 +38,11 @@ public class GeriSayım : MonoBehaviourPunCallbacks
         {
             int minutes = Mathf.FloorToInt(gameDuration / 60);
             int seconds = Mathf.FloorToInt(gameDuration % 60);
-
             countdownText.text = string.Format("{0:0}:{1:00}", minutes, seconds);
-
             gameDuration -= Time.deltaTime;
             yield return null;
         }
 
-        // Oyun bittiğinde "Game Over" panelini göster ve sonuçları güncelle
         GameOver();
     }
 
@@ -48,12 +50,6 @@ public class GeriSayım : MonoBehaviourPunCallbacks
     {
         countdownText.text = "00:00";
         isGameStarted = false;
-        photonView.RPC("ShowGameOverPanel", RpcTarget.All);
-    }
-
-    [PunRPC]
-    private void ShowGameOverPanel()
-    {
-        gameOverPanel.SetActive(true);
+        OnGameOver?.Invoke(); // Olayı tetikleyin
     }
 }

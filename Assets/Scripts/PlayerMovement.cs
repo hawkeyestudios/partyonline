@@ -16,7 +16,7 @@ public class PlayerMovement : MonoBehaviour
 
     private PhotonView photonView;
     private Animator animator;
-    private bool isMovementEnabled = true;
+    private bool isMovementEnabled = false;
 
     private Transform deadPoint;
 
@@ -26,8 +26,6 @@ public class PlayerMovement : MonoBehaviour
     private bool hasFinished = false;
 
     public GameObject ghostPrefab;
-    private bool isGhost = false;
-    private GhostController ghostController;
 
     private void Start()
     {
@@ -53,14 +51,17 @@ public class PlayerMovement : MonoBehaviour
             jumpButton.onClick.AddListener(OnJumpButtonClicked);
         }
 
-        if (!photonView.IsMine)
-        {
-            GetComponent<GhostController>().enabled = false;
-        }
+        isMovementEnabled = false;
+        StartCoroutine(EnableMovementAfterDelay(10f));
     }
-
+    IEnumerator EnableMovementAfterDelay(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        isMovementEnabled = true; // 10 saniye sonra hareketi etkinleþtir
+    }
     private void Update()
     {
+
         if (photonView.IsMine && isMovementEnabled)
         {
             Vector3 moveDirection = new Vector3(joystick.Horizontal(), 0, joystick.Vertical()).normalized;
@@ -78,7 +79,7 @@ public class PlayerMovement : MonoBehaviour
 
             rb.velocity = new Vector3(moveDirection.x * moveSpeed, rb.velocity.y, moveDirection.z * moveSpeed);
 
-            if (Input.GetButtonDown("Jump") && isGrounded)
+            if (Input.GetButtonDown("Jump") && isGrounded && isMovementEnabled)
             {
                 Jump();
             }
@@ -95,18 +96,6 @@ public class PlayerMovement : MonoBehaviour
 
         PhotonNetwork.Destroy(gameObject);
     }
-    public void DisableMovement()
-    {
-        isMovementEnabled = false;
-        rb.velocity = Vector3.zero;
-        rb.isKinematic = true;
-    }
-
-    public void EnableMovement()
-    {
-        isMovementEnabled = true;
-        rb.isKinematic = false;
-    }
 
     private void Jump()
     {
@@ -116,14 +105,14 @@ public class PlayerMovement : MonoBehaviour
         isGrounded = false;
         animator.SetTrigger("Jump");
 
-        // Diðer oyunculara zýplama bilgisini ilet
-        photonView.RPC("SyncJump", RpcTarget.Others);
+        //photonView.RPC("SyncJump", RpcTarget.Others);
     }
     IEnumerator WaitForSeconds(int seconds)
     {
         yield return new WaitForSeconds(seconds);
+        isMovementEnabled = true;
     }
-    private void OnCollisionEnter(Collision collision)
+    private IEnumerator OnCollisionEnter(Collision collision)
     {
         if (collision.gameObject.CompareTag("Ground"))
         {
@@ -131,59 +120,47 @@ public class PlayerMovement : MonoBehaviour
         }
         else if (collision.gameObject.CompareTag("Obstacle"))
         {
+            animator.SetTrigger("Die");
 
-            photonView.RPC("HandleDeathRPC", RpcTarget.All);
-        }
-    }
+            isMovementEnabled = false;
 
-    [PunRPC]
-    private void HandleDeathRPC()
-    {
-        StartCoroutine(HandleDeath());
-    }
-
-    private IEnumerator HandleDeath()
-    {
-        DisableMovement(); // Hareketi durdur
-
-        if (photonView.IsMine)
-        {
-
-            if (joystick != null)
+            if (photonView.IsMine)
             {
-                joystick.gameObject.SetActive(false);
-            }
-            if (jumpButton != null)
-            {
-                jumpButton.gameObject.SetActive(false);
-            }
-        }
 
-        animator.SetTrigger("Die"); // Die animasyonunu oynat
-
-        if (boomEffect != null)
-        {
-            boomEffect.GetComponent<ParticleSystem>().Play();
-        }
-
-        // Die animasyonu süresince bekle
-        yield return new WaitForSeconds(animator.GetCurrentAnimatorStateInfo(0).length + 1.5f);
-
-        if (photonView.IsMine)
-        {
-            // Joystick'i tekrar görünür yap
-            if (joystick != null)
-            {
-                joystick.gameObject.SetActive(true);
-                // Joystick handle pozisyonunu sýfýrla
-                joystick.ResetHandlePosition();
-            }
-            if (jumpButton != null)
-            {
-                jumpButton.gameObject.SetActive(true);
+                if (joystick != null)
+                {
+                    joystick.gameObject.SetActive(false);
+                }
+                if (jumpButton != null)
+                {
+                    jumpButton.gameObject.SetActive(false);
+                }
             }
 
-            Respawn(); // Oyuncuyu geri doður
+            if (boomEffect != null)
+            {
+                boomEffect.GetComponent<ParticleSystem>().Play();
+            }
+
+            yield return new WaitForSeconds(2.2f);
+
+            if (photonView.IsMine)
+            {
+                // Joystick'i tekrar görünür yap
+                if (joystick != null)
+                {
+                    joystick.gameObject.SetActive(true);
+                    // Joystick handle pozisyonunu sýfýrla
+                    joystick.ResetHandlePosition();
+                }
+                if (jumpButton != null)
+                {
+                    jumpButton.gameObject.SetActive(true);
+                }
+
+                Respawn(); // Oyuncuyu geri doður
+                isMovementEnabled = true;
+            }
         }
     }
 
@@ -192,7 +169,6 @@ public class PlayerMovement : MonoBehaviour
         if (deadPoint != null)
         {
             transform.position = deadPoint.position;
-            EnableMovement();
         }
     }
 
@@ -204,15 +180,4 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    [PunRPC]
-    private void SyncWalking(bool isWalking)
-    {
-        animator.SetBool("Walking", isWalking);
-    }
-
-    [PunRPC]
-    private void SyncJump()
-    {
-        animator.SetTrigger("Jump");
-    }
 }

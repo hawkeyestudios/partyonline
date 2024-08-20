@@ -1,3 +1,4 @@
+using KnoxGameStudios;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -14,14 +15,13 @@ public class CoinManager : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
-            DontDestroyOnLoad(gameObject); // Oyun sahnesi deðiþse bile bu objeyi yok etme
+            DontDestroyOnLoad(gameObject);
         }
         else
         {
             Destroy(gameObject);
         }
     }
-
     private void Start()
     {
         currentCoins = PlayerPrefs.GetInt("Coins", 1000000);

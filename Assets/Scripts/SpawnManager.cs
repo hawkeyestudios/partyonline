@@ -11,6 +11,7 @@ public class SpawnManager : MonoBehaviourPunCallbacks
     public Text[] rewardTexts;
     public Text[] nickNames;
     public GameObject gameOverPanel;
+    public GeriSayým geriSayým; // Geri sayým scripti
 
     private List<Player> finishOrder = new List<Player>();
     private bool raceFinished = false;
@@ -20,6 +21,12 @@ public class SpawnManager : MonoBehaviourPunCallbacks
         gameOverPanel.SetActive(false);
         SpawnPlayer();
         SetPlayerProfileImage();
+
+        // Geri sayým olayýný dinleyin
+        GeriSayým.OnGameOver += GameOver;
+
+        // Geri sayýmý baþlat
+        geriSayým.StartCountdown();
     }
 
     private void SpawnPlayer()
@@ -43,6 +50,7 @@ public class SpawnManager : MonoBehaviourPunCallbacks
             }
         }
     }
+
     private void SetPlayerProfileImage()
     {
         string playerImageName = PlayerPrefs.GetString("LastEquippedCharacter", "defaultProfileImage");
@@ -50,6 +58,7 @@ public class SpawnManager : MonoBehaviourPunCallbacks
         playerProperties["profileImage"] = playerImageName;
         PhotonNetwork.LocalPlayer.SetCustomProperties(playerProperties);
     }
+
     private void OnTriggerEnter(Collider other)
     {
         if (raceFinished)
@@ -70,8 +79,9 @@ public class SpawnManager : MonoBehaviourPunCallbacks
                 // Eðer tüm oyuncular bitirdiyse yarýþý sonlandýr
                 if (finishOrder.Count == PhotonNetwork.PlayerList.Length)
                 {
-                    gameOverPanel.SetActive(true);
                     raceFinished = true;
+                    geriSayým.StopAllCoroutines(); // Geri sayýmý durdur
+                    GameOver();
                 }
             }
         }
@@ -88,6 +98,11 @@ public class SpawnManager : MonoBehaviourPunCallbacks
             if (playerIndex < rewards.Length)
             {
                 rewardTexts[playerIndex].text = $"{rewards[playerIndex]}";
+                CoinManager.Instance.AddCoins(rewards[playerIndex]);
+            }
+            else
+            {
+                rewardTexts[playerIndex].text = "0";
             }
 
             nickNames[playerIndex].text = player.NickName;
@@ -111,5 +126,25 @@ public class SpawnManager : MonoBehaviourPunCallbacks
         {
             return Resources.Load<Sprite>("ProfileImages/defaultProfileImage");
         }
+    }
+
+    private void GameOver()
+    {
+        raceFinished = true;
+        gameOverPanel.SetActive(true);
+
+        // Yarýþý bitirmeyen oyuncularýn durumunu güncelle
+        foreach (Player player in PhotonNetwork.PlayerList)
+        {
+            if (!finishOrder.Contains(player))
+            {
+                finishOrder.Add(player);
+                UpdatePlayerUI(player);
+            }
+        }
+    }
+    private void OnDestroy()
+    {
+        GeriSayým.OnGameOver -= GameOver;
     }
 }

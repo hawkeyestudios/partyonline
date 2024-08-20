@@ -455,6 +455,7 @@ MonoBehaviour:
   ObservedComponents:
   - {fileID: 2720}
   - {fileID: 458708263084801470}
+  - {fileID: -1915886684507255257}
   sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
@@ -563,7 +564,7 @@ MonoBehaviour:
     SynchronizeType: 1
     Name: Jump
   - Type: 9
-    SynchronizeType: 1
+    SynchronizeType: 0
     Name: Die
   m_SynchronizeLayers:
   - SynchronizeType: 2

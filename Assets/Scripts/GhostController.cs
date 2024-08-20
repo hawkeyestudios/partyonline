@@ -9,14 +9,16 @@ public class GhostController : MonoBehaviourPun
     public float rotationSpeed = 5f; // Rotasyon hýzýný belirleyen parametre
 
     private Transform targetPlayer;
+    private bool isWaiting = false;
     void Start()
     {
-
+        StartCoroutine(WaitForGhost(10));
     }
 
     void Update()
     {
-        WaitForGhost(10);
+        if (isWaiting)
+            return;
 
         if (!photonView.IsMine)
             return;
@@ -71,9 +73,10 @@ public class GhostController : MonoBehaviourPun
             }
         }
     }
-
     IEnumerator WaitForGhost(int seconds)
     {
+        isWaiting = true;
         yield return new WaitForSeconds(seconds);
+        isWaiting = false;
     }
 }

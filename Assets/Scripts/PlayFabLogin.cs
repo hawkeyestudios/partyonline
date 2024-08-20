@@ -10,6 +10,7 @@ namespace KnoxGameStudios
 {
     public class PlayfabLogin : MonoBehaviour
     {
+
         [SerializeField] private InputField usernameInput;
         [SerializeField] private InputField emailInput;
         [SerializeField] private InputField passwordInput;
@@ -27,6 +28,9 @@ namespace KnoxGameStudios
 
         private const string EMAIL_PREF_KEY = "USER_EMAIL";
         private const string PASSWORD_PREF_KEY = "USER_PASSWORD";
+
+        private Text coinstext;
+        private Text gemstext;
 
         #region Unity Methods
         void Start()
@@ -180,16 +184,26 @@ namespace KnoxGameStudios
             Debug.Log($"You have logged into PlayFab with email {email}");
             ShowFeedback("Login successful!");
             SaveCredentials();
-            GetCharacterPurchaseStatus(); // Karakter bilgilerini yükle
-
-            // Kullanýcý bilgilerini almak için PlayFab API çaðrýsý yapýn
+            GetCharacterPurchaseStatus();
             GetUserAccountInfo();
+            GetVirtualCurrencies();
         }
         private void GetCharacterPurchaseStatus()
         {
             PlayFabClientAPI.GetUserData(new GetUserDataRequest(), OnGetUserDataSuccess, OnFailure);
         }
+        public void GetVirtualCurrencies()
+        {
+            PlayFabClientAPI.GetUserInventory(new GetUserInventoryRequest(), OnGetUserInventorySuccess, OnFailure);
+        }
+        public void OnGetUserInventorySuccess(GetUserInventoryResult result)
+        {
+            int coins = result.VirtualCurrency["CN"];
+            coinstext.text = coins.ToString();
 
+            int gems = result.VirtualCurrency["GM"];
+            gemstext.text = gems.ToString();
+        }
         private void OnGetUserDataSuccess(GetUserDataResult result)
         {
             foreach (var entry in result.Data)

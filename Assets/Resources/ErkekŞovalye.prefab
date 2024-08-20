@@ -556,7 +556,7 @@ MonoBehaviour:
     SynchronizeType: 1
     Name: Walking
   - Type: 9
-    SynchronizeType: 1
+    SynchronizeType: 0
     Name: Die
   - Type: 9
     SynchronizeType: 1

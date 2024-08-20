@@ -66,6 +66,7 @@ MonoBehaviour:
   - NotifyFinishLineCrossed
   - SendResultsToAllPlayers
   - PlayerFinished
+  - SetCrown
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

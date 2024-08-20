@@ -7,11 +7,11 @@ public class CameraIntroController : MonoBehaviour
     public GameObject gameUI;
     public float animationDuration = 5f;
     public CameraFollow cameraFollow;
-    private PlayerMovement[] playerMovements; // PlayerMovement referanslarýný saklayacak dizi
-    public GhostController ghostController; // GhostController referansý
+    private PlayerMovement[] playerMovements; 
+
 
     private float timer;
-    private bool hasAnimationCompleted = false; // Animasyonun tamamlanýp tamamlanmadýðýný kontrol etmek için
+    private bool hasAnimationCompleted = false; 
 
     void Start()
     {
@@ -20,19 +20,6 @@ public class CameraIntroController : MonoBehaviour
         if (cameraAnimator != null)
         {
             cameraAnimator.SetTrigger("StartGame");
-        }
-
-        // Joystick ve Jump butonlarýný devre dýþý býrak ve Rigidbody'yi kýsýtla
-        playerMovements = FindObjectsOfType<PlayerMovement>();
-        foreach (PlayerMovement pm in playerMovements)
-        {
-            pm.DisableMovement(); // Hareketi tamamen devre dýþý býrak
-        }
-
-        // Ghost'un hareketini baþlangýçta durdur
-        if (ghostController != null)
-        {
-            ghostController.enabled = false;
         }
     }
 
@@ -62,18 +49,6 @@ public class CameraIntroController : MonoBehaviour
         if (cameraFollow != null)
         {
             cameraFollow.StartCameraFollow();
-        }
-
-        // Joystick ve Jump butonlarýný tekrar aktif hale getir ve hareketi etkinleþtir
-        foreach (PlayerMovement pm in playerMovements)
-        {
-            pm.EnableMovement(); // Hareketi tekrar etkinleþtir
-        }
-
-        // Ghost hareketini baþlat
-        if (ghostController != null)
-        {
-            ghostController.enabled = true;
         }
 
         StartGame();

@@ -20,8 +20,6 @@ public class GridManager : MonoBehaviour
         int column = playerIndex % columns;
         Vector3 offset = new Vector3(column * cellWidth, 0, row * cellHeight);
 
-        // Kamera tarafýndan daha iyi görülebilecek bir konum elde etmek için hafif bir ofset ekleyebiliriz
-        // Örneðin, her karakter arasýnda biraz boþluk býrakmak için
         return startPos + offset;
     }
 }

@@ -42,6 +42,7 @@ public class ButtonManager : MonoBehaviour
         {
             activeButton.tickImage.gameObject.SetActive(true);
         }
+        PlayerPrefs.Save();
     }
 
     public void SetLastEquippedCharacter(CharacterButton characterButton)

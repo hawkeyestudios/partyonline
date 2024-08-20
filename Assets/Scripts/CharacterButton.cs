@@ -91,9 +91,6 @@ public class CharacterButton : MonoBehaviour
         }
     }
 
-
-
-
     private bool AnyOtherCharacterEquipped()
     {
         foreach (var button in buttonManager.characterButtons)
@@ -224,13 +221,26 @@ public class CharacterButton : MonoBehaviour
         {
             Data = new Dictionary<string, string>
         {
+            // Tüm karakterlerin satýn alma ve ekip edilme durumlarýný ekleyin
             { characterPrefabName + "_Purchased", isPurchased ? "1" : "0" },
             { characterPrefabName + "_Equipped", isEquipped ? "1" : "0" },
             { "LastEquippedCharacter", PlayerPrefs.GetString("LastEquippedCharacter", "") },
-            { "CurrentCoins", CoinManager.Instance.GetCurrentCoins().ToString() }, 
-            { "CurrentGems", GemManager.Instance.GetCurrentGems().ToString() } 
+            { "CurrentCoins", CoinManager.Instance.GetCurrentCoins().ToString() },
+            { "CurrentGems", GemManager.Instance.GetCurrentGems().ToString() }
         }
         };
+
+        // Ek olarak, en son ekip edilen karakterin tickImage bilgilerini gönderin
+        if (buttonManager != null)
+        {
+            foreach (var button in buttonManager.characterButtons)
+            {
+                // 'tickImage' durumunu güncelleyin
+                string key = button.characterPrefabName + "_TickImage";
+                string value = button.IsEquipped ? "1" : "0";
+                request.Data[key] = value;
+            }
+        }
 
         PlayFabClientAPI.UpdateUserData(request, OnDataUpdateSuccess, OnFailure);
     }
@@ -260,6 +270,8 @@ public class CharacterButton : MonoBehaviour
     {
         EquipCharacter();
         buttonManager.UpdateEquipButtons(this);
+
+        UpdateCharacterPurchaseStatus();
     }
 
     private void EquipCharacter()

@@ -450,6 +450,7 @@ MonoBehaviour:
   ObservedComponents:
   - {fileID: 8504758840191411179}
   - {fileID: 6820944665565765075}
+  - {fileID: -7019223297730872547}
   sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
@@ -555,7 +556,7 @@ MonoBehaviour:
     SynchronizeType: 1
     Name: Walking
   - Type: 9
-    SynchronizeType: 1
+    SynchronizeType: 0
     Name: Die
   - Type: 9
     SynchronizeType: 1

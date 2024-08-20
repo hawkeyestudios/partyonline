@@ -450,6 +450,7 @@ MonoBehaviour:
   ObservedComponents:
   - {fileID: 6539979365277928235}
   - {fileID: 7271267320911845130}
+  - {fileID: 3486564061748963702}
   sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
@@ -552,7 +553,7 @@ MonoBehaviour:
   ShowParameterInspector: 1
   m_SynchronizeParameters:
   - Type: 9
-    SynchronizeType: 1
+    SynchronizeType: 0
     Name: Die
   - Type: 9
     SynchronizeType: 1

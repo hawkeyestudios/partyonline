@@ -180,7 +180,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     {
         Debug.Log("Joined Lobby.");
 
-        RoomOptions roomOptions = new RoomOptions { MaxPlayers = 2 };
+        RoomOptions roomOptions = new RoomOptions { MaxPlayers = 4 };
         PhotonNetwork.JoinOrCreateRoom("LobbyRoom", roomOptions, TypedLobby.Default);
     }
 
@@ -374,9 +374,35 @@ public class PhotonManager : MonoBehaviourPunCallbacks
 
         if (masterClientCharacter != null)
         {
+            // Taç objesini tüm oyunculara görünür hale getirin
             Vector3 crownPosition = masterClientCharacter.transform.position + new Vector3(0, 2.5f, 0); // Tacý karakterin üzerinde konumlandýr
-            currentCrown = Instantiate(crownPrefab, crownPosition, Quaternion.identity);
+            currentCrown = PhotonNetwork.Instantiate(crownPrefab.name, crownPosition, Quaternion.identity);
             currentCrown.transform.SetParent(masterClientCharacter.transform); // Tacý karaktere baðla
+
+            // Tacý master client karakterinin PhotonView'ine senkronize et
+            PhotonView masterClientPhotonView = masterClientCharacter.GetComponent<PhotonView>();
+            if (masterClientPhotonView != null)
+            {
+                masterClientPhotonView.RPC("SetCrown", RpcTarget.AllBuffered, currentCrown.GetComponent<PhotonView>().ViewID);
+            }
+        }
+    }
+    [PunRPC]
+    void SetCrown(int crownViewID)
+    {
+        PhotonView crownPhotonView = PhotonView.Find(crownViewID);
+        if (crownPhotonView != null)
+        {
+            GameObject crown = crownPhotonView.gameObject;
+            if (crown != null)
+            {
+                // Taçý oyuncunun karakterine baðla
+                GameObject playerCharacter = (GameObject)PhotonNetwork.LocalPlayer.TagObject;
+                if (playerCharacter != null)
+                {
+                    crown.transform.SetParent(playerCharacter.transform);
+                }
+            }
         }
     }
 
