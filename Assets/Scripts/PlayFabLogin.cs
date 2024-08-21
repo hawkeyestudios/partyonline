@@ -10,11 +10,10 @@ namespace KnoxGameStudios
 {
     public class PlayfabLogin : MonoBehaviour
     {
-
         [SerializeField] private InputField usernameInput;
         [SerializeField] private InputField emailInput;
         [SerializeField] private InputField passwordInput;
-        [SerializeField] private Text feedbackText; // Geri bildirim metni için Text elemaný
+        [SerializeField] private Text feedbackText;
         [SerializeField] private Button showPasswordButton;
         public GameObject LoadingText;
         public GameObject LoadingImage;
@@ -186,23 +185,10 @@ namespace KnoxGameStudios
             SaveCredentials();
             GetCharacterPurchaseStatus();
             GetUserAccountInfo();
-            GetVirtualCurrencies();
         }
         private void GetCharacterPurchaseStatus()
         {
             PlayFabClientAPI.GetUserData(new GetUserDataRequest(), OnGetUserDataSuccess, OnFailure);
-        }
-        public void GetVirtualCurrencies()
-        {
-            PlayFabClientAPI.GetUserInventory(new GetUserInventoryRequest(), OnGetUserInventorySuccess, OnFailure);
-        }
-        public void OnGetUserInventorySuccess(GetUserInventoryResult result)
-        {
-            int coins = result.VirtualCurrency["CN"];
-            coinstext.text = coins.ToString();
-
-            int gems = result.VirtualCurrency["GM"];
-            gemstext.text = gems.ToString();
         }
         private void OnGetUserDataSuccess(GetUserDataResult result)
         {
@@ -225,6 +211,11 @@ namespace KnoxGameStudios
                 {
                     PlayerPrefs.SetString("LastEquippedCharacter", value);
                 }
+                else if (key == "TickImageState")
+                {
+                    bool tickImageState = value == "1";
+                    PlayerPrefs.SetInt("TickImageState", tickImageState ? 1 : 0);
+                }
                 else if (key == "CurrentCoins")
                 {
                     int coins = int.Parse(value);
@@ -238,8 +229,6 @@ namespace KnoxGameStudios
             }
             PlayerPrefs.Save();
         }
-
-
         private void GetUserAccountInfo()
         {
             var request = new GetAccountInfoRequest();

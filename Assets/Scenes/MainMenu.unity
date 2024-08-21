@@ -3245,13 +3245,14 @@ GameObject:
   - component: {fileID: 43223391}
   - component: {fileID: 43223393}
   - component: {fileID: 43223392}
+  - component: {fileID: 43223394}
   m_Layer: 5
   m_Name: requestpanel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &43223391
 RectTransform:
   m_ObjectHideFlags: 0
@@ -3272,7 +3273,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 3234.4136, y: 0}
   m_SizeDelta: {x: 3076, y: 1386}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &43223392
@@ -3313,6 +3314,27 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 43223390}
   m_CullTransparentMesh: 1
+--- !u!95 &43223394
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 43223390}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 7953129e5a4e9134cb8b7cd790314d06, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1001 &45755511
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4097,13 +4119,14 @@ GameObject:
   - component: {fileID: 61019906}
   - component: {fileID: 61019908}
   - component: {fileID: 61019907}
+  - component: {fileID: 61019909}
   m_Layer: 5
   m_Name: friendspanel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &61019906
 RectTransform:
   m_ObjectHideFlags: 0
@@ -4124,7 +4147,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 3223.217, y: 0}
   m_SizeDelta: {x: 3076, y: 1386}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &61019907
@@ -4165,6 +4188,27 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 61019905}
   m_CullTransparentMesh: 1
+--- !u!95 &61019909
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 61019905}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 0dae2a9e6cec63e4a9be132ca3a735b0, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1001 &62347093
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -19493,13 +19537,15 @@ GameObject:
   - component: {fileID: 423614632}
   - component: {fileID: 423614634}
   - component: {fileID: 423614633}
+  - component: {fileID: 423614635}
+  - component: {fileID: 423614636}
   m_Layer: 5
   m_Name: addfriendpanel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &423614632
 RectTransform:
   m_ObjectHideFlags: 0
@@ -19523,7 +19569,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 3228.8154, y: 0}
   m_SizeDelta: {x: 3076, y: 1386}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &423614633
@@ -19564,6 +19610,46 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 423614631}
   m_CullTransparentMesh: 1
+--- !u!114 &423614635
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 423614631}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4f61a298d9445774d91e85dd0b79e01b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  friendInputField: {fileID: 1389375234}
+  friendRequestPrefab: {fileID: 1237342419319903941, guid: 3449b38909573cf4886d839b9da32fce,
+    type: 3}
+  requestParentPanel: {fileID: 2059333233}
+  friendListItemPrefab: {fileID: 3367589709973181334, guid: 31599a3933c7e804aa82ce8f4f9f442a,
+    type: 3}
+  friendsListContainer: {fileID: 493139795}
+--- !u!95 &423614636
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 423614631}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 4173c6f827a842c4f945b863646f7404, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1001 &423974638
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -34367,9 +34453,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   friendSystemPanel: {fileID: 1244444033}
+  FriendSystemanim: {fileID: 1244444037}
   addfriendPanel: {fileID: 423614631}
+  addfriendPanelanim: {fileID: 423614636}
   friendRequestPanel: {fileID: 43223390}
+  friendRequestPanelanim: {fileID: 43223394}
   friendsPanel: {fileID: 61019905}
+  friendsPanelanim: {fileID: 61019909}
   notificationPanel: {fileID: 334938711}
   settingsPanel: {fileID: 1091272877}
   gamemodepanel: {fileID: 0}
@@ -38516,9 +38606,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: UIAddFriend, Assembly-CSharp
-        m_MethodName: AddFriend
+      - m_Target: {fileID: 423614635}
+        m_TargetAssemblyTypeName: AddFriend, Assembly-CSharp
+        m_MethodName: AddFriendByDisplayName
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -54169,13 +54259,14 @@ GameObject:
   - component: {fileID: 1244444034}
   - component: {fileID: 1244444036}
   - component: {fileID: 1244444035}
+  - component: {fileID: 1244444037}
   m_Layer: 5
   m_Name: FriendsSystemPanel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1244444034
 RectTransform:
   m_ObjectHideFlags: 0
@@ -54198,7 +54289,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 3228.8154, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1244444035
@@ -54239,6 +54330,27 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1244444033}
   m_CullTransparentMesh: 1
+--- !u!95 &1244444037
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1244444033}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 7aafc862c77cf174fb821bb1252d3554, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1001 &1244588156
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -60302,9 +60414,9 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 423614631}
         m_TargetAssemblyTypeName: UIAddFriend, Assembly-CSharp
-        m_MethodName: SetAddFriendName
+        m_MethodName: 
         m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

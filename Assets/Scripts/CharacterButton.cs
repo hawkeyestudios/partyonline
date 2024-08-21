@@ -221,7 +221,6 @@ public class CharacterButton : MonoBehaviour
         {
             Data = new Dictionary<string, string>
         {
-            // Tüm karakterlerin satýn alma ve ekip edilme durumlarýný ekleyin
             { characterPrefabName + "_Purchased", isPurchased ? "1" : "0" },
             { characterPrefabName + "_Equipped", isEquipped ? "1" : "0" },
             { "LastEquippedCharacter", PlayerPrefs.GetString("LastEquippedCharacter", "") },
@@ -230,16 +229,13 @@ public class CharacterButton : MonoBehaviour
         }
         };
 
-        // Ek olarak, en son ekip edilen karakterin tickImage bilgilerini gönderin
-        if (buttonManager != null)
+        if (isEquipped)
         {
-            foreach (var button in buttonManager.characterButtons)
-            {
-                // 'tickImage' durumunu güncelleyin
-                string key = button.characterPrefabName + "_TickImage";
-                string value = button.IsEquipped ? "1" : "0";
-                request.Data[key] = value;
-            }
+            request.Data[characterPrefabName + "_TickImage"] = "1";
+        }
+        else
+        {
+            request.Data[characterPrefabName + "_TickImage"] = "0";
         }
 
         PlayFabClientAPI.UpdateUserData(request, OnDataUpdateSuccess, OnFailure);
@@ -251,7 +247,7 @@ public class CharacterButton : MonoBehaviour
     }
     private void OnPurchaseSuccess()
     {
-        UpdateCharacterPurchaseStatus(); // Satýn alma bilgilerini güncelle
+        UpdateCharacterPurchaseStatus(); 
     }
 
     private void OnFailure(PlayFabError error)
@@ -291,7 +287,6 @@ public class CharacterButton : MonoBehaviour
         PlayerPrefs.SetString("LastEquippedCharacter", characterPrefabName); // En son ekip edilen karakter
         PlayerPrefs.Save();
 
-        
         UpdateCharacterPurchaseStatus(); // PlayFab'de güncelle
     }
 

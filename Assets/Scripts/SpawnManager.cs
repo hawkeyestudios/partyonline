@@ -64,7 +64,7 @@ public class SpawnManager : MonoBehaviourPunCallbacks
         if (raceFinished)
             return;
 
-        if (other.CompareTag("Player"))
+        if (other.CompareTag("FinishLine")) // Yarýþ bitiþ çizgisi tag'i
         {
             Player player = other.GetComponent<PhotonView>().Owner;
 
@@ -109,6 +109,7 @@ public class SpawnManager : MonoBehaviourPunCallbacks
         }
     }
 
+
     private Sprite GetProfileSprite(Player player)
     {
         if (player.CustomProperties.TryGetValue("profileImage", out object playerImageName))
@@ -129,20 +130,20 @@ public class SpawnManager : MonoBehaviourPunCallbacks
     }
 
     private void GameOver()
-    {
-        raceFinished = true;
-        gameOverPanel.SetActive(true);
+{
+    raceFinished = true;
+    gameOverPanel.SetActive(true);
 
-        // Yarýþý bitirmeyen oyuncularýn durumunu güncelle
-        foreach (Player player in PhotonNetwork.PlayerList)
+    // Yarýþý bitirmeyen oyuncularý da UI'da göstermek, ancak ödül vermemek için
+    foreach (Player player in PhotonNetwork.PlayerList)
+    {
+        if (!finishOrder.Contains(player))
         {
-            if (!finishOrder.Contains(player))
-            {
-                finishOrder.Add(player);
-                UpdatePlayerUI(player);
-            }
+            finishOrder.Add(player);  // Yarýþý bitirmeyen oyuncularý listeye ekle
+            UpdatePlayerUI(player);  // Ancak bunlara sýfýr ödül ver
         }
     }
+}
     private void OnDestroy()
     {
         GeriSayým.OnGameOver -= GameOver;

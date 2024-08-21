@@ -5,9 +5,13 @@ using UnityEngine.UI;
 public class SceneController : MonoBehaviour
 {
     public GameObject friendSystemPanel;
+    public Animator FriendSystemanim;
     public GameObject addfriendPanel;
+    public Animator addfriendPanelanim;
     public GameObject friendRequestPanel;
+    public Animator friendRequestPanelanim;
     public GameObject friendsPanel;
+    public Animator friendsPanelanim;
     public GameObject notificationPanel;
     public GameObject settingsPanel;
     public GameObject gamemodepanel;
@@ -37,44 +41,41 @@ public class SceneController : MonoBehaviour
 
     public void OpenFriendSystem()
     {
+        FriendSystemanim.SetTrigger("FriendSystem");
         friendSystemPanel.SetActive(true);
     }
     public void OpenAddFriend()
     {
         addfriendPanel.SetActive(true);
-        friendRequestPanel.SetActive(false);
-        friendsPanel.SetActive(false);
+        addfriendPanelanim.SetTrigger("AddFriend");
     }
     public void OpenRequestFriend()
     {
         friendRequestPanel.SetActive(true);
-        addfriendPanel.SetActive(false);
-        friendsPanel.SetActive(false);
+        friendRequestPanelanim.SetTrigger("FriendRequest");
     }
 
     public void OpenFriends()
     {
         friendsPanel.SetActive(true);
+        friendsPanelanim.SetTrigger("Friends");
     }
 
     public void CloseFriendSystem()
     {
-        friendSystemPanel.SetActive(false);
-        friendRequestPanel.SetActive(false);
-        friendsPanel.SetActive(false);
-        addfriendPanel.SetActive(false);
+        FriendSystemanim.SetTrigger("FriendSystemClose");
     }
     public void CloseAddFriend()
     {
-        addfriendPanel.SetActive(false);
+        addfriendPanelanim.SetTrigger("AddFriendClose");
     }
     public void CloseRequestFriend()
     {
-        friendRequestPanel.SetActive(false);
+        friendRequestPanelanim.SetTrigger("FriendRequestClose");
     }
     public void CloseFriends()
     {
-        friendsPanel.SetActive(false);
+        friendsPanelanim.SetTrigger("FriendsClose");
     }
 
     public void NotificationsPanel()
