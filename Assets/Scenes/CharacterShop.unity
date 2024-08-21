@@ -11372,10 +11372,10 @@ RectTransform:
   m_Father: {fileID: 1648233078}
   m_RootOrder: -2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 985, y: -1265}
+  m_SizeDelta: {x: 250, y: 250}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &303170170
 MonoBehaviour:
@@ -11453,7 +11453,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 9472e928d982fc04da4385bb28808aa2, type: 3}
+  m_Sprite: {fileID: 21300000, guid: e21d9e7c9309b4f479e9d2bbbcbb7dae, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -11485,8 +11485,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   characterPrefabName: RedSamurai
   spawnPoint: {fileID: 918653613}
-  characterPrice: 70000
-  gemPrice: 700
+  characterPrice: 80000
+  gemPrice: 800
   buyText: {fileID: 2056395985}
   gemText: {fileID: 1815619771}
   buyButton: {fileID: 947915115}
@@ -13599,10 +13599,10 @@ RectTransform:
   m_Father: {fileID: 1648233078}
   m_RootOrder: -2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 145, y: -705}
+  m_SizeDelta: {x: 250, y: 250}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &344303542
 MonoBehaviour:
@@ -13680,7 +13680,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 78f84ec48b6f1144fa9e0ad0e56f28cd, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 24bae66536c761147990bcf3f5a6c748, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -15419,7 +15419,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &392036709
 RectTransform:
   m_ObjectHideFlags: 0
@@ -15950,9 +15950,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   friendSystemPanel: {fileID: 0}
+  FriendSystemanim: {fileID: 0}
   addfriendPanel: {fileID: 0}
+  addfriendPanelanim: {fileID: 0}
   friendRequestPanel: {fileID: 0}
+  friendRequestPanelanim: {fileID: 0}
   friendsPanel: {fileID: 0}
+  friendsPanelanim: {fileID: 0}
   notificationPanel: {fileID: 0}
   settingsPanel: {fileID: 0}
   gamemodepanel: {fileID: 0}
@@ -27021,7 +27025,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &730223947
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -30843,10 +30847,10 @@ RectTransform:
   m_Father: {fileID: 1648233078}
   m_RootOrder: -2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 145, y: -145}
+  m_SizeDelta: {x: 250, y: 250}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &834744063
 MonoBehaviour:
@@ -31163,10 +31167,10 @@ RectTransform:
   m_Father: {fileID: 1648233078}
   m_RootOrder: -2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 985, y: -985}
+  m_SizeDelta: {x: 250, y: 250}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &839819415
 MonoBehaviour:
@@ -31276,8 +31280,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   characterPrefabName: BadViking
   spawnPoint: {fileID: 918653613}
-  characterPrice: 75000
-  gemPrice: 750
+  characterPrice: 60000
+  gemPrice: 600
   buyText: {fileID: 458916627}
   gemText: {fileID: 1799042140}
   buyButton: {fileID: 1767837405}
@@ -31747,10 +31751,10 @@ RectTransform:
   m_Father: {fileID: 1648233078}
   m_RootOrder: -2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 145, y: -985}
+  m_SizeDelta: {x: 250, y: 250}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &844512710
 MonoBehaviour:
@@ -32059,10 +32063,10 @@ RectTransform:
   m_Father: {fileID: 1648233078}
   m_RootOrder: -2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 425, y: -705}
+  m_SizeDelta: {x: 250, y: 250}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &859737780
 MonoBehaviour:
@@ -32140,7 +32144,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 78f84ec48b6f1144fa9e0ad0e56f28cd, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 24bae66536c761147990bcf3f5a6c748, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -32555,10 +32559,10 @@ RectTransform:
   m_Father: {fileID: 1648233078}
   m_RootOrder: -2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 705, y: -425}
+  m_SizeDelta: {x: 250, y: 250}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &870661223
 MonoBehaviour:
@@ -32636,7 +32640,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 78f84ec48b6f1144fa9e0ad0e56f28cd, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 24bae66536c761147990bcf3f5a6c748, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -32668,8 +32672,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   characterPrefabName: "Kad\u0131n\u015Eovalye"
   spawnPoint: {fileID: 918653613}
-  characterPrice: 17000
-  gemPrice: 170
+  characterPrice: 20000
+  gemPrice: 200
   buyText: {fileID: 392235337}
   gemText: {fileID: 1675144304}
   buyButton: {fileID: 566961957}
@@ -33982,7 +33986,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 918653612}
   m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
-  m_LocalPosition: {x: -5.47, y: -1.53, z: 88.13}
+  m_LocalPosition: {x: -5.47, y: -1.2799997, z: 88.13}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -34806,10 +34810,10 @@ RectTransform:
   m_Father: {fileID: 1648233078}
   m_RootOrder: -2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 425, y: -985}
+  m_SizeDelta: {x: 250, y: 250}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &953350111
 MonoBehaviour:
@@ -34887,7 +34891,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 9472e928d982fc04da4385bb28808aa2, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 24bae66536c761147990bcf3f5a6c748, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -34919,8 +34923,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   characterPrefabName: Pirates
   spawnPoint: {fileID: 918653613}
-  characterPrice: 60000
-  gemPrice: 600
+  characterPrice: 45000
+  gemPrice: 450
   buyText: {fileID: 204192484}
   gemText: {fileID: 1268912033}
   buyButton: {fileID: 878195025}
@@ -35742,10 +35746,10 @@ RectTransform:
   m_Father: {fileID: 1648233078}
   m_RootOrder: -2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 705, y: -1265}
+  m_SizeDelta: {x: 250, y: 250}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &983535910
 MonoBehaviour:
@@ -35823,7 +35827,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 24bae66536c761147990bcf3f5a6c748, type: 3}
+  m_Sprite: {fileID: 21300000, guid: e21d9e7c9309b4f479e9d2bbbcbb7dae, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -35855,8 +35859,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   characterPrefabName: Wizard
   spawnPoint: {fileID: 918653613}
-  characterPrice: 50000
-  gemPrice: 500
+  characterPrice: 80000
+  gemPrice: 800
   buyText: {fileID: 865357450}
   gemText: {fileID: 190770737}
   buyButton: {fileID: 1177801726}
@@ -37425,10 +37429,10 @@ RectTransform:
   m_Father: {fileID: 1648233078}
   m_RootOrder: -2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 705, y: -985}
+  m_SizeDelta: {x: 250, y: 250}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1022698607
 MonoBehaviour:
@@ -37506,7 +37510,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 24bae66536c761147990bcf3f5a6c748, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 9472e928d982fc04da4385bb28808aa2, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -37538,8 +37542,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   characterPrefabName: Samurai
   spawnPoint: {fileID: 918653613}
-  characterPrice: 45000
-  gemPrice: 450
+  characterPrice: 60000
+  gemPrice: 600
   buyText: {fileID: 1895842126}
   gemText: {fileID: 1205994768}
   buyButton: {fileID: 1530396361}
@@ -39427,10 +39431,10 @@ RectTransform:
   m_Father: {fileID: 1648233078}
   m_RootOrder: -2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 985, y: -705}
+  m_SizeDelta: {x: 250, y: 250}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1075185136
 MonoBehaviour:
@@ -50160,10 +50164,10 @@ RectTransform:
   m_Father: {fileID: 1648233078}
   m_RootOrder: -2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 145, y: -1265}
+  m_SizeDelta: {x: 250, y: 250}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1398181282
 MonoBehaviour:
@@ -52907,10 +52911,10 @@ RectTransform:
   m_Father: {fileID: 1648233078}
   m_RootOrder: -2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 145, y: -425}
+  m_SizeDelta: {x: 250, y: 250}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1466545236
 MonoBehaviour:
@@ -52988,7 +52992,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 3ada3d50c278eae4a879b1966fa41660, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 78f84ec48b6f1144fa9e0ad0e56f28cd, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -59633,20 +59637,20 @@ RectTransform:
   - {fileID: 2123724442}
   - {fileID: 1075185135}
   - {fileID: 844512709}
-  - {fileID: 1022698606}
-  - {fileID: 983535909}
-  - {fileID: 1752063878}
   - {fileID: 953350110}
-  - {fileID: 1398181281}
-  - {fileID: 303170169}
+  - {fileID: 1022698606}
   - {fileID: 839819414}
+  - {fileID: 1398181281}
+  - {fileID: 1752063878}
+  - {fileID: 983535909}
+  - {fileID: 303170169}
   m_Father: {fileID: 1415119834}
   m_RootOrder: -2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -0.00045358515}
-  m_SizeDelta: {x: 0, y: 1539.37}
+  m_AnchoredPosition: {x: 0, y: -0.0005384541}
+  m_SizeDelta: {x: 0, y: 1529.22}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &1648233079
 MonoBehaviour:
@@ -62428,10 +62432,10 @@ RectTransform:
   m_Father: {fileID: 1648233078}
   m_RootOrder: -2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 425, y: -1265}
+  m_SizeDelta: {x: 250, y: 250}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1752063879
 MonoBehaviour:
@@ -62509,7 +62513,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 9472e928d982fc04da4385bb28808aa2, type: 3}
+  m_Sprite: {fileID: 21300000, guid: e21d9e7c9309b4f479e9d2bbbcbb7dae, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -62541,8 +62545,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   characterPrefabName: Witch
   spawnPoint: {fileID: 918653613}
-  characterPrice: 52000
-  gemPrice: 520
+  characterPrice: 80000
+  gemPrice: 800
   buyText: {fileID: 703848170}
   gemText: {fileID: 577471906}
   buyButton: {fileID: 1647907977}
@@ -67935,10 +67939,10 @@ RectTransform:
   m_Father: {fileID: 1648233078}
   m_RootOrder: -2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 425, y: -425}
+  m_SizeDelta: {x: 250, y: 250}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1902513089
 MonoBehaviour:
@@ -68999,10 +69003,10 @@ RectTransform:
   m_Father: {fileID: 1648233078}
   m_RootOrder: -2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 425, y: -145}
+  m_SizeDelta: {x: 250, y: 250}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1929881064
 MonoBehaviour:
@@ -69369,10 +69373,10 @@ RectTransform:
   m_Father: {fileID: 1648233078}
   m_RootOrder: -2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 985, y: -145}
+  m_SizeDelta: {x: 250, y: 250}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1954063814
 MonoBehaviour:
@@ -69450,7 +69454,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 3ada3d50c278eae4a879b1966fa41660, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 78f84ec48b6f1144fa9e0ad0e56f28cd, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -69482,8 +69486,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   characterPrefabName: Warrior
   spawnPoint: {fileID: 918653613}
-  characterPrice: 13000
-  gemPrice: 130
+  characterPrice: 12000
+  gemPrice: 120
   buyText: {fileID: 1861688836}
   gemText: {fileID: 459555537}
   buyButton: {fileID: 424997901}
@@ -75135,10 +75139,10 @@ RectTransform:
   m_Father: {fileID: 1648233078}
   m_RootOrder: -2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 705, y: -705}
+  m_SizeDelta: {x: 250, y: 250}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2123724443
 MonoBehaviour:
@@ -75375,10 +75379,10 @@ RectTransform:
   m_Father: {fileID: 1648233078}
   m_RootOrder: -2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 985, y: -425}
+  m_SizeDelta: {x: 250, y: 250}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2125493458
 MonoBehaviour:
@@ -75456,7 +75460,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 78f84ec48b6f1144fa9e0ad0e56f28cd, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 24bae66536c761147990bcf3f5a6c748, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -75611,10 +75615,10 @@ RectTransform:
   m_Father: {fileID: 1648233078}
   m_RootOrder: -2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 705, y: -145}
+  m_SizeDelta: {x: 250, y: 250}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2127337524
 MonoBehaviour:

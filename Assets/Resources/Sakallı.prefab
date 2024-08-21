@@ -396,11 +396,11 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 052447a14ef3f954692adf505f50b880,
         type: 3}
       insertIndex: -1
-      addedObject: {fileID: 5641498921609711883}
+      addedObject: {fileID: -5882418569586773833}
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 052447a14ef3f954692adf505f50b880,
         type: 3}
       insertIndex: -1
-      addedObject: {fileID: -5882418569586773833}
+      addedObject: {fileID: 5641498921609711883}
   m_SourcePrefab: {fileID: 100100000, guid: 052447a14ef3f954692adf505f50b880, type: 3}
 --- !u!4 &5899454054312704423 stripped
 Transform:
@@ -455,8 +455,8 @@ MonoBehaviour:
   observableSearch: 2
   ObservedComponents:
   - {fileID: 715884836513958819}
-  - {fileID: 5641498921609711883}
   - {fileID: -5882418569586773833}
+  - {fileID: 5641498921609711883}
   sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
@@ -543,6 +543,22 @@ CapsuleCollider:
   m_Height: 1.7969092
   m_Direction: 1
   m_Center: {x: 0.0030950904, y: 0.90059334, z: 0.03702402}
+--- !u!114 &-5882418569586773833
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6527055718975775517}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 64179f3720bbfe947b7724caa67b7c1d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_SynchronizeVelocity: 1
+  m_SynchronizeAngularVelocity: 0
+  m_TeleportEnabled: 0
+  m_TeleportIfDistanceGreaterThan: 3
 --- !u!114 &5641498921609711883
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -565,24 +581,8 @@ MonoBehaviour:
     SynchronizeType: 1
     Name: Jump
   - Type: 9
-    SynchronizeType: 0
+    SynchronizeType: 1
     Name: Die
   m_SynchronizeLayers:
   - SynchronizeType: 0
     LayerIndex: 0
---- !u!114 &-5882418569586773833
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6527055718975775517}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 64179f3720bbfe947b7724caa67b7c1d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_SynchronizeVelocity: 1
-  m_SynchronizeAngularVelocity: 0
-  m_TeleportEnabled: 0
-  m_TeleportIfDistanceGreaterThan: 3

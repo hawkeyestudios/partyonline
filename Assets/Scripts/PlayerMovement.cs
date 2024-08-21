@@ -23,7 +23,6 @@ public class PlayerMovement : MonoBehaviour
 
     private RectTransform joystickHandle;
     public GameObject boomEffect;
-    private bool hasFinished = false;
 
     public GameObject ghostPrefab;
 
@@ -89,12 +88,10 @@ public class PlayerMovement : MonoBehaviour
     {
         Vector3 currentPosition = transform.position;
         Quaternion currentRotation = transform.rotation;
-
+        
+        animator.SetTrigger("Die");
 
         GameObject ghost = PhotonNetwork.Instantiate(ghostPrefab.name, currentPosition, currentRotation);
-
-
-        PhotonNetwork.Destroy(gameObject);
     }
 
     private void Jump()

@@ -401,11 +401,11 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 4a0b0000d60d9e64db2107bb244cb708,
         type: 3}
       insertIndex: -1
-      addedObject: {fileID: 458708263084801470}
+      addedObject: {fileID: -1915886684507255257}
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 4a0b0000d60d9e64db2107bb244cb708,
         type: 3}
       insertIndex: -1
-      addedObject: {fileID: -1915886684507255257}
+      addedObject: {fileID: 458708263084801470}
   m_SourcePrefab: {fileID: 100100000, guid: 4a0b0000d60d9e64db2107bb244cb708, type: 3}
 --- !u!1 &8536599673531048727 stripped
 GameObject:
@@ -454,8 +454,8 @@ MonoBehaviour:
   observableSearch: 2
   ObservedComponents:
   - {fileID: 2720}
-  - {fileID: 458708263084801470}
   - {fileID: -1915886684507255257}
+  - {fileID: 458708263084801470}
   sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
@@ -542,6 +542,22 @@ CapsuleCollider:
   m_Height: 1.7825527
   m_Direction: 1
   m_Center: {x: -0.01373291, y: 0.8723259, z: -0.0074021816}
+--- !u!114 &-1915886684507255257
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8536599673531048727}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 64179f3720bbfe947b7724caa67b7c1d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_SynchronizeVelocity: 1
+  m_SynchronizeAngularVelocity: 0
+  m_TeleportEnabled: 0
+  m_TeleportIfDistanceGreaterThan: 3
 --- !u!114 &458708263084801470
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -564,27 +580,11 @@ MonoBehaviour:
     SynchronizeType: 1
     Name: Jump
   - Type: 9
-    SynchronizeType: 0
+    SynchronizeType: 1
     Name: Die
   m_SynchronizeLayers:
   - SynchronizeType: 2
     LayerIndex: 0
---- !u!114 &-1915886684507255257
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8536599673531048727}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 64179f3720bbfe947b7724caa67b7c1d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_SynchronizeVelocity: 1
-  m_SynchronizeAngularVelocity: 0
-  m_TeleportEnabled: 0
-  m_TeleportIfDistanceGreaterThan: 3
 --- !u!4 &9021774930638338477 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 4a0b0000d60d9e64db2107bb244cb708,

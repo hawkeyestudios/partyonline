@@ -18198,7 +18198,6 @@ GameObject:
   - component: {fileID: 1000699830}
   - component: {fileID: 1000699833}
   - component: {fileID: 1000699832}
-  - component: {fileID: 1000699834}
   m_Layer: 0
   m_Name: FinishCollider
   m_TagString: Untagged
@@ -18260,40 +18259,6 @@ MonoBehaviour:
   sceneViewId: 2
   InstantiationId: 0
   isRuntimeInstantiated: 0
---- !u!114 &1000699834
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1000699829}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0d83bd2f240f34d478e9cafa0328e837, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  spawnPoints:
-  - {fileID: 925625341}
-  - {fileID: 1625530573}
-  - {fileID: 1365445590}
-  - {fileID: 354192485}
-  profileImages:
-  - {fileID: 1903622187}
-  - {fileID: 1903622186}
-  - {fileID: 1903622185}
-  - {fileID: 1903622184}
-  rewardTexts:
-  - {fileID: 1903622183}
-  - {fileID: 1903622182}
-  - {fileID: 1903622181}
-  - {fileID: 1903622180}
-  nickNames:
-  - {fileID: 1903622179}
-  - {fileID: 1903622178}
-  - {fileID: 1903622177}
-  - {fileID: 1903622176}
-  gameOverPanel: {fileID: 1903622175}
-  "geriSay\u0131m": {fileID: 46666245}
 --- !u!1001 &1004773374
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -40794,11 +40759,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: Ghost
       objectReference: {fileID: 0}
-    - target: {fileID: 8555421485844250906, guid: f28f7b115a46a2a4aadd51143d3131d3,
-        type: 3}
-      propertyPath: m_TagString
-      value: Finish
-      objectReference: {fileID: 0}
     - target: {fileID: 9075076711154817952, guid: f28f7b115a46a2a4aadd51143d3131d3,
         type: 3}
       propertyPath: m_RootOrder
@@ -40857,5 +40817,49 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 8555421485844250906, guid: f28f7b115a46a2a4aadd51143d3131d3,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4665773982566416427}
   m_SourcePrefab: {fileID: 100100000, guid: f28f7b115a46a2a4aadd51143d3131d3, type: 3}
+--- !u!1 &4665773982566416426 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8555421485844250906, guid: f28f7b115a46a2a4aadd51143d3131d3,
+    type: 3}
+  m_PrefabInstance: {fileID: 4665773982566416425}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &4665773982566416427
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4665773982566416426}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0d83bd2f240f34d478e9cafa0328e837, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  spawnPoints:
+  - {fileID: 925625341}
+  - {fileID: 1625530573}
+  - {fileID: 1365445590}
+  - {fileID: 354192485}
+  profileImages:
+  - {fileID: 1903622187}
+  - {fileID: 1903622186}
+  - {fileID: 1903622185}
+  - {fileID: 1903622184}
+  rewardTexts:
+  - {fileID: 1903622183}
+  - {fileID: 1903622182}
+  - {fileID: 1903622181}
+  - {fileID: 1903622180}
+  nickNames:
+  - {fileID: 1903622179}
+  - {fileID: 1903622178}
+  - {fileID: 1903622177}
+  - {fileID: 1903622176}
+  gameOverPanel: {fileID: 1903622175}
+  "geriSay\u0131m": {fileID: 46666245}

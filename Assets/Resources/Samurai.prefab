@@ -316,11 +316,11 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 55d4a7adc84e45f4da7ac8ef91fb703a,
         type: 3}
       insertIndex: -1
-      addedObject: {fileID: 1188081120678289681}
+      addedObject: {fileID: -4028609470167473084}
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 55d4a7adc84e45f4da7ac8ef91fb703a,
         type: 3}
       insertIndex: -1
-      addedObject: {fileID: -4028609470167473084}
+      addedObject: {fileID: 1188081120678289681}
   m_SourcePrefab: {fileID: 100100000, guid: 55d4a7adc84e45f4da7ac8ef91fb703a, type: 3}
 --- !u!4 &1266438843160696551 stripped
 Transform:
@@ -375,8 +375,8 @@ MonoBehaviour:
   observableSearch: 2
   ObservedComponents:
   - {fileID: 4974448946090951076}
-  - {fileID: 1188081120678289681}
   - {fileID: -4028609470167473084}
+  - {fileID: 1188081120678289681}
   sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
@@ -463,6 +463,22 @@ CapsuleCollider:
   m_Height: 1.9391834
   m_Direction: 1
   m_Center: {x: -0.011465132, y: 0.96691173, z: -0.003400147}
+--- !u!114 &-4028609470167473084
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1934467321555438685}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 64179f3720bbfe947b7724caa67b7c1d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_SynchronizeVelocity: 1
+  m_SynchronizeAngularVelocity: 0
+  m_TeleportEnabled: 0
+  m_TeleportIfDistanceGreaterThan: 3
 --- !u!114 &1188081120678289681
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -485,27 +501,11 @@ MonoBehaviour:
     SynchronizeType: 1
     Name: Jump
   - Type: 9
-    SynchronizeType: 0
+    SynchronizeType: 1
     Name: Die
   m_SynchronizeLayers:
   - SynchronizeType: 0
     LayerIndex: 0
---- !u!114 &-4028609470167473084
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1934467321555438685}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 64179f3720bbfe947b7724caa67b7c1d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_SynchronizeVelocity: 1
-  m_SynchronizeAngularVelocity: 0
-  m_TeleportEnabled: 0
-  m_TeleportIfDistanceGreaterThan: 3
 --- !u!1001 &7302915543165112823
 PrefabInstance:
   m_ObjectHideFlags: 0

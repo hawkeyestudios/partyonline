@@ -396,11 +396,11 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 5721c7ab2165efa459f189cd41abbb22,
         type: 3}
       insertIndex: -1
-      addedObject: {fileID: 1556417500580569961}
+      addedObject: {fileID: -5699812122754962387}
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 5721c7ab2165efa459f189cd41abbb22,
         type: 3}
       insertIndex: -1
-      addedObject: {fileID: -5699812122754962387}
+      addedObject: {fileID: 1556417500580569961}
   m_SourcePrefab: {fileID: 100100000, guid: 5721c7ab2165efa459f189cd41abbb22, type: 3}
 --- !u!4 &8196194789781480268 stripped
 Transform:
@@ -455,8 +455,8 @@ MonoBehaviour:
   observableSearch: 2
   ObservedComponents:
   - {fileID: 9020902422848490210}
-  - {fileID: 1556417500580569961}
   - {fileID: -5699812122754962387}
+  - {fileID: 1556417500580569961}
   sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
@@ -543,6 +543,22 @@ CapsuleCollider:
   m_Height: 1.809128
   m_Direction: 1
   m_Center: {x: -0.017404199, y: 0.90311825, z: 0.0009010434}
+--- !u!114 &-5699812122754962387
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8860105562418149878}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 64179f3720bbfe947b7724caa67b7c1d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_SynchronizeVelocity: 1
+  m_SynchronizeAngularVelocity: 0
+  m_TeleportEnabled: 0
+  m_TeleportIfDistanceGreaterThan: 3
 --- !u!114 &1556417500580569961
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -562,7 +578,7 @@ MonoBehaviour:
     SynchronizeType: 1
     Name: Jump
   - Type: 9
-    SynchronizeType: 0
+    SynchronizeType: 1
     Name: Die
   - Type: 4
     SynchronizeType: 1
@@ -570,19 +586,3 @@ MonoBehaviour:
   m_SynchronizeLayers:
   - SynchronizeType: 0
     LayerIndex: 0
---- !u!114 &-5699812122754962387
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8860105562418149878}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 64179f3720bbfe947b7724caa67b7c1d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_SynchronizeVelocity: 1
-  m_SynchronizeAngularVelocity: 0
-  m_TeleportEnabled: 0
-  m_TeleportIfDistanceGreaterThan: 3

@@ -64,7 +64,7 @@ public class SpawnManager : MonoBehaviourPunCallbacks
         if (raceFinished)
             return;
 
-        if (other.CompareTag("FinishLine")) // Yarýþ bitiþ çizgisi tag'i
+        if (other.CompareTag("Player")) // Finish çizgisinden geçen oyunculara göre iþlem yapýlýr
         {
             Player player = other.GetComponent<PhotonView>().Owner;
 
@@ -94,21 +94,15 @@ public class SpawnManager : MonoBehaviourPunCallbacks
         {
             profileImages[playerIndex].sprite = GetProfileSprite(player);
 
-            int[] rewards = { 3000, 1500, 1000, 500 };
-            if (playerIndex < rewards.Length)
-            {
-                rewardTexts[playerIndex].text = $"{rewards[playerIndex]}";
-                CoinManager.Instance.AddCoins(rewards[playerIndex]);
-            }
-            else
-            {
-                rewardTexts[playerIndex].text = "0";
-            }
+            // Ýlk oyuncuya 1000 ödül ver, sonrakilere sýrasýyla 250 daha az ver
+            int reward = Mathf.Max(1000 - (playerIndex * 250), 0); // En düþük ödül 0 olmalý
+
+            rewardTexts[playerIndex].text = $"{reward}";
+            CoinManager.Instance.AddCoins(reward);
 
             nickNames[playerIndex].text = player.NickName;
         }
     }
-
 
     private Sprite GetProfileSprite(Player player)
     {
@@ -130,20 +124,21 @@ public class SpawnManager : MonoBehaviourPunCallbacks
     }
 
     private void GameOver()
-{
-    raceFinished = true;
-    gameOverPanel.SetActive(true);
-
-    // Yarýþý bitirmeyen oyuncularý da UI'da göstermek, ancak ödül vermemek için
-    foreach (Player player in PhotonNetwork.PlayerList)
     {
-        if (!finishOrder.Contains(player))
+        raceFinished = true;
+        gameOverPanel.SetActive(true);
+
+        // Yarýþý bitirmeyen oyuncularý da UI'da göstermek, ancak ödül vermemek için
+        foreach (Player player in PhotonNetwork.PlayerList)
         {
-            finishOrder.Add(player);  // Yarýþý bitirmeyen oyuncularý listeye ekle
-            UpdatePlayerUI(player);  // Ancak bunlara sýfýr ödül ver
+            if (!finishOrder.Contains(player))
+            {
+                finishOrder.Add(player);  // Yarýþý bitirmeyen oyuncularý listeye ekle
+                UpdatePlayerUI(player);  // Ancak bunlara sýfýr ödül ver
+            }
         }
     }
-}
+
     private void OnDestroy()
     {
         GeriSayým.OnGameOver -= GameOver;

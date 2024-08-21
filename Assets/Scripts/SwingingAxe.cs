@@ -6,7 +6,6 @@ public class SwingingAxe : MonoBehaviour
     public float swingSpeed = 2f; // Baltanýn döneceði hýz
 
     private float startAngle;
-    private bool swingingRight = true;
 
     void Start()
     {
