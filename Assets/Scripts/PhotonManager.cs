@@ -313,10 +313,12 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     {
         if (time > 0)
         {
+            leaveRoomButton.interactable = false;
             statusText.text = $"Starting game in {time} seconds...";
         }
         else
         {
+            leaveRoomButton.interactable=true;
             statusText.text = "Waiting for more players...";
         }
     }

@@ -8,6 +8,7 @@ public class ProfileManager : MonoBehaviour
     [SerializeField] private Text usernameDisplayText;
     [SerializeField] private Text profilenameDisplayText;
     [SerializeField] private Text requestnameDisplayText;
+    [SerializeField] private Text profileNameText;
 
     void Start()
     {
@@ -31,6 +32,7 @@ public class ProfileManager : MonoBehaviour
         if (usernameDisplayText != null)
         {
             usernameDisplayText.text = username;
+            profileNameText.text = username;
         }
     }
 

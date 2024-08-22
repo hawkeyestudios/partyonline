@@ -12,6 +12,8 @@ public class SceneController : MonoBehaviour
     public Animator friendRequestPanelanim;
     public GameObject friendsPanel;
     public Animator friendsPanelanim;
+    public GameObject profilePanel;
+    public Animator profilePanelAnim;
     public GameObject notificationPanel;
     public GameObject settingsPanel;
     public GameObject gamemodepanel;
@@ -20,6 +22,7 @@ public class SceneController : MonoBehaviour
     public GameObject CoinStore;
     public GameObject CharacterStore;
     public GameObject PartyPass;
+    public Animator PartyPassAnim;
     public GameObject characterpanel;
     public GameObject wingspanel;
     public GameObject auraspanel;
@@ -60,7 +63,11 @@ public class SceneController : MonoBehaviour
         friendsPanel.SetActive(true);
         friendsPanelanim.SetTrigger("Friends");
     }
-
+    public void OpenProfile()
+    {
+        profilePanel.SetActive(true);
+        profilePanelAnim.SetTrigger("Profile");
+    }
     public void CloseFriendSystem()
     {
         FriendSystemanim.SetTrigger("FriendSystemClose");
@@ -77,7 +84,10 @@ public class SceneController : MonoBehaviour
     {
         friendsPanelanim.SetTrigger("FriendsClose");
     }
-
+    public void CloseProfile()
+    {
+        profilePanelAnim.SetTrigger("ProfileClose");
+    }
     public void NotificationsPanel()
     {
         notificationPanel.SetActive(true);
@@ -132,10 +142,11 @@ public class SceneController : MonoBehaviour
     public void OpenPartyPass()
     {
         PartyPass.SetActive(true);
+        PartyPassAnim.SetTrigger("PartyPass");
     }
     public void ClosePartyPass()
     {
-        PartyPass.SetActive(false);
+        PartyPassAnim.SetTrigger("PartyClose");
     }
     public void CharacterStoreScene()
     {

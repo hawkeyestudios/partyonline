@@ -12,6 +12,7 @@ public class MapGecisGeriSayım : MonoBehaviour
     private float timeRemaining = 15f; // 15 saniye geri sayım
     public string levelName;
     private bool hasLoaded = false; // Sahne yüklendi mi kontrolü
+    public GameObject loadingPanel;
 
     void Start()
     {
@@ -29,7 +30,7 @@ public class MapGecisGeriSayım : MonoBehaviour
         else if (!hasLoaded)
         {
             // Zaman sıfıra ulaştığında ve sahne henüz yüklenmediyse sahneyi yükle
-            NextSceneLoading();
+            StartCoroutine(NextSceneLoading());
             hasLoaded = true; // Sahnenin sadece bir kez yüklenmesini sağla
         }
     }
@@ -40,8 +41,11 @@ public class MapGecisGeriSayım : MonoBehaviour
         countdownText.text = Mathf.Ceil(timeRemaining).ToString() + " seconds";
     }
 
-    private void NextSceneLoading()
+    IEnumerator NextSceneLoading()
     {
+        loadingPanel.SetActive(true);
+
+        yield return new WaitForSeconds(3f); // 3 saniye bekle
         // Sahneyi yükle
         PhotonNetwork.LoadLevel(levelName);
     }
