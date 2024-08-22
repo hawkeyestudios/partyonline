@@ -11,9 +11,10 @@ public class PhotonManager : MonoBehaviourPunCallbacks
 {
     private const string FirstTimeKey = "FirstTime";
     private const string LastEquippedCharacterKey = "LastEquippedCharacter";
-    private string[] spawnPoints = { "SpawnPoint1", "SpawnPoint2", "SpawnPoint3", "SpawnPoint4" };
-    private Dictionary<int, string> playerSpawnPoints = new Dictionary<int, string>();
-    private HashSet<string> occupiedSpawnPoints = new HashSet<string>();
+    public Transform[] spawnPoints;  // 4 adet spawn noktasý
+    private bool[] occupiedSpawns;
+    private Dictionary<int, int> playerSpawnMap;
+
 
     public Button playButton;
     public GameObject loadingPanel;
@@ -30,6 +31,10 @@ public class PhotonManager : MonoBehaviourPunCallbacks
 
     private void Start()
     {
+        occupiedSpawns = new bool[spawnPoints.Length]; // Baþlangýçta tüm spawn noktalarý boþ
+        playerSpawnMap = new Dictionary<int, int>(); // Oyuncularýn spawn noktalarýný tutan dictionary
+        SpawnExistingPlayers();
+
         PhotonNetwork.AutomaticallySyncScene = true;
         Debug.Log($"{PhotonNetwork.NickName}");
         ShowLastEquippedCharacter();
@@ -184,7 +189,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         PhotonNetwork.JoinOrCreateRoom("LobbyRoom", roomOptions, TypedLobby.Default);
     }
 
-    public override void OnJoinedRoom()
+    public override void OnPlayerEnteredRoom(Player newPlayer)
     {
         Debug.Log("Joined Room.");
         leaveRoomButton.gameObject.SetActive(true);
@@ -203,7 +208,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
 
         if (!string.IsNullOrEmpty(characterPrefabName))
         {
-            Vector3 spawnPosition = gridManager.GetNextSpawnPosition(PhotonNetwork.LocalPlayer.ActorNumber - 1);
+            Vector3 spawnPosition = GetNextAvailableSpawnPoint(newPlayer.ActorNumber);
             GameObject character = PhotonNetwork.Instantiate(characterPrefabName, spawnPosition, Quaternion.identity);
 
             if (character != null)
@@ -241,21 +246,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     public override void OnPlayerLeftRoom(Player otherPlayer)
     {
         Debug.Log($"Player {otherPlayer.NickName} has left the room.");
-
-        if (playerSpawnPoints.ContainsKey(otherPlayer.ActorNumber))
-        {
-            string spawnPointName = playerSpawnPoints[otherPlayer.ActorNumber];
-
-            if (!string.IsNullOrEmpty(spawnPointName) && occupiedSpawnPoints.Contains(spawnPointName))
-            {
-                occupiedSpawnPoints.Remove(spawnPointName);
-                playerSpawnPoints.Remove(otherPlayer.ActorNumber);
-                Debug.Log($"Spawn point '{spawnPointName}' is now available.");
-            }
-        }
-
-        photonView.RPC("UpdateSpawnPointsRPC", RpcTarget.AllBuffered, string.Join(",", occupiedSpawnPoints.ToArray()));
-
+        ReleaseSpawnPoint(otherPlayer.ActorNumber);
         if (PhotonNetwork.CurrentRoom.PlayerCount < PhotonNetwork.CurrentRoom.MaxPlayers)
         {
             if (isCountdownActive && PhotonNetwork.IsMasterClient)
@@ -264,13 +255,52 @@ public class PhotonManager : MonoBehaviourPunCallbacks
             }
         }
     }
-
-    [PunRPC]
-    private void UpdateSpawnPointsRPC(string occupiedPoints)
+    Vector3 GetNextAvailableSpawnPoint(int playerID)
     {
-        occupiedSpawnPoints = new HashSet<string>(occupiedPoints.Split(','));
+        // Boþ bir spawn noktasý bul ve onu iþgal et
+        for (int i = 0; i < spawnPoints.Length; i++)
+        {
+            if (!occupiedSpawns[i])
+            {
+                occupiedSpawns[i] = true;
+                playerSpawnMap[playerID] = i; // Oyuncu ID'si ile spawn noktasý eþleþmesini sakla
+                return spawnPoints[i].position;
+            }
+        }
+        return Vector3.zero; // Eðer boþ bir spawn noktasý yoksa
     }
+    void ReleaseSpawnPoint(int playerID)
+    {
+        // Oyuncunun spawn noktasýný boþalt
+        if (playerSpawnMap.ContainsKey(playerID))
+        {
+            int spawnIndex = playerSpawnMap[playerID]; // Oyuncunun hangi spawn noktasýnda olduðunu bul
+            occupiedSpawns[spawnIndex] = false; // O spawn noktasýný boþalt
+            playerSpawnMap.Remove(playerID); // Oyuncuyu dictionary'den kaldýr
+        }
+    }
+    void SpawnExistingPlayers()
+    {
+        // Zaten lobide olan oyuncularý spawn et
+        foreach (Player player in PhotonNetwork.PlayerList)
+        {
+            string characterPrefabName = PlayerPrefs.GetString(LastEquippedCharacterKey, "DefaultCharacter");
 
+            if (player != PhotonNetwork.LocalPlayer && !string.IsNullOrEmpty(characterPrefabName)) // Kendini iki kere spawn etmemek için kontrol
+            {
+                Vector3 spawnPosition = GetNextAvailableSpawnPoint(player.ActorNumber);
+                GameObject character = PhotonNetwork.Instantiate(characterPrefabName, spawnPosition, Quaternion.identity);
+            }
+        }
+    }
+    int GetPlayerSpawnIndex(Player player)
+    {
+        // Oyuncunun hangi spawn noktasýna yerleþtirildiðini bul
+        // Bu fonksiyonu her oyuncu için spawn indexlerini saklayarak yapabilirsin
+        // Burada yerel veri yapýlarýyla bunu yapman önerilir (örneðin bir dictionary ile)
+        // Bu örnekte basitlik adýna false dönüþ yapýyoruz.
+        return -1;
+    }
     IEnumerator StartCountdown()
     {
         isCountdownActive = true;
