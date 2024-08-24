@@ -1,25 +1,13 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class GridManager : MonoBehaviour
 {
-    public int rows = 2; // Satýr sayýsý
-    public int columns = 2; // Sütun sayýsý
-    public float cellWidth = 2f; // Hücre geniþliði
-    public float cellHeight = 2f; // Hücre yüksekliði
+    public List<Transform> spawnPoints;
 
-    public Vector3 startPos;
-
-    private void Start()
+    public Transform GetRandomSpawnPoint()
     {
-        startPos = transform.position;
-    }
-
-    public Vector3 GetNextSpawnPosition(int playerIndex)
-    {
-        int row = playerIndex / columns;
-        int column = playerIndex % columns;
-        Vector3 offset = new Vector3(column * cellWidth, 0, row * cellHeight);
-
-        return startPos + offset;
+        int index = Random.Range(0, spawnPoints.Count);
+        return spawnPoints[index];
     }
 }

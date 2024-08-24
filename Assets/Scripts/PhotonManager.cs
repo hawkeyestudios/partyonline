@@ -11,9 +11,6 @@ public class PhotonManager : MonoBehaviourPunCallbacks
 {
     private const string FirstTimeKey = "FirstTime";
     private const string LastEquippedCharacterKey = "LastEquippedCharacter";
-    private string[] spawnPoints = { "SpawnPoint1", "SpawnPoint2", "SpawnPoint3", "SpawnPoint4" };
-    private Dictionary<int, string> playerSpawnPoints = new Dictionary<int, string>();
-    private HashSet<string> occupiedSpawnPoints = new HashSet<string>();
 
     public Button playButton;
     public GameObject loadingPanel;
@@ -199,12 +196,14 @@ public class PhotonManager : MonoBehaviourPunCallbacks
             Debug.LogError("Cosmetics button is not assigned.");
         }
 
+        // Oyuncunun instantiate edilmesi için spawn point'i seç
+        Transform spawnPoint = gridManager.GetRandomSpawnPoint();
         string characterPrefabName = PlayerPrefs.GetString(LastEquippedCharacterKey, "DefaultCharacter");
 
         if (!string.IsNullOrEmpty(characterPrefabName))
         {
-            Vector3 spawnPosition = gridManager.GetNextSpawnPosition(PhotonNetwork.LocalPlayer.ActorNumber - 1);
-            GameObject character = PhotonNetwork.Instantiate(characterPrefabName, spawnPosition, Quaternion.identity);
+            // Karakteri spawn point'te instantiate et
+            GameObject character = PhotonNetwork.Instantiate(characterPrefabName, spawnPoint.position, Quaternion.identity);
 
             if (character != null)
             {
@@ -234,28 +233,12 @@ public class PhotonManager : MonoBehaviourPunCallbacks
                 leaveRoomButton.interactable = false;
                 countdownCoroutine = StartCoroutine(StartCountdown());
             }
-
         }
     }
 
     public override void OnPlayerLeftRoom(Player otherPlayer)
     {
         Debug.Log($"Player {otherPlayer.NickName} has left the room.");
-
-        if (playerSpawnPoints.ContainsKey(otherPlayer.ActorNumber))
-        {
-            string spawnPointName = playerSpawnPoints[otherPlayer.ActorNumber];
-
-            if (!string.IsNullOrEmpty(spawnPointName) && occupiedSpawnPoints.Contains(spawnPointName))
-            {
-                occupiedSpawnPoints.Remove(spawnPointName);
-                playerSpawnPoints.Remove(otherPlayer.ActorNumber);
-                Debug.Log($"Spawn point '{spawnPointName}' is now available.");
-            }
-        }
-
-        photonView.RPC("UpdateSpawnPointsRPC", RpcTarget.AllBuffered, string.Join(",", occupiedSpawnPoints.ToArray()));
-
         if (PhotonNetwork.CurrentRoom.PlayerCount < PhotonNetwork.CurrentRoom.MaxPlayers)
         {
             if (isCountdownActive && PhotonNetwork.IsMasterClient)
@@ -264,13 +247,6 @@ public class PhotonManager : MonoBehaviourPunCallbacks
             }
         }
     }
-
-    [PunRPC]
-    private void UpdateSpawnPointsRPC(string occupiedPoints)
-    {
-        occupiedSpawnPoints = new HashSet<string>(occupiedPoints.Split(','));
-    }
-
     IEnumerator StartCountdown()
     {
         isCountdownActive = true;
