@@ -8,6 +8,9 @@ TagManager:
   - Ground
   - GameUI
   - Obstacle
+  - SpeedOzellik
+  - ReviveOzellik
+  - AttackOzellik
   layers:
   - Default
   - TransparentFX

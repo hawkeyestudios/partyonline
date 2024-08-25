@@ -14,6 +14,7 @@ public class CameraFollow : MonoBehaviour
 
     private void LateUpdate()
     {
+
         if (followStarted && target != null)
         {
             // Kamera hedefin arkasýnda ve yukarýsýnda bir mesafede olacak þekilde hesapla
