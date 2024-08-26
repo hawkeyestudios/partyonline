@@ -67,9 +67,18 @@ public class GhostController : MonoBehaviourPun
         if (other.CompareTag("Player"))
         {
             PhotonView playerPhotonView = other.GetComponent<PhotonView>();
-            if (playerPhotonView.IsMine)
+            if (playerPhotonView != null && playerPhotonView.IsMine)
             {
-                other.gameObject.GetComponent<PlayerMovement>().BecomeGhost();
+                PlayerMovement playerMovement = other.gameObject.GetComponent<PlayerMovement>();
+
+                if (playerMovement != null)
+                {
+                    playerMovement.StartCoroutine(playerMovement.BecomeGhost()); 
+                }
+                else
+                {
+                    Debug.LogError("PlayerMovement bileþeni bulunamadý.");
+                }
             }
         }
     }

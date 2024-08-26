@@ -13,6 +13,7 @@ public class MapGecisGeriSayım : MonoBehaviour
     public string levelName;
     private bool hasLoaded = false; // Sahne yüklendi mi kontrolü
     public GameObject loadingPanel;
+    private string MainMenu = "MainMenu";
 
     void Start()
     {
@@ -46,7 +47,7 @@ public class MapGecisGeriSayım : MonoBehaviour
         loadingPanel.SetActive(true);
 
         yield return new WaitForSeconds(3f); // 3 saniye bekle
-        // Sahneyi yükle
-        PhotonNetwork.LoadLevel(levelName);
+                                             // Sahneyi yükle
+        SceneManager.LoadScene(levelName);
     }
 }

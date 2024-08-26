@@ -556,11 +556,20 @@ namespace CartoonFX
 				materialPropertyBlock.SetVector("_GameObjectWorldPosition", this.transform.position);
 				particleRenderer.SetPropertyBlock(materialPropertyBlock);
 			}
-		}
+
+            time += Time.deltaTime;
+
+            if (cameraShake != null && cameraShake.enabled && !GlobalDisableCameraShake)
+            {
+                Debug.Log("CameraShake çalışıyor!");
+                cameraShake.animate(time);
+            }
+
+        }
 #endif
 
 #if !DISABLE_LIGHTS || !DISABLE_CAMERA_SHAKE
-		public void Animate(float time)
+        public void Animate(float time)
 		{
 #if !DISABLE_LIGHTS
 			if (animatedLights != null && !GlobalDisableLights)

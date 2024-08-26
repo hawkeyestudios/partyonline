@@ -12,11 +12,15 @@ public class PlayerMovement : MonoBehaviour
     //Speed
     private bool isSpeedBoosted = false;
     private GameObject speedIcon;
+    private Image speedYellowBar;
     private Text speedCountdownText;
     //Revive
     private bool isRevived = false;
+    private int reviveCount = 0; // Toplanan kalp sayýsý
+    private const int maxReviveCount = 3; // Maksimum kalp sayýsý
     private GameObject reviveIcon;
     private Text reviveCountdownText;
+    private Image[] heartImages = new Image[3];
     //Attack
     private GameObject attackIcon;
     private Text attackCountdownText;
@@ -47,14 +51,14 @@ public class PlayerMovement : MonoBehaviour
            {
                speedIcon.SetActive(false);
            }
-           speedCountdownText = speedIcon.transform.Find("SpeedCountdown")?.GetComponent<Text>();
-           if (speedCountdownText == null)
-           {
-               Debug.LogError("CountdownText bulunamadý.");
-           }
+            speedYellowBar = speedIcon.transform.Find("YellowBar")?.GetComponent<Image>();
+            if (speedYellowBar == null)
+            {
+                Debug.LogError("YellowBar bulunamadý.");
+            }
 
-           //Revive Özelliði
-           isRevived = false;
+            //Revive Özelliði
+            isRevived = false;
            reviveIcon = GameObject.Find("Revive");
            if (reviveIcon != null)
            {
@@ -65,9 +69,15 @@ public class PlayerMovement : MonoBehaviour
            {
                Debug.LogError("CountdownText bulunamadý.");
            }
-
-           //Attack Özelliði
-           attackIcon = GameObject.Find("Attack");
+            heartImages[0] = reviveIcon.transform.Find("Heart1").GetComponent<Image>();
+            heartImages[1] = reviveIcon.transform.Find("Heart2").GetComponent<Image>();
+            heartImages[2] = reviveIcon.transform.Find("Heart3").GetComponent<Image>();
+            foreach (var heart in heartImages)
+            {
+                heart.enabled = false;
+            }
+            //Attack Özelliði
+            attackIcon = GameObject.Find("Attack");
            if (attackIcon != null)
            {
                attackIcon.SetActive(false);
@@ -110,7 +120,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void Update()
     {
-        if (photonView != null && photonView.IsMine && isMovementEnabled)
+        if (photonView.IsMine && isMovementEnabled)
         {
             if (joystick != null)
             {
@@ -150,40 +160,25 @@ public class PlayerMovement : MonoBehaviour
         Quaternion currentRotation = transform.rotation;
         animator.SetTrigger("Die");
         isMovementEnabled = false;
+        gameObject.tag = "Immune";
 
-        if (isRevived && photonView.IsMine)
+        if (reviveCount > 0)
         {
-            if (joystick != null)
-            {
-                joystick.gameObject.SetActive(false);
-            }
-            if (jumpButton != null)
-            {
-                jumpButton.gameObject.SetActive(false);
-            }
+            reviveCount--;
+            heartImages[reviveCount].enabled = false;
+            Debug.Log("Bir kalp kaybedildi, kalan kalp: " + reviveCount);
+
             yield return new WaitForSeconds(3f);
 
-            if (isRevived && photonView.IsMine)
-            {
-                // Joystick'i tekrar görünür yap
-                if (joystick != null)
-                {
-                    joystick.gameObject.SetActive(true);
-                    // Joystick handle pozisyonunu sýfýrla
-                    joystick.ResetHandlePosition();
-                }
-                if (jumpButton != null)
-                {
-                    jumpButton.gameObject.SetActive(true);
-                }
-                transform.position = currentPosition;
-          
-                isMovementEnabled = true;
-            }
+            isMovementEnabled = true;
+            gameObject.tag = "Player";
         }
         else
         {
-            GameObject ghost = PhotonNetwork.Instantiate(ghostPrefab.name, currentPosition, currentRotation);
+            Debug.Log("Yeterli kalp yok, yeniden doðma baþarýsýz.");
+            Destroy(gameObject);
+            // Eðer hiç kalp kalmamýþsa oyuncu artýk yeniden doðamaz.
+            GameObject ghost = PhotonNetwork.Instantiate(ghostPrefab.name, currentPosition, currentRotation);  
         }
     }
 
@@ -216,10 +211,12 @@ public class PlayerMovement : MonoBehaviour
         }
         else if(other.CompareTag("ReviveOzellik"))
         {
-            isRevived = true;
-            if (reviveIcon != null)
+            reviveIcon.SetActive(true);
+            if (reviveCount < maxReviveCount)
             {
-                reviveIcon.SetActive(true);
+                reviveCount++;
+                heartImages[reviveCount - 1].enabled = true; // Alýnan kalbi aktif hale getir
+                Debug.Log("Kalp alýndý, toplam kalp: " + reviveCount);
             }
         }
     }
@@ -229,9 +226,9 @@ public class PlayerMovement : MonoBehaviour
 
         while (countdown > 0)
         {
-            if (speedCountdownText != null)
+            if (speedYellowBar != null)
             {
-                speedCountdownText.text = countdown.ToString("F0");  
+                speedYellowBar.fillAmount = countdown / duration; 
             }
 
             yield return new WaitForSeconds(1f); 
@@ -245,9 +242,9 @@ public class PlayerMovement : MonoBehaviour
             speedIcon.SetActive(false);
         }
 
-        if (speedCountdownText != null)
+        if (speedYellowBar != null)
         {
-            speedCountdownText.text = "0"; 
+            speedYellowBar.fillAmount = 0; 
         }
     }
 

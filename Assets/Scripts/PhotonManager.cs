@@ -177,7 +177,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     {
         Debug.Log("Joined Lobby.");
 
-        RoomOptions roomOptions = new RoomOptions { MaxPlayers = 2 };
+        RoomOptions roomOptions = new RoomOptions { MaxPlayers = 4 };
         PhotonNetwork.JoinOrCreateRoom("LobbyRoom", roomOptions, TypedLobby.Default);
     }
 

@@ -250,7 +250,7 @@ namespace CartoonFX
 
 					if (!isShaking)
 					{
-						this.StartShake();
+                        this.StartShake();
 					}
 
 					// duration of the camera shake

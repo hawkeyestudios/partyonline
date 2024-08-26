@@ -518,7 +518,7 @@ GameObject:
   - component: {fileID: 7728743834803219236}
   - component: {fileID: 7653226305100090866}
   m_Layer: 5
-  m_Name: Button (Legacy)
+  m_Name: MainMenuButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -721,6 +721,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   countdownText: {fileID: 3585715093373077327}
+  levelName: MainMenu
+  loadingPanel: {fileID: 0}
 --- !u!1 &6681918766827612914
 GameObject:
   m_ObjectHideFlags: 0
@@ -738,7 +740,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &4556021879815286042
 RectTransform:
   m_ObjectHideFlags: 0
@@ -922,7 +924,7 @@ PrefabInstance:
     - target: {fileID: 2013997367930053344, guid: 058388b8d779be34883f71e24fdb13d4,
         type: 3}
       propertyPath: m_Text
-      value: 1500
+      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 3765696352199956042, guid: 058388b8d779be34883f71e24fdb13d4,
         type: 3}
@@ -1066,7 +1068,7 @@ PrefabInstance:
     - target: {fileID: 8289401212504386534, guid: 8b30937f03f739144af8b1b40c25a3f3,
         type: 3}
       propertyPath: m_Text
-      value: 1000
+      value: 
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1207,6 +1209,11 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8074767948936774274, guid: 69b951b5fd7ba2449a44c7851d4f6675,
+        type: 3}
+      propertyPath: m_Text
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 8565185698154349917, guid: 69b951b5fd7ba2449a44c7851d4f6675,
         type: 3}
       propertyPath: m_Name
@@ -1339,7 +1346,7 @@ PrefabInstance:
     - target: {fileID: 3908664672638538524, guid: 836a45b3b96a34a4cb767df8329b1d66,
         type: 3}
       propertyPath: m_Text
-      value: 500
+      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 4200594855042165372, guid: 836a45b3b96a34a4cb767df8329b1d66,
         type: 3}
