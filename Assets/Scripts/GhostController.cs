@@ -10,6 +10,7 @@ public class GhostController : MonoBehaviourPun
 
     private Transform targetPlayer;
     private bool isWaiting = false;
+    bool isStopped = false;
     void Start()
     {
         StartCoroutine(WaitForGhost(10));
@@ -24,7 +25,7 @@ public class GhostController : MonoBehaviourPun
             return;
 
         FindClosestPlayer();
-        if (targetPlayer != null)
+        if (targetPlayer != null && !isStopped)
         {
             RotateTowardsPlayer();  // Yüzü hedefe doðru döndür
             MoveTowardsPlayer();    // Hedefe doðru ilerle
@@ -81,6 +82,12 @@ public class GhostController : MonoBehaviourPun
                 }
             }
         }
+    }
+    public IEnumerator StopMovementForSeconds(float duration)
+    {
+        isStopped = true;
+        yield return new WaitForSeconds(duration);
+        isStopped = false;
     }
     IEnumerator WaitForGhost(int seconds)
     {

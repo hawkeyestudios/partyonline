@@ -4,6 +4,7 @@ using UnityEngine.UI;
 using System.Collections;
 using Unity.VisualScripting;
 using UnityEngine.SceneManagement;
+using UnityEngine.EventSystems;
 
 public class PlayerMovement : MonoBehaviour
 {
@@ -23,12 +24,18 @@ public class PlayerMovement : MonoBehaviour
     private Image[] heartImages = new Image[3];
     //Attack
     private GameObject attackIcon;
-    private Text attackCountdownText;
+    private GameObject attackButton;
+    private Text attackCountText;
+    private int attackCount = 0;
+    public ParticleSystem attackParticle;
+    private Transform targetGhost;
 
     private Joystick joystick;
     private Button jumpButton;
     private Rigidbody rb;
     private bool isGrounded;
+    private bool canAnim = true;
+    private bool hasCollided;
 
     private PhotonView photonView;
     private Animator animator;
@@ -39,10 +46,12 @@ public class PlayerMovement : MonoBehaviour
     private RectTransform joystickHandle;
     public GameObject boomEffect;
     public GameObject ghostPrefab;
+    public ParticleSystem stepParticle;
 
 
     private void Start()
     {
+        stepParticle.Stop();
         //Speed Özelliði
         if (SceneManager.GetActiveScene().name == "GhostPG")
         {
@@ -78,15 +87,18 @@ public class PlayerMovement : MonoBehaviour
             }
             //Attack Özelliði
             attackIcon = GameObject.Find("Attack");
-           if (attackIcon != null)
-           {
-               attackIcon.SetActive(false);
-           }
-           attackCountdownText = attackIcon.transform.Find("AttackCountdown")?.GetComponent<Text>();
-           if (attackCountdownText == null)
-           {
-               Debug.LogError("CountdownText bulunamadý.");
-           }
+            if (attackIcon != null)
+            {
+                attackIcon.SetActive(false);
+            }
+            attackButton = GameObject.Find("AttackButton");
+            if (attackButton != null)
+            {
+                attackButton.SetActive(false);
+                attackButton.GetComponent<Button>().onClick.AddListener(OnAttackButtonClicked);
+            }
+            attackCountText = attackIcon.transform.Find("AttackCountText")?.GetComponent<Text>();
+            attackCountText.text = attackCount.ToString();
         }
 
         rb = GetComponent<Rigidbody>();
@@ -131,10 +143,18 @@ public class PlayerMovement : MonoBehaviour
                     Quaternion toRotation = Quaternion.LookRotation(moveDirection, Vector3.up);
                     transform.rotation = Quaternion.Lerp(transform.rotation, toRotation, Time.deltaTime * 10f);
                     animator.SetBool("Walking", true);
+                    if (!stepParticle.isPlaying && isGrounded)
+                    {
+                        stepParticle.Play();
+                    }
                 }
                 else
                 {
                     animator.SetBool("Walking", false);
+                    if (!stepParticle.isPlaying)
+                    {
+                        stepParticle.Stop();
+                    }
                 }
 
                 if (rb != null)
@@ -158,7 +178,16 @@ public class PlayerMovement : MonoBehaviour
     {
         Vector3 currentPosition = transform.position;
         Quaternion currentRotation = transform.rotation;
-        animator.SetTrigger("Die");
+        canAnim = true;
+        if(canAnim)
+        {      
+            animator.SetTrigger("Die");
+        }
+
+        if (!stepParticle.isPlaying)
+        {
+            stepParticle.Stop();
+        }
         isMovementEnabled = false;
         gameObject.tag = "Immune";
 
@@ -170,6 +199,7 @@ public class PlayerMovement : MonoBehaviour
 
             yield return new WaitForSeconds(3f);
 
+            canAnim = false;
             isMovementEnabled = true;
             gameObject.tag = "Player";
         }
@@ -188,7 +218,15 @@ public class PlayerMovement : MonoBehaviour
 
         rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
         isGrounded = false;
-        animator.SetTrigger("Jump");
+        if(animator != null)
+        {
+            animator.SetTrigger("Jump");
+        }
+        
+        if (!stepParticle.isPlaying)
+        {
+            stepParticle.Stop();
+        }
     }
     IEnumerator WaitForSeconds(int seconds)
     {
@@ -215,9 +253,16 @@ public class PlayerMovement : MonoBehaviour
             if (reviveCount < maxReviveCount)
             {
                 reviveCount++;
-                heartImages[reviveCount - 1].enabled = true; // Alýnan kalbi aktif hale getir
+                heartImages[reviveCount - 1].enabled = true; 
                 Debug.Log("Kalp alýndý, toplam kalp: " + reviveCount);
             }
+        }
+        if (other.CompareTag("AttackOzellik"))
+        {
+            attackIcon.SetActive(true);
+            attackButton.SetActive(true);
+            attackCount++;
+            attackCountText.text = attackCount.ToString(); 
         }
     }
     private IEnumerator SpeedBoostCountdown(float duration)
@@ -247,17 +292,88 @@ public class PlayerMovement : MonoBehaviour
             speedYellowBar.fillAmount = 0; 
         }
     }
+    private void OnAttackButtonClicked()
+    {
+        if (attackCount > 0)
+        {
+            FindClosestGhost();
+            if (targetGhost != null)
+            {
+                StartCoroutine(SendParticleToGhost());
+                attackCount--;
+                attackCountText.text = attackCount.ToString();
+                if (attackCount == 0)
+                {
+                    attackIcon.SetActive(false);
+                    attackButton.SetActive(false);
+                }
+            }
+        }
+    }
+    private void FindClosestGhost()
+    {
+        GameObject[] ghosts = GameObject.FindGameObjectsWithTag("Finish");
+        float minDistance = Mathf.Infinity;
+        Transform closestGhost = null;
+
+        foreach (GameObject ghost in ghosts)
+        {
+            float distance = Vector3.Distance(transform.position, ghost.transform.position);
+            if (distance < minDistance)
+            {
+                minDistance = distance;
+                closestGhost = ghost.transform;
+            }
+        }
+
+        targetGhost = closestGhost;
+    }
+    private IEnumerator SendParticleToGhost()
+    {
+        Vector3 spawnPosition = transform.position + Vector3.up * 1.5f;
+
+        ParticleSystem particle = Instantiate(attackParticle, spawnPosition, Quaternion.identity);
+        particle.Play();
+
+        while (Vector3.Distance(particle.transform.position, targetGhost.position) > 0.1f)
+        {
+            if(!particle.isPlaying)
+            {
+               particle.Play();
+            }
+            
+            particle.transform.position = Vector3.MoveTowards(particle.transform.position, targetGhost.position, 5f * Time.deltaTime);
+            yield return null;
+        }
+
+        particle.Stop();
+        Destroy(particle.gameObject);
+
+        GhostController ghostController = targetGhost.GetComponent<GhostController>();
+        if (ghostController != null)
+        {
+            StartCoroutine(ghostController.StopMovementForSeconds(3f));
+        }
+    }
 
     private IEnumerator OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.CompareTag("Ground"))
+        if (collision.gameObject.CompareTag("Ground") && !isGrounded)
         {
             isGrounded = true;
         }
-        else if (collision.gameObject.CompareTag("Obstacle"))
+        else if (collision.gameObject.CompareTag("Obstacle") && !hasCollided)
         {
-            animator.SetTrigger("Die");
-
+            hasCollided = true;
+            canAnim = true;
+            if (canAnim)
+            {
+                animator.SetTrigger("Die");
+            }
+            if (!stepParticle.isPlaying)
+            {
+                stepParticle.Stop();
+            }
             isMovementEnabled = false;
 
             if (photonView.IsMine)
@@ -278,6 +394,8 @@ public class PlayerMovement : MonoBehaviour
             }
 
             yield return new WaitForSeconds(2.2f);
+            canAnim = false;
+            hasCollided = false;
 
             if (photonView.IsMine)
             {
@@ -293,8 +411,12 @@ public class PlayerMovement : MonoBehaviour
                     jumpButton.gameObject.SetActive(true);
                 }
 
-                Respawn(); // Oyuncuyu geri doður
-                isMovementEnabled = true;
+                Respawn();
+                if (!isMovementEnabled)
+                {
+                    isMovementEnabled = true;
+                }
+                    
             }
         }
     }

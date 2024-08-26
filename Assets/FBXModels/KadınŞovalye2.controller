@@ -114,7 +114,7 @@ AnimatorStateMachine:
   m_ChildStates:
   - serializedVersion: 1
     m_State: {fileID: 3974076452083393087}
-    m_Position: {x: 430, y: -30, z: 0}
+    m_Position: {x: 470, y: -130, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 3269510618517965221}
     m_Position: {x: 600, y: 50, z: 0}
@@ -331,7 +331,7 @@ AnimatorState:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Walk
-  m_Speed: 2
+  m_Speed: 1
   m_CycleOffset: 0
   m_Transitions:
   - {fileID: 8372957381507086510}
@@ -346,7 +346,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: -203655887218126122, guid: dbed31682d5765447811110ff433daab,
+  m_Motion: {fileID: -203655887218126122, guid: e01465b867d8014429cc6eb4f178d5ed,
     type: 3}
   m_Tag: 
   m_SpeedParameter: 
