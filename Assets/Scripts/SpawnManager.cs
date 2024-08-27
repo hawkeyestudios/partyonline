@@ -34,15 +34,29 @@ public class SpawnManager : MonoBehaviourPunCallbacks
         if (PhotonNetwork.IsConnectedAndReady)
         {
             Player localPlayer = PhotonNetwork.LocalPlayer;
+
+            // Oyuncunun ActorNumber'ýna göre spawn noktasýný belirle
             int spawnPointIndex = localPlayer.ActorNumber % spawnPoints.Length;
             Transform spawnPoint = spawnPoints[spawnPointIndex];
             Vector3 spawnPosition = spawnPoint.position;
             Quaternion spawnRotation = spawnPoint.rotation;
 
-            string characterPrefab = PlayerPrefs.GetString("LastEquippedCharacter");
-            if (!string.IsNullOrEmpty(characterPrefab))
+            // Son seçilen karakter prefab ismini PlayerPrefs'ten al
+            string characterPrefabName = PlayerPrefs.GetString("LastEquippedCharacter", "DefaultCharacter");
+
+            if (!string.IsNullOrEmpty(characterPrefabName))
             {
-                PhotonNetwork.Instantiate(characterPrefab, spawnPosition, spawnRotation);
+                // Karakter prefab'ýný PhotonNetwork.Instantiate ile instantiate et
+                GameObject character = PhotonNetwork.Instantiate(characterPrefabName, spawnPosition, spawnRotation);
+
+                if (character != null)
+                {
+                    Debug.Log("Character successfully spawned.");
+                }
+                else
+                {
+                    Debug.LogError("Failed to instantiate character.");
+                }
             }
             else
             {
@@ -50,6 +64,7 @@ public class SpawnManager : MonoBehaviourPunCallbacks
             }
         }
     }
+
 
     private void SetPlayerProfileImage()
     {

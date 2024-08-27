@@ -63,14 +63,14 @@ public class PhotonManager : MonoBehaviourPunCallbacks
 
     private void ShowLastEquippedCharacter()
     {
-        string characterPrefabName = PlayerPrefs.GetString(LastEquippedCharacterKey, "DefaultCharacter");
+        string characterPrefabName = PlayerPrefs.GetString("LastEquippedCharacter", "DefaultCharacter"); // DefaultCharacter adýnda varsayýlan karakterin prefab ismi
 
         if (!string.IsNullOrEmpty(characterPrefabName))
         {
             GameObject characterPrefab = Resources.Load<GameObject>(characterPrefabName);
             if (characterPrefab != null)
             {
-                Vector3 spawnPosition = new Vector3(19.7f, -4.75f, 79.25f); // Sahneye göre pozisyonu ayarlayýn
+                Vector3 spawnPosition = new Vector3(19.7f, -4.75f, 79.25f); // Sahneye göre pozisyonu ayarla
                 currentCharacter = Instantiate(characterPrefab, spawnPosition, Quaternion.identity);
 
                 if (currentCharacter != null)
@@ -84,7 +84,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
             }
             else
             {
-                Debug.LogError("Character prefab not found in Resources.");
+                Debug.LogError($"Character prefab '{characterPrefabName}' not found in Resources.");
             }
         }
         else
@@ -147,7 +147,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
 
     private void ShowCharacterShop()
     {
-        SceneManager.LoadScene("CharacterShop");
+        SceneManager.LoadScene("Customize");
     }
 
     public void ConnectToLobby()
@@ -198,7 +198,9 @@ public class PhotonManager : MonoBehaviourPunCallbacks
 
         // Oyuncunun instantiate edilmesi için spawn point'i seç
         Transform spawnPoint = gridManager.GetRandomSpawnPoint();
-        string characterPrefabName = PlayerPrefs.GetString(LastEquippedCharacterKey, "DefaultCharacter");
+
+        // Son seçilen karakterin prefab adýný al
+        string characterPrefabName = PlayerPrefs.GetString("LastEquippedCharacter", "DefaultCharacter"); // Default olarak bir karakter prefabý atýyoruz.
 
         if (!string.IsNullOrEmpty(characterPrefabName))
         {
@@ -207,12 +209,12 @@ public class PhotonManager : MonoBehaviourPunCallbacks
 
             if (character != null)
             {
-                character.transform.rotation = Quaternion.Euler(0, 10, 0);
-                PhotonNetwork.LocalPlayer.TagObject = character;
+                character.transform.rotation = Quaternion.Euler(0, 10, 0); // Karakterin rotasyonunu ayarla
+                PhotonNetwork.LocalPlayer.TagObject = character; // Oyuncunun karakterine referans tut
 
                 if (PhotonNetwork.IsMasterClient)
                 {
-                    AssignCrownToMasterClient(character);
+                    AssignCrownToMasterClient(character); // Eðer master client iseniz tacý atayýn
                 }
             }
             else
@@ -235,6 +237,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
             }
         }
     }
+
 
     public override void OnPlayerLeftRoom(Player otherPlayer)
     {

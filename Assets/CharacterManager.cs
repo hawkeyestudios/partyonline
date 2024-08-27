@@ -27,7 +27,7 @@ public class CharacterManager : MonoBehaviour
 
         // Tick iþaretlerini güncelle
         UpdateCatalogUI(lastSelectedCharacterIndex);
-
+        CheckAndUpdateLockedImages();
     }
     public void ShowCharacterPreview(int characterIndex)
     {
@@ -148,17 +148,56 @@ public class CharacterManager : MonoBehaviour
     }
 
     // Karakter Satýn Alma Fonksiyonu
+    // Karakter Satýn Alma Fonksiyonu
     public void PurchaseCharacter(int characterIndex)
     {
         PlayerPrefs.SetInt("CharacterPurchased_" + characterIndex, 1); // Karakteri satýn alýndý olarak iþaretle
+        PlayerPrefs.SetInt("CharacterLocked_" + characterIndex, 0); // Karakterin kilidini açýk olarak iþaretle (0 = kilit açýk)
+
         UpdateButtons(characterIndex); // Butonlarý güncelle
+
+        // Satýn alýnan karakterin LockedImage'ini gizle
+        HideLockedImage(characterIndex);
+    }
+
+    // LockedImage'i Gizleme Fonksiyonu
+    private void HideLockedImage(int characterIndex)
+    {
+        // Karakterin ilgili butonunu al
+        Transform characterButton = catalogCharacterButtons[characterIndex].transform;
+
+        // LockedImage bileþenini bul ve gizle
+        Transform lockedImageTransform = characterButton.Find("Locked");
+
+        if (lockedImageTransform != null)
+        {
+            lockedImageTransform.gameObject.SetActive(false); // LockedImage'i gizle
+        }
+        else
+        {
+            Debug.LogWarning("LockedImage not found for character " + characterIndex);
+        }
+    }
+
+    // Oyun baþladýðýnda satýn alýnan karakterlerin LockedImage'lerini kontrol et
+    public void CheckAndUpdateLockedImages()
+    {
+        for (int i = 0; i < catalogCharacterButtons.Length; i++)
+        {
+            // Eðer karakter satýn alýndýysa (kilidi açýk olarak iþaretlendiyse)
+            if (PlayerPrefs.GetInt("CharacterLocked_" + i, 1) == 0) // 1 = kilitli, 0 = kilit açýk
+            {
+                HideLockedImage(i); // Karakterin LockedImage'ini gizle
+            }
+        }
     }
 
     // Karakter Seçme Fonksiyonu
     public void SelectCharacter(int characterIndex)
     {
         PlayerPrefs.SetInt("SelectedCharacter", characterIndex); // Seçilen karakteri kaydet
-        PlayerPrefs.SetInt("LastEquippedCharacter", characterIndex); // En son seçilen karakteri kaydet
+        PlayerPrefs.SetString("LastEquippedCharacter", characterPrefabs[characterIndex].name); // Karakterin prefab adýný kaydet
+        PlayerPrefs.SetInt("LastEquippedCharacterIndex", characterIndex); // En son seçilen karakterin index'ini kaydet
         selectButton.gameObject.SetActive(false); // Seç butonunu gizle
         UpdateCatalogUI(characterIndex); // Katalogda tick iþaretini güncelle
     }
