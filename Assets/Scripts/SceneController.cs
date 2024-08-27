@@ -150,7 +150,7 @@ public class SceneController : MonoBehaviour
     }
     public void CharacterStoreScene()
     {
-        SceneManager.LoadScene("CharacterShop");
+        SceneManager.LoadScene("Customize");
     }
     public void OpenCharacters()
     {

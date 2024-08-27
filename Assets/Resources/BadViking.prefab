@@ -867,6 +867,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveSpeed: 3
   jumpForce: 12
+  attackParticle: {fileID: 0}
   boomEffect: {fileID: 8491073492837037023}
   ghostPrefab: {fileID: 8555421485844250906, guid: f28f7b115a46a2a4aadd51143d3131d3,
     type: 3}
@@ -1256,6 +1257,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: SM_Wep_Ornate_GreatAxe_01
       objectReference: {fileID: 0}
+    - target: {fileID: 110228, guid: 28ee7d66c5b18a64b93436da8089e0ca, type: 3}
+      propertyPath: m_TagString
+      value: Items
+      objectReference: {fileID: 0}
     - target: {fileID: 466318, guid: 28ee7d66c5b18a64b93436da8089e0ca, type: 3}
       propertyPath: m_RootOrder
       value: -2
@@ -1313,8 +1318,32 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 110228, guid: 28ee7d66c5b18a64b93436da8089e0ca,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6692815066932999653}
   m_SourcePrefab: {fileID: 100100000, guid: 28ee7d66c5b18a64b93436da8089e0ca, type: 3}
+--- !u!1 &5238035715735121279 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 110228, guid: 28ee7d66c5b18a64b93436da8089e0ca,
+    type: 3}
+  m_PrefabInstance: {fileID: 5238035715735077867}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &6692815066932999653
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5238035715735121279}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e21aff37de806ff4ab5a2f8461275f35, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemName: GreatAxe
+  itemIcon: {fileID: 21300000, guid: 69a7ffbe48e5c9b43a529f30161dc5d3, type: 3}
 --- !u!4 &5238035715735281253 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 466318, guid: 28ee7d66c5b18a64b93436da8089e0ca,
