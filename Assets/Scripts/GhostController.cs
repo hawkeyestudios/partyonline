@@ -6,7 +6,7 @@ using UnityEngine.UI;
 public class GhostController : MonoBehaviourPun
 {
     public float speed = 5f;
-    public float rotationSpeed = 5f; // Rotasyon hýzýný belirleyen parametre
+    public float rotationSpeed = 5f;
 
     private Transform targetPlayer;
     private bool isWaiting = false;
@@ -27,8 +27,8 @@ public class GhostController : MonoBehaviourPun
         FindClosestPlayer();
         if (targetPlayer != null && !isStopped)
         {
-            RotateTowardsPlayer();  // Yüzü hedefe doðru döndür
-            MoveTowardsPlayer();    // Hedefe doðru ilerle
+            RotateTowardsPlayer();
+            MoveTowardsPlayer();  
         }
     }
 
@@ -57,7 +57,6 @@ public class GhostController : MonoBehaviourPun
 
     void RotateTowardsPlayer()
     {
-        // Hedef oyuncuya doðru yönelme
         Vector3 direction = (targetPlayer.position - transform.position).normalized;
         Quaternion lookRotation = Quaternion.LookRotation(new Vector3(direction.x, 0, direction.z));
         transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * rotationSpeed);

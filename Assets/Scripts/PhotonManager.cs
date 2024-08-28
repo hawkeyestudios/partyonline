@@ -17,11 +17,11 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     public Text statusText;
     public Button leaveRoomButton;
     public Button cosmeticsButton;
-    public GridManager gridManager; // GridManager referansý
+    public GridManager gridManager;
     private GameObject currentCharacter;
     public GameObject crownPrefab;
-    private GameObject currentCrown; // Taç objesini takip etmek için
-    private int countdownTime = 10; // Geri sayým süresi
+    private GameObject currentCrown; 
+    private int countdownTime = 10; 
     private Coroutine countdownCoroutine;
     private bool isCountdownActive = false;
 
@@ -70,7 +70,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
             GameObject characterPrefab = Resources.Load<GameObject>(characterPrefabName);
             if (characterPrefab != null)
             {
-                Vector3 spawnPosition = new Vector3(19.7f, -4.75f, 79.25f); // Sahneye göre pozisyonu ayarla
+                Vector3 spawnPosition = new Vector3(19.7f, -4.75f, 79.25f); 
                 currentCharacter = Instantiate(characterPrefab, spawnPosition, Quaternion.identity);
 
                 if (currentCharacter != null)
@@ -196,11 +196,9 @@ public class PhotonManager : MonoBehaviourPunCallbacks
             Debug.LogError("Cosmetics button is not assigned.");
         }
 
-        // Oyuncunun instantiate edilmesi için spawn point'i seç
         Transform spawnPoint = gridManager.GetRandomSpawnPoint();
 
-        // Son seçilen karakterin prefab adýný al
-        string characterPrefabName = PlayerPrefs.GetString("LastEquippedCharacter", "DefaultCharacter"); // Default olarak bir karakter prefabý atýyoruz.
+        string characterPrefabName = PlayerPrefs.GetString("LastEquippedCharacter", "DefaultCharacter"); 
 
         if (!string.IsNullOrEmpty(characterPrefabName))
         {
@@ -209,12 +207,12 @@ public class PhotonManager : MonoBehaviourPunCallbacks
 
             if (character != null)
             {
-                character.transform.rotation = Quaternion.Euler(0, 10, 0); // Karakterin rotasyonunu ayarla
-                PhotonNetwork.LocalPlayer.TagObject = character; // Oyuncunun karakterine referans tut
+                character.transform.rotation = Quaternion.Euler(0, 10, 0);
+                PhotonNetwork.LocalPlayer.TagObject = character;
 
                 if (PhotonNetwork.IsMasterClient)
                 {
-                    AssignCrownToMasterClient(character); // Eðer master client iseniz tacý atayýn
+                    AssignCrownToMasterClient(character);
                 }
             }
             else
@@ -256,7 +254,6 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         // Geri sayýmý baþlat
         while (countdownTime > 0)
         {
-            // Geri sayým süresini tüm oyunculara gönder
             photonView.RPC("UpdateCountdown", RpcTarget.All, countdownTime);
 
             yield return new WaitForSeconds(1f);
@@ -266,24 +263,19 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         photonView.RPC("ShowLoadingPanel", RpcTarget.All);
 
         yield return new WaitForSeconds(3f);
-        // Geri sayým bittiðinde oyunu baþlat
         photonView.RPC("StartGame", RpcTarget.All);
     }
 
     [PunRPC]
     void StopCountdown()
     {
-        // Geri sayýmý durdur
         if (countdownCoroutine != null)
         {
             StopCoroutine(countdownCoroutine);
         }
 
-        // Geri sayým durumunu ve zamanlayýcýyý sýfýrla
         isCountdownActive = false;
         countdownTime = 10;
-
-        // Geri sayýmý durdurduðunuzu tüm oyunculara bildirin
         photonView.RPC("UpdateCountdown", RpcTarget.All, 0);
     }
 
@@ -314,7 +306,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     [PunRPC]
     void StartGame()
     {
-        PhotonNetwork.LoadLevel("TrapPG"); // Oyununuzu baþlatacak sahneyi yükleyin
+        PhotonNetwork.LoadLevel("TrapPG");
     }
 
     public override void OnMasterClientSwitched(Player newMasterClient)
@@ -323,13 +315,11 @@ public class PhotonManager : MonoBehaviourPunCallbacks
 
         if (PhotonNetwork.LocalPlayer.ActorNumber == newMasterClient.ActorNumber)
         {
-            // Yeni lobi kurucusu (Master Client) siz oldunuz
             Debug.Log("I am the new Master Client.");
 
             // Tacý yeni lobi kurucusuna ata
             AssignCrownToMasterClient((GameObject)newMasterClient.TagObject);
 
-            // Geri sayým baþlatýlmamýþsa ve odadaki oyuncu sayýsý maksimum kapasiteye ulaþmýþsa geri sayýmý baþlat
             if (PhotonNetwork.CurrentRoom.PlayerCount == PhotonNetwork.CurrentRoom.MaxPlayers)
             {
                 if (!isCountdownActive)
@@ -350,17 +340,15 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     {
         if (currentCrown != null)
         {
-            Destroy(currentCrown); // Mevcut tacý yok et
+            Destroy(currentCrown);
         }
 
         if (masterClientCharacter != null)
         {
-            // Taç objesini tüm oyunculara görünür hale getirin
-            Vector3 crownPosition = masterClientCharacter.transform.position + new Vector3(0, 2.5f, 0); // Tacý karakterin üzerinde konumlandýr
+            Vector3 crownPosition = masterClientCharacter.transform.position + new Vector3(0, 2.5f, 0); 
             currentCrown = PhotonNetwork.Instantiate(crownPrefab.name, crownPosition, Quaternion.identity);
-            currentCrown.transform.SetParent(masterClientCharacter.transform); // Tacý karaktere baðla
+            currentCrown.transform.SetParent(masterClientCharacter.transform); 
 
-            // Tacý master client karakterinin PhotonView'ine senkronize et
             PhotonView masterClientPhotonView = masterClientCharacter.GetComponent<PhotonView>();
             if (masterClientPhotonView != null)
             {
@@ -377,7 +365,6 @@ public class PhotonManager : MonoBehaviourPunCallbacks
             GameObject crown = crownPhotonView.gameObject;
             if (crown != null)
             {
-                // Taçý oyuncunun karakterine baðla
                 GameObject playerCharacter = (GameObject)PhotonNetwork.LocalPlayer.TagObject;
                 if (playerCharacter != null)
                 {

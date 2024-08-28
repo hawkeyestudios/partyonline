@@ -23,7 +23,6 @@ public class PlayerMovement : MonoBehaviour
     private Text reviveCountdownText;
     private Image[] heartImages = new Image[3];
     //Attack
-    private GameObject attackIcon;
     private GameObject attackButton;
     private Text attackCountText;
     private int attackCount = 0;
@@ -86,18 +85,13 @@ public class PlayerMovement : MonoBehaviour
                 heart.enabled = false;
             }
             //Attack Özelliði
-            attackIcon = GameObject.Find("Attack");
-            if (attackIcon != null)
-            {
-                attackIcon.SetActive(false);
-            }
             attackButton = GameObject.Find("AttackButton");
             if (attackButton != null)
             {
                 attackButton.SetActive(false);
                 attackButton.GetComponent<Button>().onClick.AddListener(OnAttackButtonClicked);
             }
-            attackCountText = attackIcon.transform.Find("AttackCountText")?.GetComponent<Text>();
+            attackCountText = attackButton.transform.Find("AttackCountText")?.GetComponent<Text>();
             attackCountText.text = attackCount.ToString();
         }
 
@@ -120,14 +114,12 @@ public class PlayerMovement : MonoBehaviour
         }
 
         isMovementEnabled = false;
-        Debug.Log("Baþlangýçta hareket devre dýþý.");
         StartCoroutine(EnableMovementAfterDelay(10f));
     }
     IEnumerator EnableMovementAfterDelay(float delay)
     {
         yield return new WaitForSeconds(delay);
-        Debug.Log("10 saniye sonra hareket aktif.");
-        isMovementEnabled = true; // 10 saniye sonra hareketi etkinleþtir
+        isMovementEnabled = true;
     }
 
     private void Update()
@@ -165,6 +157,16 @@ public class PlayerMovement : MonoBehaviour
                 if (Input.GetButtonDown("Jump") && isGrounded && isMovementEnabled)
                 {
                     Jump();
+                }
+
+                if (!isGrounded && rb.velocity.y < 0)
+                {
+                    animator.SetBool("Walking", false);
+                    animator.SetBool("isGliding", true);
+                }
+                else
+                {
+                    animator.SetBool("isGliding", false);
                 }
             }
             else
@@ -222,7 +224,7 @@ public class PlayerMovement : MonoBehaviour
         {
             animator.SetTrigger("Jump");
         }
-        
+        animator.SetBool("isGliding", false);
         if (!stepParticle.isPlaying)
         {
             stepParticle.Stop();
@@ -259,7 +261,6 @@ public class PlayerMovement : MonoBehaviour
         }
         if (other.CompareTag("AttackOzellik"))
         {
-            attackIcon.SetActive(true);
             attackButton.SetActive(true);
             attackCount++;
             attackCountText.text = attackCount.ToString(); 
@@ -268,17 +269,28 @@ public class PlayerMovement : MonoBehaviour
     private IEnumerator SpeedBoostCountdown(float duration)
     {
         float countdown = duration;
+        float initialFillAmount = speedYellowBar.fillAmount; 
+        float targetFillAmount = 0f; 
+        float elapsedTime = 0f;
 
         while (countdown > 0)
         {
+            elapsedTime += Time.deltaTime;
+
             if (speedYellowBar != null)
             {
-                speedYellowBar.fillAmount = countdown / duration; 
+                speedYellowBar.fillAmount = Mathf.Lerp(initialFillAmount, targetFillAmount, elapsedTime / duration);
             }
 
-            yield return new WaitForSeconds(1f); 
-            countdown--;
+            yield return null;
+            countdown -= Time.deltaTime;
         }
+
+        if (speedYellowBar != null)
+        {
+            speedYellowBar.fillAmount = 0f;
+        }
+
         moveSpeed /= 2f;
         isSpeedBoosted = false;
 
@@ -286,12 +298,8 @@ public class PlayerMovement : MonoBehaviour
         {
             speedIcon.SetActive(false);
         }
-
-        if (speedYellowBar != null)
-        {
-            speedYellowBar.fillAmount = 0; 
-        }
     }
+
     private void OnAttackButtonClicked()
     {
         if (attackCount > 0)
@@ -304,7 +312,6 @@ public class PlayerMovement : MonoBehaviour
                 attackCountText.text = attackCount.ToString();
                 if (attackCount == 0)
                 {
-                    attackIcon.SetActive(false);
                     attackButton.SetActive(false);
                 }
             }
@@ -361,6 +368,7 @@ public class PlayerMovement : MonoBehaviour
         if (collision.gameObject.CompareTag("Ground") && !isGrounded)
         {
             isGrounded = true;
+            animator.SetBool("isGliding", false);
         }
         else if (collision.gameObject.CompareTag("Obstacle") && !hasCollided)
         {

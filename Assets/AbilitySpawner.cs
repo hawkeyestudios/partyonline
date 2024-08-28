@@ -1,21 +1,17 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Photon.Pun;
+using Photon.Realtime;
 
 public class AbilitySpawner : MonoBehaviour
 {
-    // Colliderlarýn yer aldýðý boþ gameObject'lerin transform'larý
-    public Transform[] spawnPoints;
-
-    // Yetenek prefab'larý
-    public GameObject[] abilities;  // Temel yetenekler (Örneðin Hýz, Can, Saldýrý)
-
-    // Her 10 saniyede bir rastgele iki yeteneði spawn eder.
+    public Collider[] spawnAreas; 
+    public string[] abilities;
     public float spawnInterval = 10f;
 
     private void Start()
     {
-        // Spawn iþlemini baþlat
         StartCoroutine(SpawnAbilities());
     }
 
@@ -23,77 +19,87 @@ public class AbilitySpawner : MonoBehaviour
     {
         while (true)
         {
-            // Collider'larýn olduðu noktalardan rastgele iki tane seç
-            List<Transform> chosenSpawnPoints = ChooseRandomSpawnPoints(2, 1.5f);  // Minimum 1.5 birim mesafe þartý
+            List<Vector3> chosenSpawnPositions = ChooseRandomSpawnPositions(2, 1.5f);
+            List<string> chosenAbilities = ChooseRandomAbilities(2);
 
-            // Temel yeteneklerden rastgele iki tanesini seç
-            List<GameObject> chosenAbilities = ChooseRandomAbilities(2);
-
-            // Seçilen yetenekleri, seçilen collider'larýn bulunduðu noktalara spawn et
             for (int i = 0; i < chosenAbilities.Count; i++)
             {
-                Instantiate(chosenAbilities[i], chosenSpawnPoints[i].position, Quaternion.identity);
+                PhotonNetwork.Instantiate(chosenAbilities[i], chosenSpawnPositions[i], Quaternion.identity);
             }
 
-            // 10 saniye bekle
             yield return new WaitForSeconds(spawnInterval);
         }
     }
 
-    // Rastgele iki tane spawn point seçer ve aralarýndaki mesafeyi kontrol eder
-    private List<Transform> ChooseRandomSpawnPoints(int count, float minDistance)
+    private List<Vector3> ChooseRandomSpawnPositions(int count, float minDistance)
     {
-        List<Transform> chosenPoints = new List<Transform>();
-        List<Transform> availablePoints = new List<Transform>(spawnPoints);
+        List<Vector3> chosenPositions = new List<Vector3>();
 
         for (int i = 0; i < count; i++)
         {
-            Transform selectedPoint = null;
-            bool validPoint = false;
+            Vector3 selectedPosition = Vector3.zero;
+            bool validPosition = false;
 
-            while (!validPoint && availablePoints.Count > 0)
+            while (!validPosition)
             {
-                int randomIndex = Random.Range(0, availablePoints.Count);
-                selectedPoint = availablePoints[randomIndex];
+                Collider selectedCollider = spawnAreas[Random.Range(0, spawnAreas.Length)];
 
-                // Ýlk noktayý seçtikten sonra mesafeyi kontrol ederiz
-                if (i == 0 || IsFarEnough(selectedPoint, chosenPoints, minDistance))
+                selectedPosition = GetRandomPositionInCollider(selectedCollider);
+
+                if (i == 0 || IsFarEnough(selectedPosition, chosenPositions, minDistance))
                 {
-                    validPoint = true;
-                    chosenPoints.Add(selectedPoint);
-                    availablePoints.RemoveAt(randomIndex);
+                    validPosition = true;
+                    chosenPositions.Add(selectedPosition);
                 }
             }
         }
 
-        return chosenPoints;
+        return chosenPositions;
     }
 
-    // Seçilen noktanýn önceki noktalara yeterli uzaklýkta olup olmadýðýný kontrol eder
-    private bool IsFarEnough(Transform point, List<Transform> chosenPoints, float minDistance)
+    private Vector3 GetRandomPositionInCollider(Collider collider)
     {
-        foreach (Transform chosenPoint in chosenPoints)
+        Vector3 boundsMin = collider.bounds.min;
+        Vector3 boundsMax = collider.bounds.max;
+
+        float x = Random.Range(boundsMin.x, boundsMax.x);
+        float y = Random.Range(boundsMin.y, boundsMax.y);
+        float z = Random.Range(boundsMin.z, boundsMax.z);
+
+        Vector3 randomPosition = new Vector3(x, y, z);
+        if (collider.bounds.Contains(randomPosition))
         {
-            if (Vector3.Distance(point.position, chosenPoint.position) < minDistance)
+            return randomPosition;
+        }
+        else
+        {
+            randomPosition.y = boundsMin.y;
+            return randomPosition;
+        }
+    }
+
+    private bool IsFarEnough(Vector3 position, List<Vector3> chosenPositions, float minDistance)
+    {
+        foreach (Vector3 chosenPosition in chosenPositions)
+        {
+            if (Vector3.Distance(position, chosenPosition) < minDistance)
             {
                 return false;
             }
         }
-
         return true;
     }
 
-    // Rastgele iki tane yetenek prefab'ý seçer
-    private List<GameObject> ChooseRandomAbilities(int count)
+    private List<string> ChooseRandomAbilities(int count)
     {
-        List<GameObject> chosenAbilities = new List<GameObject>();
-        List<GameObject> availableAbilities = new List<GameObject>(abilities);
+        List<string> chosenAbilities = new List<string>();
+        List<string> availableAbilities = new List<string>(abilities);
 
         for (int i = 0; i < count; i++)
         {
             int randomIndex = Random.Range(0, availableAbilities.Count);
             chosenAbilities.Add(availableAbilities[randomIndex]);
-            availableAbilities.RemoveAt(randomIndex);  // Ayný yeteneðin tekrar seçilmemesi için çýkarýyoruz.
+            availableAbilities.RemoveAt(randomIndex);
         }
 
         return chosenAbilities;

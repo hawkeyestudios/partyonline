@@ -4,17 +4,23 @@ using Photon.Realtime;
 using UnityEngine.UI;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 
 public class GhostManager : MonoBehaviourPunCallbacks
 {
     public Transform[] spawnPoints;
     public Image[] profileImages;
-    public Text[] rewardTexts;
+    //ScoreSystem
+    public Text[] playerScoreTexts;
+    public float scoreIncrement = 0.2f;
+    public Image[] scoreImages;
+    public Text[] scoreNames;
+
     public Text[] nickNames;
     public GameObject gameOverPanel;
     public GeriSayým geriSayým;
 
-    private List<Player> finishOrder = new List<Player>(); // Yakalananlarýn sýralamasý
+    private List<Player> frozenPlayers = new List<Player>();
     private bool raceFinished = false;
 
     private void Start()
@@ -22,32 +28,74 @@ public class GhostManager : MonoBehaviourPunCallbacks
         gameOverPanel.SetActive(false);
         SpawnPlayer();
         SetPlayerProfileImage();
-
-        // Geri sayým olayýný dinleyin
         GeriSayým.OnGameOver += GameOver;
-
-        // Geri sayýmý baþlat
         geriSayým.StartCountdown();
+
+        // scoreImages ve scoreNames'leri profileImages ve nickNames'e eþitle
+        scoreImages = profileImages;
+        scoreNames = nickNames;
+    }
+    private void Update()
+    {
+        if (!raceFinished)
+        {
+            UpdateScores();
+            UpdateScoreUI();
+        }
+    }
+    private void UpdateScores()
+    {
+        foreach (Player player in PhotonNetwork.PlayerList)
+        {
+            if (!frozenPlayers.Contains(player))
+            {
+                float currentScore = GetPlayerScore(player);
+                currentScore += scoreIncrement * Time.deltaTime;
+                SetPlayerScore(player, currentScore);
+            }
+        }
     }
 
+    private void UpdateScoreUI()
+    {
+        for (int i = 0; i < PhotonNetwork.PlayerList.Length; i++)
+        {
+            Player player = PhotonNetwork.PlayerList[i];
+            playerScoreTexts[i].text = player.NickName + ": " + GetPlayerScore(player).ToString("F1"); // Skoru UI'ye güncelle
+        }
+    }
+    private float GetPlayerScore(Player player)
+    {
+        if (player.CustomProperties.TryGetValue("PlayerScore", out object score))
+        {
+            return (float)score;
+        }
+        return 0f;
+    }
+
+    private void SetPlayerScore(Player player, float score)
+    {
+        ExitGames.Client.Photon.Hashtable playerProperties = new ExitGames.Client.Photon.Hashtable
+        {
+            { "PlayerScore", score }
+        };
+        player.SetCustomProperties(playerProperties);
+    }
     private void SpawnPlayer()
     {
         if (PhotonNetwork.IsConnectedAndReady)
         {
             Player localPlayer = PhotonNetwork.LocalPlayer;
 
-            // Oyuncunun ActorNumber'ýna göre spawn noktasýný belirle
             int spawnPointIndex = localPlayer.ActorNumber % spawnPoints.Length;
             Transform spawnPoint = spawnPoints[spawnPointIndex];
             Vector3 spawnPosition = spawnPoint.position;
             Quaternion spawnRotation = spawnPoint.rotation;
 
-            // Son seçilen karakter prefab ismini PlayerPrefs'ten al
             string characterPrefabName = PlayerPrefs.GetString("LastEquippedCharacter", "DefaultCharacter");
 
             if (!string.IsNullOrEmpty(characterPrefabName))
             {
-                // Karakter prefab'ýný PhotonNetwork.Instantiate ile instantiate et
                 GameObject character = PhotonNetwork.Instantiate(characterPrefabName, spawnPosition, spawnRotation);
 
                 if (character != null)
@@ -65,8 +113,6 @@ public class GhostManager : MonoBehaviourPunCallbacks
             }
         }
     }
-
-
     private void SetPlayerProfileImage()
     {
         string playerImageName = PlayerPrefs.GetString("LastEquippedCharacter", "defaultProfileImage");
@@ -83,72 +129,25 @@ public class GhostManager : MonoBehaviourPunCallbacks
         {
             Player player = other.GetComponent<PhotonView>().Owner;
 
-            if (!finishOrder.Contains(player))
+            if (!frozenPlayers.Contains(player))
             {
-                finishOrder.Add(player); // Yakalananlarý sýraya ekle
-                UpdatePlayerUI(player, 0); // Ýlk yakalandýðýnda henüz ödül vermiyoruz, sadece UI güncelleme
+                frozenPlayers.Add(player); // Oyuncunun puan kazanýmýný durdur
+                UpdateScoreUI(); // Skoru güncelle
+            }
 
-                if (finishOrder.Count == PhotonNetwork.PlayerList.Length)
-                {
-                    raceFinished = true;
-                    geriSayým.StopAllCoroutines(); // Geri sayýmý durdur
-                    GameOver(); // Tüm oyuncular yakalandýðýnda oyunu bitir
-                }
+            if (frozenPlayers.Count == PhotonNetwork.PlayerList.Length)
+            {
+                raceFinished = true;
+                geriSayým.StopAllCoroutines();
+                GameOver();
             }
         }
     }
-
     private void GameOver()
     {
         raceFinished = true;
         gameOverPanel.SetActive(true);
-
-        // Yakalananlar için sýralý ödül ve yakalanmayanlar için sabit ödül hesaplama
-        int caughtReward = 250; // Ýlk yakalanan için baþlangýç ödülü
-        List<Player> uncaughtPlayers = new List<Player>();
-        List<Player> caughtPlayers = new List<Player>();
-
-        // Yakalanan ve yakalanmayanlarý ayýr
-        foreach (Player player in PhotonNetwork.PlayerList)
-        {
-            if (!finishOrder.Contains(player))
-            {
-                uncaughtPlayers.Add(player); // Yakalanmayanlar listesine ekle
-            }
-            else
-            {
-                caughtPlayers.Add(player); // Yakalananlar listesine ekle
-            }
-        }
-
-        // Yakalanmayanlara 1000 ödül ver
-        foreach (Player player in uncaughtPlayers)
-        {
-            UpdatePlayerUI(player, 1000); // UI güncelleme (1000 ödül)
-            CoinManager.Instance.AddCoins(1000); // 1000 ödül ekle
-        }
-
-        // Yakalananlara sýralý ödül ver
-        for (int i = 0; i < caughtPlayers.Count; i++)
-        {
-            Player caughtPlayer = caughtPlayers[i];
-            UpdatePlayerUI(caughtPlayer, caughtReward); // Yakalananlar için UI güncelleme
-            CoinManager.Instance.AddCoins(caughtReward); // Sýraya göre ödül ekle
-            caughtReward += 250; // Her sýradaki oyuncuya ödül 250 artar
-        }
     }
-
-    private void UpdatePlayerUI(Player player, int reward)
-    {
-        int playerIndex = PhotonNetwork.PlayerList.ToList().IndexOf(player);
-        if (playerIndex >= 0 && playerIndex < profileImages.Length)
-        {
-            profileImages[playerIndex].sprite = GetProfileSprite(player);
-            rewardTexts[playerIndex].text = $"{reward}"; // Ödül metnini güncelle
-            nickNames[playerIndex].text = player.NickName; // Oyuncunun ismini güncelle
-        }
-    }
-
     private Sprite GetProfileSprite(Player player)
     {
         if (player.CustomProperties.TryGetValue("profileImage", out object playerImageName))

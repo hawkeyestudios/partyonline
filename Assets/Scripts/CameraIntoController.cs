@@ -33,7 +33,7 @@ public class CameraIntroController : MonoBehaviour
                 if (timer >= animationDuration)
                 {
                     OnAnimationComplete();
-                    hasAnimationCompleted = true; // Animasyon tamamlandýðýnda bunu iþaretle
+                    hasAnimationCompleted = true;
                 }
             }
         }
@@ -56,6 +56,6 @@ public class CameraIntroController : MonoBehaviour
 
     void StartGame()
     {
-        // Oyun baþlangýç iþlemlerini buraya ekleyin
+
     }
 }
