@@ -3,26 +3,24 @@ using Photon.Pun;
 using Photon.Realtime;
 using UnityEngine.UI;
 using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography.X509Certificates;
 using System.Collections;
 
-public class GhostManager : MonoBehaviourPunCallbacks
+public class BarrelManager : MonoBehaviourPunCallbacks
 {
     public Transform[] spawnPoints;
     public Image[] profileImages;
-    //ScoreSystem
+
+    // Score system
     public Text[] playerScoreTexts;
     public float scoreIncrement = 0.2f;
-    public Image[] scoreImages;
-    public Text[] scoreNames;
 
     public Text[] nickNames;
     public GameObject gameOverPanel;
     public GeriSayým geriSayým;
 
-    // GameOverPanel'deki Score Text'leri
     public Text[] gameOverScoreTexts;
+    public Image[] gameOverProfileImages;
+    public Text[] gameOverNickNames;
 
     private List<Player> frozenPlayers = new List<Player>();
     private bool raceFinished = false;
@@ -35,9 +33,6 @@ public class GhostManager : MonoBehaviourPunCallbacks
         SetPlayerProfileImage();
         GeriSayým.OnGameOver += GameOver;
         geriSayým.StartCountdown();
-
-        scoreImages = profileImages;
-        scoreNames = nickNames;
 
         StartCoroutine(StartScoreCountingAfterDelay(10f));
     }
@@ -75,7 +70,7 @@ public class GhostManager : MonoBehaviourPunCallbacks
         for (int i = 0; i < PhotonNetwork.PlayerList.Length; i++)
         {
             Player player = PhotonNetwork.PlayerList[i];
-            playerScoreTexts[i].text = player.NickName + ": " + GetPlayerScore(player).ToString("F1"); // Skoru UI'ye güncelle
+            playerScoreTexts[i].text = player.NickName + ": " + GetPlayerScore(player).ToString("F1");
         }
     }
 
@@ -95,6 +90,15 @@ public class GhostManager : MonoBehaviourPunCallbacks
             { "PlayerScore", score }
         };
         player.SetCustomProperties(playerProperties);
+    }
+
+    public void OnPlayerDeath(Player player)
+    {
+        if (!frozenPlayers.Contains(player))
+        {
+            frozenPlayers.Add(player);
+            UpdateScoreUI();
+        }
     }
 
     private void SpawnPlayer()
@@ -138,34 +142,11 @@ public class GhostManager : MonoBehaviourPunCallbacks
         PhotonNetwork.LocalPlayer.SetCustomProperties(playerProperties);
     }
 
-    private void OnTriggerEnter(Collider other)
-    {
-        if (raceFinished) return;
-
-        if (other.CompareTag("Player"))
-        {
-            Player player = other.GetComponent<PhotonView>().Owner;
-
-            if (!frozenPlayers.Contains(player))
-            {
-                frozenPlayers.Add(player); // Oyuncunun puan kazanýmýný durdur
-                UpdateScoreUI(); // Skoru güncelle
-            }
-
-            if (frozenPlayers.Count == PhotonNetwork.PlayerList.Length)
-            {
-                raceFinished = true;
-                geriSayým.StopAllCoroutines();
-                GameOver();
-            }
-        }
-    }
-
     private void GameOver()
     {
         raceFinished = true;
         gameOverPanel.SetActive(true);
-        UpdateGameOverScores(); // GameOverPanel'deki scorelarý güncelle
+        UpdateGameOverScores();
     }
 
     private void UpdateGameOverScores()
@@ -173,7 +154,9 @@ public class GhostManager : MonoBehaviourPunCallbacks
         for (int i = 0; i < PhotonNetwork.PlayerList.Length; i++)
         {
             Player player = PhotonNetwork.PlayerList[i];
-            gameOverScoreTexts[i].text = player.NickName + ": " + GetPlayerScore(player).ToString("F1"); // GameOverPanel'deki Score Text'leri güncelle
+            gameOverScoreTexts[i].text = player.NickName + ": " + GetPlayerScore(player).ToString("F1");
+            gameOverProfileImages[i].sprite = GetProfileSprite(player);
+            gameOverNickNames[i].text = player.NickName;
         }
     }
 

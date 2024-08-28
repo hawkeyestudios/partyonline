@@ -81,8 +81,7 @@ public class SpawnManager : MonoBehaviourPunCallbacks
             {
                 finishOrder.Add(player);
 
-                UpdatePlayerUI(player);
-
+                UpdatePlayerUI(player, true);  // Finish çizgisini geçen oyuncular için true gönder
                 if (finishOrder.Count == PhotonNetwork.PlayerList.Length)
                 {
                     raceFinished = true;
@@ -93,17 +92,20 @@ public class SpawnManager : MonoBehaviourPunCallbacks
         }
     }
 
-    private void UpdatePlayerUI(Player player)
+    private void UpdatePlayerUI(Player player, bool passedFinish)
     {
         int playerIndex = finishOrder.IndexOf(player);
         if (playerIndex >= 0 && playerIndex < profileImages.Length)
         {
             profileImages[playerIndex].sprite = GetProfileSprite(player);
 
-            int reward = Mathf.Max(1000 - (playerIndex * 250), 0);
+            int reward = passedFinish ? Mathf.Max(1000 - (playerIndex * 250), 0) : 0; 
 
             rewardTexts[playerIndex].text = $"{reward}";
-            CoinManager.Instance.AddCoins(reward);
+            if (reward > 0)
+            {
+                CoinManager.Instance.AddCoins(reward);
+            }
 
             nickNames[playerIndex].text = player.NickName;
         }
@@ -137,8 +139,8 @@ public class SpawnManager : MonoBehaviourPunCallbacks
         {
             if (!finishOrder.Contains(player))
             {
-                finishOrder.Add(player);  
-                UpdatePlayerUI(player);  
+                finishOrder.Add(player);
+                UpdatePlayerUI(player, false); 
             }
         }
     }

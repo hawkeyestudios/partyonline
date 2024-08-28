@@ -7,16 +7,13 @@ EditorBuildSettings:
   m_Scenes:
   - enabled: 1
     path: Assets/Scenes/Login.unity
-    guid: a4ac5c6f297afc44582deabdd8a93cb6
+    guid: 2fae7912cb1dc074d8f8d3039a02885b
   - enabled: 1
     path: Assets/Scenes/MainMenu.unity
     guid: ce04bfbd8b0707840be8dd507be37ca5
   - enabled: 1
-    path: Assets/Scenes/CharacterShop.unity
-    guid: c477fefeff3fd7a4685ee06a9ce5817c
-  - enabled: 1
-    path: Assets/Scenes/GameScene.unity
-    guid: a1686b14091dd784384a2c9a8f02c8da
+    path: Assets/Scenes/Customize.unity
+    guid: ef82e25fc0fa0cc429c1408af8daac5f
   - enabled: 1
     path: Assets/Scenes/TrapPG.unity
     guid: 9fc0d4010bbf28b4594072e72b8655ab
@@ -27,8 +24,8 @@ EditorBuildSettings:
     path: Assets/Scenes/GhostPG.unity
     guid: 6cbdc0d3bddb27f4287b87efa9eb3d15
   - enabled: 1
-    path: Assets/Scenes/Customize.unity
-    guid: ef82e25fc0fa0cc429c1408af8daac5f
+    path: Assets/Scenes/TntPG.unity
+    guid: 82673d6a45f9f3b468e49710684dd2d3
   m_configObjects:
     com.unity.adaptiveperformance.simulator.provider_settings: {fileID: 11400000,
       guid: 4491cbb253a5be2498f18d51e91b0e6b, type: 2}

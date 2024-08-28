@@ -563,6 +563,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveSpeed: 3
   jumpForce: 12
+  attackParticle: {fileID: 0}
   boomEffect: {fileID: 3390875788063411610}
   ghostPrefab: {fileID: 8555421485844250906, guid: f28f7b115a46a2a4aadd51143d3131d3,
     type: 3}
@@ -673,6 +674,9 @@ MonoBehaviour:
   - Type: 9
     SynchronizeType: 1
     Name: Die
+  - Type: 4
+    SynchronizeType: 1
+    Name: isGliding
   m_SynchronizeLayers:
-  - SynchronizeType: 0
+  - SynchronizeType: 1
     LayerIndex: 0

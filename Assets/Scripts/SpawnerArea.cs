@@ -44,7 +44,22 @@ public class RandomSpawner : MonoBehaviourPunCallbacks
             }
         }
     }
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("Player"))
+        {
+            PhotonView playerPhotonView = collision.gameObject.GetComponent<PhotonView>();
 
+            if (playerPhotonView != null && playerPhotonView.IsMine)
+            {
+                BarrelManager barrelManager = FindObjectOfType<BarrelManager>();
+                barrelManager.OnPlayerDeath(playerPhotonView.Owner);
+            }
+
+            // Barrel yok edilebilir veya baþka bir iþlem yapýlabilir
+            Destroy(gameObject);
+        }
+    }
     void SpawnObjects()
     {
         Vector3 spawnPosition1 = GetRandomPositionInCollider(spawnArea);

@@ -503,8 +503,11 @@ MonoBehaviour:
   - Type: 9
     SynchronizeType: 1
     Name: Die
+  - Type: 4
+    SynchronizeType: 1
+    Name: isGliding
   m_SynchronizeLayers:
-  - SynchronizeType: 0
+  - SynchronizeType: 1
     LayerIndex: 0
 --- !u!4 &684317389905972978 stripped
 Transform:

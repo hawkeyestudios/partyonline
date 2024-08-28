@@ -24,7 +24,8 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     private int countdownTime = 10; 
     private Coroutine countdownCoroutine;
     private bool isCountdownActive = false;
-
+    private string[] mapNames = { "TrapPG", "GhostPG", "TntPG", "CrownPG" };
+    public List<GameObject> loadingPanels;
     private void Start()
     {
         PhotonNetwork.AutomaticallySyncScene = true;
@@ -63,7 +64,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
 
     private void ShowLastEquippedCharacter()
     {
-        string characterPrefabName = PlayerPrefs.GetString("LastEquippedCharacter", "DefaultCharacter"); // DefaultCharacter adýnda varsayýlan karakterin prefab ismi
+        string characterPrefabName = PlayerPrefs.GetString("LastEquippedCharacter", "DefaultCharacter");
 
         if (!string.IsNullOrEmpty(characterPrefabName))
         {
@@ -251,17 +252,14 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     IEnumerator StartCountdown()
     {
         isCountdownActive = true;
-        // Geri sayýmý baþlat
         while (countdownTime > 0)
         {
             photonView.RPC("UpdateCountdown", RpcTarget.All, countdownTime);
-
             yield return new WaitForSeconds(1f);
             countdownTime--;
         }
 
         photonView.RPC("ShowLoadingPanel", RpcTarget.All);
-
         yield return new WaitForSeconds(3f);
         photonView.RPC("StartGame", RpcTarget.All);
     }
@@ -297,17 +295,30 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     [PunRPC]
     void ShowLoadingPanel()
     {
-        if (loadingPanel != null)
+        // Random harita seç
+        string randomMap = mapNames[Random.Range(0, mapNames.Length)];
+        int mapIndex = System.Array.IndexOf(mapNames, randomMap);
+
+        if (mapIndex >= 0 && mapIndex < loadingPanels.Count)
         {
-            loadingPanel.SetActive(true);
+            loadingPanels[mapIndex].SetActive(true);
         }
+        StartCoroutine(LoadSelectedMap(randomMap));
+    }
+
+    IEnumerator LoadSelectedMap(string mapName)
+    {
+        yield return new WaitForSeconds(3f);
+        PhotonNetwork.LoadLevel(mapName);
     }
 
     [PunRPC]
     void StartGame()
     {
-        PhotonNetwork.LoadLevel("TrapPG");
+        string randomMap = mapNames[Random.Range(0, mapNames.Length)];
+        PhotonNetwork.LoadLevel(randomMap);
     }
+
 
     public override void OnMasterClientSwitched(Player newMasterClient)
     {

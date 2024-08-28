@@ -1268,8 +1268,11 @@ MonoBehaviour:
   - Type: 9
     SynchronizeType: 1
     Name: Jump
+  - Type: 4
+    SynchronizeType: 1
+    Name: isGliding
   m_SynchronizeLayers:
-  - SynchronizeType: 0
+  - SynchronizeType: 1
     LayerIndex: 0
 --- !u!4 &7784631893125450680 stripped
 Transform:

@@ -6,23 +6,25 @@ using UnityEngine.UI;
 using Photon.Pun;
 using Photon.Realtime;
 
-public class MapGecisGeriSayım : MonoBehaviour
+public class MapGecisGeriSayim : MonoBehaviour
 {
-    public Text countdownText; // Geri sayım için UI Text bileşeni
-    private float timeRemaining = 15f; // 15 saniye geri sayım
-    public string levelName;
-    private bool hasLoaded = false; // Sahne yüklendi mi kontrolü
-    public GameObject loadingPanel;
-    private string MainMenu = "MainMenu";
+    public Text countdownText;
+    private float timeRemaining = 15f;
+    private bool hasLoaded = false;
+
+    public List<GameObject> loadingPanels;
+    private string mainMenu = "MainMenu";
+
+    private string[] mapNames = { "TrapPG", "GhostPG", "TntPG", "CrownPG" };
 
     void Start()
     {
+        SaveCurrentScene();
         UpdateCountdownText();
     }
 
     void Update()
     {
-        // Geri sayım süresini azalt
         if (timeRemaining > 0)
         {
             timeRemaining -= Time.deltaTime;
@@ -30,24 +32,85 @@ public class MapGecisGeriSayım : MonoBehaviour
         }
         else if (!hasLoaded)
         {
-            // Zaman sıfıra ulaştığında ve sahne henüz yüklenmediyse sahneyi yükle
             StartCoroutine(NextSceneLoading());
-            hasLoaded = true; // Sahnenin sadece bir kez yüklenmesini sağla
+            hasLoaded = true;
         }
     }
 
     void UpdateCountdownText()
     {
-        // UI Text bileşenini güncelle
         countdownText.text = Mathf.Ceil(timeRemaining).ToString() + " seconds";
     }
 
     IEnumerator NextSceneLoading()
     {
-        loadingPanel.SetActive(true);
+        string nextMap = GetRandomUnvisitedMap();
+        if (!string.IsNullOrEmpty(nextMap))
+        {
+            int mapIndex = System.Array.IndexOf(mapNames, nextMap);
 
-        yield return new WaitForSeconds(3f); // 3 saniye bekle
-                                             // Sahneyi yükle
-        SceneManager.LoadScene(levelName);
+            if (mapIndex >= 0 && mapIndex < loadingPanels.Count)
+            {
+                loadingPanels[mapIndex].SetActive(true);
+            }
+
+            yield return new WaitForSeconds(3f);
+
+            AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(nextMap);
+
+            while (!asyncLoad.isDone)
+            {
+                yield return null;
+            }
+        }
+        else
+        {
+            ClearVisitedMapRecords();
+            SceneManager.LoadScene(mainMenu);
+        }
+    }
+
+    void SaveCurrentScene()
+    {
+        string currentSceneName = SceneManager.GetActiveScene().name;
+        PlayerPrefs.SetInt(currentSceneName, 1);
+        PlayerPrefs.Save();
+    }
+
+    string GetRandomUnvisitedMap()
+    {
+        List<string> unvisitedMaps = new List<string>();
+
+        foreach (string mapName in mapNames)
+        {
+            if (PlayerPrefs.GetInt(mapName, 0) == 0)
+            {
+                unvisitedMaps.Add(mapName);
+            }
+        }
+
+        if (unvisitedMaps.Count > 0)
+        {
+            int randomIndex = Random.Range(0, unvisitedMaps.Count);
+            return unvisitedMaps[randomIndex];
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    void ClearVisitedMapRecords()
+    {
+        foreach (string mapName in mapNames)
+        {
+            PlayerPrefs.DeleteKey(mapName);
+        }
+        PlayerPrefs.Save();
+
+        if (PhotonNetwork.InRoom)
+        {
+            PhotonNetwork.LeaveRoom();
+        }
     }
 }

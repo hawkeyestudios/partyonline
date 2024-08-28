@@ -28,9 +28,6 @@ namespace KnoxGameStudios
         private const string EMAIL_PREF_KEY = "USER_EMAIL";
         private const string PASSWORD_PREF_KEY = "USER_PASSWORD";
 
-        private Text coinstext;
-        private Text gemstext;
-
         #region Unity Methods
         void Start()
         {
@@ -183,51 +180,7 @@ namespace KnoxGameStudios
             Debug.Log($"You have logged into PlayFab with email {email}");
             ShowFeedback("Login successful!");
             SaveCredentials();
-            GetCharacterPurchaseStatus();
             GetUserAccountInfo();
-        }
-        private void GetCharacterPurchaseStatus()
-        {
-            PlayFabClientAPI.GetUserData(new GetUserDataRequest(), OnGetUserDataSuccess, OnFailure);
-        }
-        private void OnGetUserDataSuccess(GetUserDataResult result)
-        {
-            foreach (var entry in result.Data)
-            {
-                string key = entry.Key;
-                string value = entry.Value.Value;
-
-                if (key.EndsWith("_Purchased"))
-                {
-                    bool purchased = value == "1";
-                    PlayerPrefs.SetInt(key, purchased ? 1 : 0);
-                }
-                else if (key.EndsWith("_Equipped"))
-                {
-                    bool equipped = value == "1";
-                    PlayerPrefs.SetInt(key, equipped ? 1 : 0);
-                }
-                else if (key == "LastEquippedCharacter")
-                {
-                    PlayerPrefs.SetString("LastEquippedCharacter", value);
-                }
-                else if (key == "TickImageState")
-                {
-                    bool tickImageState = value == "1";
-                    PlayerPrefs.SetInt("TickImageState", tickImageState ? 1 : 0);
-                }
-                else if (key == "CurrentCoins")
-                {
-                    int coins = int.Parse(value);
-                    CoinManager.Instance.SetCurrentCoins(coins); // Mevcut coinleri ayarla
-                }
-                else if (key == "CurrentGems")
-                {
-                    int gems = int.Parse(value);
-                    GemManager.Instance.SetCurrentGems(gems); // Mevcut gemleri ayarla
-                }
-            }
-            PlayerPrefs.Save();
         }
         private void GetUserAccountInfo()
         {
