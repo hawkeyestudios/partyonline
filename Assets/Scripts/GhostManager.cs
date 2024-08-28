@@ -5,6 +5,7 @@ using UnityEngine.UI;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
+using System.Collections;
 
 public class GhostManager : MonoBehaviourPunCallbacks
 {
@@ -22,6 +23,7 @@ public class GhostManager : MonoBehaviourPunCallbacks
 
     private List<Player> frozenPlayers = new List<Player>();
     private bool raceFinished = false;
+    private bool scoreCountingStarted = false;
 
     private void Start()
     {
@@ -34,10 +36,17 @@ public class GhostManager : MonoBehaviourPunCallbacks
         // scoreImages ve scoreNames'leri profileImages ve nickNames'e eþitle
         scoreImages = profileImages;
         scoreNames = nickNames;
+
+        StartCoroutine(StartScoreCountingAfterDelay(10f));
+    }
+    private IEnumerator StartScoreCountingAfterDelay(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        scoreCountingStarted = true;
     }
     private void Update()
     {
-        if (!raceFinished)
+        if (!raceFinished && scoreCountingStarted)
         {
             UpdateScores();
             UpdateScoreUI();

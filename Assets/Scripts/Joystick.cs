@@ -28,7 +28,7 @@ public class Joystick : MonoBehaviour, IDragHandler, IPointerUpHandler, IPointer
         inputVector = new Vector2(pos.x * 2, pos.y * 2);
         inputVector = (inputVector.magnitude > 1.0f) ? inputVector.normalized : inputVector;
 
-        handle.anchoredPosition = new Vector2(inputVector.x * (background.sizeDelta.x / 3), inputVector.y * (background.sizeDelta.y / 3));
+        handle.anchoredPosition = new Vector2(inputVector.x * (background.sizeDelta.x / 5), inputVector.y * (background.sizeDelta.y / 5));
 
         // Highlight'ý güncelle
         UpdateHighlight();
