@@ -13,7 +13,7 @@ public class CrownManager : MonoBehaviourPunCallbacks
 
     // Score system
     public Text[] playerScoreTexts;
-    public float scoreIncrement = 0.2f;
+    public float scoreIncrement = 4f;
 
     public Text[] nickNames;
     public GameObject gameOverPanel;
@@ -94,8 +94,6 @@ public class CrownManager : MonoBehaviourPunCallbacks
 
     private void SpawnPlayer()
     {
-        if (PhotonNetwork.IsConnectedAndReady)
-        {
             Player localPlayer = PhotonNetwork.LocalPlayer;
 
             int spawnPointIndex = localPlayer.ActorNumber % spawnPoints.Length;
@@ -123,7 +121,6 @@ public class CrownManager : MonoBehaviourPunCallbacks
             {
                 Debug.LogError("Character prefab not found in PlayerPrefs.");
             }
-        }
     }
 
     private void SetPlayerProfileImage()
@@ -141,7 +138,7 @@ public class CrownManager : MonoBehaviourPunCallbacks
             Transform crownTransform = crownPrefab.transform;
             Transform playerTransform = playerTransforms[currentCrownHolder];
 
-            crownTransform.position = playerTransform.position + new Vector3(0, 2.5f, 0); // Taç pozisyonu, oyuncunun üzerinde olacak þekilde ayarlanýr
+            crownTransform.position = playerTransform.position + new Vector3(0, 2.5f, 0); 
         }
     }
 

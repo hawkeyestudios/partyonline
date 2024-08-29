@@ -12,7 +12,7 @@ public class BarrelManager : MonoBehaviourPunCallbacks
 
     // Score system
     public Text[] playerScoreTexts;
-    public float scoreIncrement = 0.2f;
+    public float scoreIncrement = 4f;
 
     public Text[] nickNames;
     public GameObject gameOverPanel;
@@ -103,8 +103,6 @@ public class BarrelManager : MonoBehaviourPunCallbacks
 
     private void SpawnPlayer()
     {
-        if (PhotonNetwork.IsConnectedAndReady)
-        {
             Player localPlayer = PhotonNetwork.LocalPlayer;
 
             int spawnPointIndex = localPlayer.ActorNumber % spawnPoints.Length;
@@ -131,7 +129,6 @@ public class BarrelManager : MonoBehaviourPunCallbacks
             {
                 Debug.LogError("Character prefab not found in PlayerPrefs.");
             }
-        }
     }
 
     private void SetPlayerProfileImage()

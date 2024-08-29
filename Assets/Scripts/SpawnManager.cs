@@ -28,8 +28,6 @@ public class SpawnManager : MonoBehaviourPunCallbacks
 
     private void SpawnPlayer()
     {
-        if (PhotonNetwork.IsConnectedAndReady)
-        {
             Player localPlayer = PhotonNetwork.LocalPlayer;
 
             int spawnPointIndex = localPlayer.ActorNumber % spawnPoints.Length;
@@ -56,7 +54,6 @@ public class SpawnManager : MonoBehaviourPunCallbacks
             {
                 Debug.LogError("Character prefab not found in PlayerPrefs.");
             }
-        }
     }
 
 

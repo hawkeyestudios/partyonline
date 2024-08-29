@@ -103,6 +103,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 2515501980641916771}
+    - targetCorrespondingSourceObject: {fileID: 6532625474870085665, guid: 07a977963523b3b4dbcaa27119f6b469,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 231002141906462806}
   m_SourcePrefab: {fileID: 100100000, guid: 07a977963523b3b4dbcaa27119f6b469, type: 3}
 --- !u!1 &412575920714479025 stripped
 GameObject:
@@ -124,6 +128,28 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   speedParticle: {fileID: 412575920714479025}
   boomEffect: {fileID: 2398404913462732830}
+--- !u!114 &231002141906462806
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 412575920714479025}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ObservedComponentsFoldoutOpen: 1
+  Group: 0
+  prefixField: -1
+  Synchronization: 3
+  OwnershipTransfer: 0
+  observableSearch: 2
+  ObservedComponents: []
+  sceneViewId: 0
+  InstantiationId: 0
+  isRuntimeInstantiated: 0
 --- !u!198 &2398404913462732830 stripped
 ParticleSystem:
   m_CorrespondingSourceObject: {fileID: 9104474493759460750, guid: 07a977963523b3b4dbcaa27119f6b469,

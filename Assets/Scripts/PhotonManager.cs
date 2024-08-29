@@ -64,6 +64,12 @@ public class PhotonManager : MonoBehaviourPunCallbacks
 
     private void ShowLastEquippedCharacter()
     {
+        if (currentCharacter != null)
+        {
+            Debug.Log("Son kullanýlan karakter zaten instantiate edilmiþ.");
+            return;
+        }
+
         string characterPrefabName = PlayerPrefs.GetString("LastEquippedCharacter", "DefaultCharacter");
 
         if (!string.IsNullOrEmpty(characterPrefabName))
@@ -71,7 +77,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
             GameObject characterPrefab = Resources.Load<GameObject>(characterPrefabName);
             if (characterPrefab != null)
             {
-                Vector3 spawnPosition = new Vector3(19.7f, -4.75f, 79.25f); 
+                Vector3 spawnPosition = new Vector3(19.7f, -4.75f, 79.25f);
                 currentCharacter = Instantiate(characterPrefab, spawnPosition, Quaternion.identity);
 
                 if (currentCharacter != null)
@@ -80,19 +86,20 @@ public class PhotonManager : MonoBehaviourPunCallbacks
                 }
                 else
                 {
-                    Debug.LogError("Failed to instantiate character.");
+                    Debug.LogError("Karakter instantiate edilemedi.");
                 }
             }
             else
             {
-                Debug.LogError($"Character prefab '{characterPrefabName}' not found in Resources.");
+                Debug.LogError($"'Resources' klasöründe '{characterPrefabName}' adlý karakter prefab'ý bulunamadý.");
             }
         }
         else
         {
-            Debug.LogError("Character prefab name is empty.");
+            Debug.LogError("Karakter prefab adý boþ.");
         }
     }
+
 
     private void OnPlayButtonClicked()
     {

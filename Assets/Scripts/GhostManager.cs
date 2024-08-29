@@ -13,7 +13,7 @@ public class GhostManager : MonoBehaviourPunCallbacks
     public Image[] profileImages;
     //ScoreSystem
     public Text[] playerScoreTexts;
-    public float scoreIncrement = 0.2f;
+    public float scoreIncrement = 4f;
     public Image[] scoreImages;
     public Text[] scoreNames;
 
@@ -99,8 +99,6 @@ public class GhostManager : MonoBehaviourPunCallbacks
 
     private void SpawnPlayer()
     {
-        if (PhotonNetwork.IsConnectedAndReady)
-        {
             Player localPlayer = PhotonNetwork.LocalPlayer;
 
             int spawnPointIndex = localPlayer.ActorNumber % spawnPoints.Length;
@@ -127,7 +125,6 @@ public class GhostManager : MonoBehaviourPunCallbacks
             {
                 Debug.LogError("Character prefab not found in PlayerPrefs.");
             }
-        }
     }
 
     private void SetPlayerProfileImage()
