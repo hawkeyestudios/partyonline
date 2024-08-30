@@ -1,25 +1,36 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
+using Photon.Pun;
+using Photon.Realtime;
 
-public class GeriSayım : MonoBehaviour
+public class GeriSayım : MonoBehaviourPunCallbacks
 {
-    public Text countdownText; // Geri sayımın gösterileceği Text
-    public float preparationTime = 10f; // Hazırlık süresi (saniye)
-    public float gameDuration = 120f; // Oyun süresi (saniye)
+    public Text countdownText;
+    public float preparationTime = 10f;
+    public float gameDuration = 120f;
     public bool isGameStarted = false;
 
     public delegate void GameOverAction();
     public static event GameOverAction OnGameOver;
 
+    private bool isCountdownStarted = false; // Yeni kontrol değişkeni
+
     private void Start()
     {
-        // Geri sayım başlatılmadan önce bir işlem yapılacaksa buraya eklenebilir
+        if (PhotonNetwork.IsMasterClient && !isCountdownStarted)
+        {
+            StartCountdown();
+        }
     }
 
     public void StartCountdown()
     {
-        StartCoroutine(CountdownRoutine());
+        if (PhotonNetwork.IsMasterClient && !isCountdownStarted)
+        {
+            isCountdownStarted = true; // Coroutine başlatılmadan önce kontrolü etkinleştir
+            StartCoroutine(CountdownRoutine());
+        }
     }
 
     private IEnumerator CountdownRoutine()
@@ -27,7 +38,7 @@ public class GeriSayım : MonoBehaviour
         // 10 saniyelik hazırlık geri sayımı
         while (preparationTime > 0)
         {
-            countdownText.text = "Get Ready " + preparationTime.ToString("0");
+            photonView.RPC("UpdateCountdownText", RpcTarget.All, "Get Ready " + preparationTime.ToString("0"));
             preparationTime -= Time.deltaTime;
             yield return null;
         }
@@ -38,18 +49,34 @@ public class GeriSayım : MonoBehaviour
         {
             int minutes = Mathf.FloorToInt(gameDuration / 60);
             int seconds = Mathf.FloorToInt(gameDuration % 60);
-            countdownText.text = string.Format("{0:0}:{1:00}", minutes, seconds);
+            string countdownDisplay = string.Format("{0:0}:{1:00}", minutes, seconds);
+            photonView.RPC("UpdateCountdownText", RpcTarget.All, countdownDisplay);
             gameDuration -= Time.deltaTime;
             yield return null;
         }
 
-        GameOver();
+        photonView.RPC("GameOver_RPC", RpcTarget.AllBuffered); // GameOver'ı tüm oyuncular için tetikle
     }
 
-    private void GameOver()
+    [PunRPC]
+    private void GameOver_RPC()
     {
-        countdownText.text = "00:00";
+        UpdateCountdownText("00:00");
         isGameStarted = false;
         OnGameOver?.Invoke(); // Olayı tetikleyin
+    }
+
+    [PunRPC]
+    private void UpdateCountdownText(string text)
+    {
+        countdownText.text = text;
+    }
+
+    public override void OnMasterClientSwitched(Player newMasterClient)
+    {
+        if (PhotonNetwork.IsMasterClient && !isGameStarted)
+        {
+            StartCountdown();
+        }
     }
 }

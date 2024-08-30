@@ -1,6 +1,7 @@
 using UnityEngine;
+using Photon.Pun;
 
-public class SpikeTrap : MonoBehaviour
+public class SpikeTrap : MonoBehaviourPun, IPunObservable
 {
     public float riseHeight = 2f; // Býçaklarýn yukarý çýkacaðý mesafe
     public float riseSpeed = 2f; // Býçaklarýn yukarý çýkma hýzý
@@ -12,12 +13,28 @@ public class SpikeTrap : MonoBehaviour
     private bool isRising = true;
     private bool isWaiting = false;
 
+    private Vector3 networkPosition;
+
     void Start()
     {
         startPos = transform.position; // Baþlangýç pozisyonunu kaydet
+        networkPosition = transform.position;
     }
 
     void Update()
+    {
+        if (photonView.IsMine)
+        {
+            HandleMovement();
+        }
+        else
+        {
+            // Pozisyonu senkronize et
+            transform.position = Vector3.Lerp(transform.position, networkPosition, Time.deltaTime * riseSpeed);
+        }
+    }
+
+    private void HandleMovement()
     {
         if (isRising)
         {
@@ -52,5 +69,20 @@ public class SpikeTrap : MonoBehaviour
     {
         isWaiting = false; // Bekleme durumunu bitir, tekrar yukarý çýkmaya baþla
         isRising = true;
+    }
+
+    // Photon'un senkronizasyon metodunu kullanarak pozisyonlarý güncelleriz
+    public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+    {
+        if (stream.IsWriting)
+        {
+            // Eðer bu objenin sahibi ise, pozisyon verisini gönder
+            stream.SendNext(transform.position);
+        }
+        else
+        {
+            // Eðer bu objenin sahibi deðilse, pozisyon verisini al
+            networkPosition = (Vector3)stream.ReceiveNext();
+        }
     }
 }

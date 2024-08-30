@@ -106,43 +106,46 @@ namespace UnityStandardAssets.ImageEffects
             return cachedCamera.WorldToViewportPoint((worldDist-cachedCamera.nearClipPlane) * cachedCamera.transform.forward + cachedCamera.transform.position).z / (cachedCamera.farClipPlane-cachedCamera.nearClipPlane);
         }
 
-        private void WriteCoc ( RenderTexture fromTo, bool fgDilate) {
+        private void WriteCoc(RenderTexture fromTo, bool fgDilate)
+        {
             dofHdrMaterial.SetTexture("_FgOverlap", null);
 
-            if (nearBlur && fgDilate) {
-
-                int rtW = fromTo.width/2;
-                int rtH = fromTo.height/2;
+            if (nearBlur && fgDilate)
+            {
+                int rtW = fromTo.width / 2;
+                int rtH = fromTo.height / 2;
 
                 // capture fg coc
-                RenderTexture temp2 = RenderTexture.GetTemporary (rtW, rtH, 0, fromTo.format);
-                Graphics.Blit (fromTo, temp2, dofHdrMaterial, 4);
+                RenderTexture temp2 = RenderTexture.GetTemporary(rtW, rtH, 0, fromTo.format);
+                Graphics.Blit(fromTo, temp2, dofHdrMaterial, 4);
 
                 // special blur
                 float fgAdjustment = internalBlurWidth * foregroundOverlap;
 
-                dofHdrMaterial.SetVector ("_Offsets", new Vector4 (0.0f, fgAdjustment , 0.0f, fgAdjustment));
-                RenderTexture temp1 = RenderTexture.GetTemporary (rtW, rtH, 0, fromTo.format);
-                Graphics.Blit (temp2, temp1, dofHdrMaterial, 2);
+                dofHdrMaterial.SetVector("_Offsets", new Vector4(0.0f, fgAdjustment, 0.0f, fgAdjustment));
+                RenderTexture temp1 = RenderTexture.GetTemporary(rtW, rtH, 0, fromTo.format);
+                Graphics.Blit(temp2, temp1, dofHdrMaterial, 2);
                 RenderTexture.ReleaseTemporary(temp2);
 
-                dofHdrMaterial.SetVector ("_Offsets", new Vector4 (fgAdjustment, 0.0f, 0.0f, fgAdjustment));
-                temp2 = RenderTexture.GetTemporary (rtW, rtH, 0, fromTo.format);
-                Graphics.Blit (temp1, temp2, dofHdrMaterial, 2);
+                dofHdrMaterial.SetVector("_Offsets", new Vector4(fgAdjustment, 0.0f, 0.0f, fgAdjustment));
+                temp2 = RenderTexture.GetTemporary(rtW, rtH, 0, fromTo.format);
+                Graphics.Blit(temp1, temp2, dofHdrMaterial, 2);
                 RenderTexture.ReleaseTemporary(temp1);
 
                 // "merge up" with background COC
                 dofHdrMaterial.SetTexture("_FgOverlap", temp2);
-                fromTo.MarkRestoreExpected(); // only touching alpha channel, RT restore expected
-                Graphics.Blit (fromTo, fromTo, dofHdrMaterial,  13);
+                //fromTo.MarkRestoreExpected(); // only touching alpha channel, RT restore expected
+                Graphics.Blit(fromTo, fromTo, dofHdrMaterial, 13);
                 RenderTexture.ReleaseTemporary(temp2);
             }
-            else {
+            else
+            {
                 // capture full coc in alpha channel (fromTo is not read, but bound to detect screen flip)
-				fromTo.MarkRestoreExpected(); // only touching alpha channel, RT restore expected
-                Graphics.Blit (fromTo, fromTo, dofHdrMaterial,  0);
+                //fromTo.MarkRestoreExpected(); // only touching alpha channel, RT restore expected
+                Graphics.Blit(fromTo, fromTo, dofHdrMaterial, 0);
             }
         }
+
 
         void OnRenderImage (RenderTexture source, RenderTexture destination) {
             if (!CheckResources ()) {

@@ -2,13 +2,13 @@ using UnityEngine;
 
 public class ParticleController : MonoBehaviour
 {
-    public ParticleSystem particleSystem;
+    public ParticleSystem particle;
 
     void Awake()
     {
-        if (particleSystem != null)
+        if (particle != null)
         {
-            particleSystem.Stop(); // Baþlangýçta partikül sistemini durdurur
+            particle.Stop(); 
         }
     }
 }

@@ -23,6 +23,7 @@ public class CharacterManager : MonoBehaviour
 
         ShowCharacterPreview(lastSelectedCharacterIndex);
 
+        int tickIndex = PlayerPrefs.GetInt("SelectedCharacterTickIndex", lastSelectedCharacterIndex);
         UpdateCatalogUI(lastSelectedCharacterIndex);
         CheckAndUpdateLockedImages();
     }
@@ -166,6 +167,7 @@ public class CharacterManager : MonoBehaviour
         PlayerPrefs.SetInt("LastEquippedCharacterIndex", characterIndex);
         selectButton.gameObject.SetActive(false);
         UpdateCatalogUI(characterIndex);
+        PlayerPrefs.Save();
     }
     public void UpdateCatalogUI(int selectedCharacterIndex)
     {
@@ -192,6 +194,9 @@ public class CharacterManager : MonoBehaviour
         {
             Debug.LogWarning("Tick object not found on selected button");
         }
+
+        PlayerPrefs.SetInt("SelectedCharacterTickIndex", selectedCharacterIndex);
+        PlayerPrefs.Save();
     }
     public void OfferFirstCharacterForFree()
     {

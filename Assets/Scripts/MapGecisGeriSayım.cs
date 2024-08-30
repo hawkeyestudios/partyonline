@@ -6,7 +6,7 @@ using UnityEngine.UI;
 using Photon.Pun;
 using Photon.Realtime;
 
-public class MapGecisGeriSayim : MonoBehaviour
+public class MapGecisGeriSayim : MonoBehaviourPunCallbacks
 {
     public Text countdownText;
     private float timeRemaining = 15f;
@@ -30,7 +30,7 @@ public class MapGecisGeriSayim : MonoBehaviour
             timeRemaining -= Time.deltaTime;
             UpdateCountdownText();
         }
-        else if (!hasLoaded)
+        else if (!hasLoaded && PhotonNetwork.IsMasterClient)
         {
             StartCoroutine(NextSceneLoading());
             hasLoaded = true;
@@ -47,26 +47,40 @@ public class MapGecisGeriSayim : MonoBehaviour
         string nextMap = GetRandomUnvisitedMap();
         if (!string.IsNullOrEmpty(nextMap))
         {
-            int mapIndex = System.Array.IndexOf(mapNames, nextMap);
-
-            if (mapIndex >= 0 && mapIndex < loadingPanels.Count)
-            {
-                loadingPanels[mapIndex].SetActive(true);
-            }
-
-            yield return new WaitForSeconds(3f);
-
-            AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(nextMap);
-
-            while (!asyncLoad.isDone)
-            {
-                yield return null;
-            }
+            photonView.RPC("LoadMapForAllPlayers", RpcTarget.All, nextMap);
         }
         else
         {
             ClearVisitedMapRecords();
             SceneManager.LoadScene(mainMenu);
+        }
+
+        yield break;
+    }
+
+
+    [PunRPC]
+    void LoadMapForAllPlayers(string mapName)
+    {
+        int mapIndex = System.Array.IndexOf(mapNames, mapName);
+
+        if (mapIndex >= 0 && mapIndex < loadingPanels.Count)
+        {
+            loadingPanels[mapIndex].SetActive(true);
+        }
+
+        StartCoroutine(LoadMapAsync(mapName));
+    }
+
+    IEnumerator LoadMapAsync(string mapName)
+    {
+        yield return new WaitForSeconds(3f);
+
+        AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(mapName);
+
+        while (!asyncLoad.isDone)
+        {
+            yield return null;
         }
     }
 

@@ -3,19 +3,15 @@ using Photon.Pun;
 using Photon.Realtime;
 using UnityEngine.UI;
 using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography.X509Certificates;
 using System.Collections;
 
 public class GhostManager : MonoBehaviourPunCallbacks
 {
     public Transform[] spawnPoints;
     public Image[] profileImages;
-    //ScoreSystem
+    // ScoreSystem
     public Text[] playerScoreTexts;
-    public float scoreIncrement = 4f;
-    public Image[] scoreImages;
-    public Text[] scoreNames;
+    public float scoreIncrement = 1f;
 
     public Text[] nickNames;
     public GameObject gameOverPanel;
@@ -30,14 +26,12 @@ public class GhostManager : MonoBehaviourPunCallbacks
 
     private void Start()
     {
+        ResetPlayerScores();
         gameOverPanel.SetActive(false);
         SpawnPlayer();
+        GeriSayým.OnGameOver += GameOver_RPC;
         SetPlayerProfileImage();
-        GeriSayým.OnGameOver += GameOver;
         geriSayým.StartCountdown();
-
-        scoreImages = profileImages;
-        scoreNames = nickNames;
 
         StartCoroutine(StartScoreCountingAfterDelay(10f));
     }
@@ -46,39 +40,49 @@ public class GhostManager : MonoBehaviourPunCallbacks
     {
         yield return new WaitForSeconds(delay);
         scoreCountingStarted = true;
+        StartCoroutine(UpdateScores());
     }
-
-    private void Update()
+    private IEnumerator UpdateScores()
     {
-        if (!raceFinished && scoreCountingStarted)
+        while (!raceFinished && PhotonNetwork.IsMasterClient)
         {
-            UpdateScores();
-            UpdateScoreUI();
-        }
-    }
-
-    private void UpdateScores()
-    {
-        foreach (Player player in PhotonNetwork.PlayerList)
-        {
-            if (!frozenPlayers.Contains(player))
+            foreach (Player player in PhotonNetwork.PlayerList)
             {
-                float currentScore = GetPlayerScore(player);
-                currentScore += scoreIncrement * Time.deltaTime;
-                SetPlayerScore(player, currentScore);
+                if (!frozenPlayers.Contains(player))
+                {
+                    for (int i = 0; i < 10; i++)
+                    {
+                        float currentScore = GetPlayerScore(player);
+                        currentScore += 1f;
+                        SetPlayerScore(player, currentScore);
+                    }
+                }
             }
+
+            photonView.RPC("UpdateScoreUI_RPC", RpcTarget.All);
+
+            yield return new WaitForSeconds(0.1f);
         }
     }
 
-    private void UpdateScoreUI()
+    [PunRPC]
+    private void UpdateScoreUI_RPC()
     {
         for (int i = 0; i < PhotonNetwork.PlayerList.Length; i++)
         {
             Player player = PhotonNetwork.PlayerList[i];
-            playerScoreTexts[i].text = player.NickName + ": " + GetPlayerScore(player).ToString("F1"); // Skoru UI'ye güncelle
+            playerScoreTexts[i].text = GetPlayerScore(player).ToString("F0");
         }
     }
+    private void ResetPlayerScores()
+    {
+        foreach (Player player in PhotonNetwork.PlayerList)
+        {
+            SetPlayerScore(player, 0f);
+        }
 
+        photonView.RPC("UpdateScoreUI_RPC", RpcTarget.All);
+    }
     private float GetPlayerScore(Player player)
     {
         if (player.CustomProperties.TryGetValue("PlayerScore", out object score))
@@ -99,37 +103,37 @@ public class GhostManager : MonoBehaviourPunCallbacks
 
     private void SpawnPlayer()
     {
-            Player localPlayer = PhotonNetwork.LocalPlayer;
+        Player localPlayer = PhotonNetwork.LocalPlayer;
 
-            int spawnPointIndex = localPlayer.ActorNumber % spawnPoints.Length;
-            Transform spawnPoint = spawnPoints[spawnPointIndex];
-            Vector3 spawnPosition = spawnPoint.position;
-            Quaternion spawnRotation = spawnPoint.rotation;
+        int spawnPointIndex = localPlayer.ActorNumber % spawnPoints.Length;
+        Transform spawnPoint = spawnPoints[spawnPointIndex];
+        Vector3 spawnPosition = spawnPoint.position;
+        Quaternion spawnRotation = spawnPoint.rotation;
 
-            string characterPrefabName = PlayerPrefs.GetString("LastEquippedCharacter", "DefaultCharacter");
+        string characterPrefabName = PlayerPrefs.GetString("LastEquippedCharacter", "DefaultCharacter");
 
-            if (!string.IsNullOrEmpty(characterPrefabName))
+        if (!string.IsNullOrEmpty(characterPrefabName))
+        {
+            GameObject character = PhotonNetwork.Instantiate(characterPrefabName, spawnPosition, spawnRotation);
+
+            if (character != null)
             {
-                GameObject character = PhotonNetwork.Instantiate(characterPrefabName, spawnPosition, spawnRotation);
-
-                if (character != null)
-                {
-                    Debug.Log("Character successfully spawned.");
-                }
-                else
-                {
-                    Debug.LogError("Failed to instantiate character.");
-                }
+                Debug.Log("Character successfully spawned.");
             }
             else
             {
-                Debug.LogError("Character prefab not found in PlayerPrefs.");
+                Debug.LogError("Failed to instantiate character.");
             }
+        }
+        else
+        {
+            Debug.LogError("Character prefab not found in PlayerPrefs.");
+        }
     }
 
     private void SetPlayerProfileImage()
     {
-        string playerImageName = PlayerPrefs.GetString("LastEquippedCharacter", "defaultProfileImage");
+        string playerImageName = PlayerPrefs.GetString("LastEquippedCharacter");
         ExitGames.Client.Photon.Hashtable playerProperties = new ExitGames.Client.Photon.Hashtable();
         playerProperties["profileImage"] = playerImageName;
         PhotonNetwork.LocalPlayer.SetCustomProperties(playerProperties);
@@ -137,32 +141,36 @@ public class GhostManager : MonoBehaviourPunCallbacks
 
     private void OnTriggerEnter(Collider other)
     {
-        if (raceFinished) return;
+        if (raceFinished || !PhotonNetwork.IsMasterClient) return;
 
         if (other.CompareTag("Player"))
         {
-            Player player = other.GetComponent<PhotonView>().Owner;
-
-            if (!frozenPlayers.Contains(player))
+            PhotonView playerPhotonView = other.GetComponent<PhotonView>();
+            if (playerPhotonView != null)
             {
-                frozenPlayers.Add(player); // Oyuncunun puan kazanýmýný durdur
-                UpdateScoreUI(); // Skoru güncelle
-            }
+                Player player = playerPhotonView.Owner;
 
-            if (frozenPlayers.Count == PhotonNetwork.PlayerList.Length)
-            {
-                raceFinished = true;
-                geriSayým.StopAllCoroutines();
-                GameOver();
+                if (!frozenPlayers.Contains(player))
+                {
+                    frozenPlayers.Add(player);
+                    photonView.RPC("UpdateScoreUI_RPC", RpcTarget.All);
+                }
+
+                if (frozenPlayers.Count == PhotonNetwork.PlayerList.Length)
+                {
+                    raceFinished = true;
+                    photonView.RPC("GameOver_RPC", RpcTarget.All);
+                }
             }
         }
     }
 
-    private void GameOver()
+    [PunRPC]
+    private void GameOver_RPC()
     {
         raceFinished = true;
         gameOverPanel.SetActive(true);
-        UpdateGameOverScores(); // GameOverPanel'deki scorelarý güncelle
+        UpdateGameOverScores();
     }
 
     private void UpdateGameOverScores()
@@ -170,7 +178,9 @@ public class GhostManager : MonoBehaviourPunCallbacks
         for (int i = 0; i < PhotonNetwork.PlayerList.Length; i++)
         {
             Player player = PhotonNetwork.PlayerList[i];
-            gameOverScoreTexts[i].text = player.NickName + ": " + GetPlayerScore(player).ToString("F1"); // GameOverPanel'deki Score Text'leri güncelle
+            gameOverScoreTexts[i].text = GetPlayerScore(player).ToString("F0");
+            profileImages[i].sprite = GetProfileSprite(player);
+            nickNames[i].text = player.NickName;
         }
     }
 
@@ -195,6 +205,6 @@ public class GhostManager : MonoBehaviourPunCallbacks
 
     private void OnDestroy()
     {
-        GeriSayým.OnGameOver -= GameOver;
+        GeriSayým.OnGameOver -= GameOver_RPC;
     }
 }

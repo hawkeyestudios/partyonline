@@ -1,7 +1,6 @@
+using UnityEngine;
 using Photon.Pun;
 using System.Collections;
-using UnityEngine;
-using UnityEngine.UI;
 
 public class GhostController : MonoBehaviourPun
 {
@@ -10,25 +9,26 @@ public class GhostController : MonoBehaviourPun
 
     private Transform targetPlayer;
     private bool isWaiting = false;
-    bool isStopped = false;
+    private bool isStopped = false;
+    public ParticleSystem impactParticle;
+    public Animator animator;
+
     void Start()
     {
+        impactParticle.Stop();
         StartCoroutine(WaitForGhost(10));
     }
 
     void Update()
     {
-        if (isWaiting)
-            return;
-
-        if (!photonView.IsMine)
+        if (isWaiting || !photonView.IsMine)
             return;
 
         FindClosestPlayer();
         if (targetPlayer != null && !isStopped)
         {
             RotateTowardsPlayer();
-            MoveTowardsPlayer();  
+            MoveTowardsPlayer();
         }
     }
 
@@ -73,7 +73,7 @@ public class GhostController : MonoBehaviourPun
 
                 if (playerMovement != null)
                 {
-                    playerMovement.StartCoroutine(playerMovement.BecomeGhost()); 
+                    playerMovement.StartCoroutine(playerMovement.BecomeGhost());
                 }
                 else
                 {
@@ -82,13 +82,23 @@ public class GhostController : MonoBehaviourPun
             }
         }
     }
+
     public IEnumerator StopMovementForSeconds(float duration)
     {
         isStopped = true;
+        if (animator != null)
+        {
+            animator.SetTrigger("Impact");
+        }
+        if (impactParticle != null)
+        {
+            impactParticle.Play();
+        }
         yield return new WaitForSeconds(duration);
         isStopped = false;
     }
-    IEnumerator WaitForGhost(int seconds)
+
+    private IEnumerator WaitForGhost(int seconds)
     {
         isWaiting = true;
         yield return new WaitForSeconds(seconds);

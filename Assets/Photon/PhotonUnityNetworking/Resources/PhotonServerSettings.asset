@@ -68,6 +68,18 @@ MonoBehaviour:
   - PlayerFinished
   - SetCrown
   - StartCountdown
+  - LoadMapForAllPlayers
+  - LoadSelectedMapForAll
+  - UpdateCountdownText
+  - GameOver_RPC
+  - UpdatePlayerUI_RPC
+  - UpdateScoreUI_RPC
+  - SetCrownHolder_RPC
+  - OnAnimationComplete_RPC
+  - StartAnimation_RPC
+  - StartGame_RPC
+  - DisplayLoadingPanel
+  - UpdateCrownPosition_RPC
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

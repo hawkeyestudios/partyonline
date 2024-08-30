@@ -12,7 +12,7 @@ public class BarrelManager : MonoBehaviourPunCallbacks
 
     // Score system
     public Text[] playerScoreTexts;
-    public float scoreIncrement = 4f;
+    public float scoreIncrement = 1f;
 
     public Text[] nickNames;
     public GameObject gameOverPanel;
@@ -28,10 +28,11 @@ public class BarrelManager : MonoBehaviourPunCallbacks
 
     private void Start()
     {
+        ResetPlayerScores();
         gameOverPanel.SetActive(false);
         SpawnPlayer();
         SetPlayerProfileImage();
-        GeriSayým.OnGameOver += GameOver;
+        GeriSayým.OnGameOver += GameOver_RPC;
         geriSayým.StartCountdown();
 
         StartCoroutine(StartScoreCountingAfterDelay(10f));
@@ -41,37 +42,50 @@ public class BarrelManager : MonoBehaviourPunCallbacks
     {
         yield return new WaitForSeconds(delay);
         scoreCountingStarted = true;
+        StartCoroutine(UpdateScores());
     }
 
-    private void Update()
+    private IEnumerator UpdateScores()
     {
-        if (!raceFinished && scoreCountingStarted)
+        while (!raceFinished && PhotonNetwork.IsMasterClient)
         {
-            UpdateScores();
-            UpdateScoreUI();
-        }
-    }
-
-    private void UpdateScores()
-    {
-        foreach (Player player in PhotonNetwork.PlayerList)
-        {
-            if (!frozenPlayers.Contains(player))
+            foreach (Player player in PhotonNetwork.PlayerList)
             {
-                float currentScore = GetPlayerScore(player);
-                currentScore += scoreIncrement * Time.deltaTime;
-                SetPlayerScore(player, currentScore);
+                if (!frozenPlayers.Contains(player))
+                {
+                    for (int i = 0; i < 10; i++)
+                    {
+                        float currentScore = GetPlayerScore(player);
+                        currentScore += 1f; 
+                        SetPlayerScore(player, currentScore);
+                    }
+                }
             }
+
+            photonView.RPC("UpdateScoreUI_RPC", RpcTarget.All);
+
+            yield return new WaitForSeconds(0.1f);
         }
     }
 
-    private void UpdateScoreUI()
+
+    [PunRPC]
+    private void UpdateScoreUI_RPC()
     {
         for (int i = 0; i < PhotonNetwork.PlayerList.Length; i++)
         {
             Player player = PhotonNetwork.PlayerList[i];
-            playerScoreTexts[i].text = player.NickName + ": " + GetPlayerScore(player).ToString("F1");
+            playerScoreTexts[i].text = GetPlayerScore(player).ToString("F0");
         }
+    }
+    private void ResetPlayerScores()
+    {
+        foreach (Player player in PhotonNetwork.PlayerList)
+        {
+            SetPlayerScore(player, 0f);
+        }
+
+        photonView.RPC("UpdateScoreUI_RPC", RpcTarget.All);
     }
 
     private float GetPlayerScore(Player player)
@@ -97,49 +111,65 @@ public class BarrelManager : MonoBehaviourPunCallbacks
         if (!frozenPlayers.Contains(player))
         {
             frozenPlayers.Add(player);
-            UpdateScoreUI();
+            photonView.RPC("UpdateScoreUI_RPC", RpcTarget.All);
+
+            CheckForGameOver();
         }
     }
-
+    private void CheckForGameOver()
+    {
+        if (frozenPlayers.Count == PhotonNetwork.PlayerList.Length)
+        {
+            StartCoroutine(DelayedGameOver());
+        }
+    }
+    private IEnumerator DelayedGameOver()
+    {
+        yield return new WaitForSeconds(2f);
+        photonView.RPC("GameOver_RPC", RpcTarget.All);
+    }
     private void SpawnPlayer()
     {
-            Player localPlayer = PhotonNetwork.LocalPlayer;
+        Player localPlayer = PhotonNetwork.LocalPlayer;
 
-            int spawnPointIndex = localPlayer.ActorNumber % spawnPoints.Length;
-            Transform spawnPoint = spawnPoints[spawnPointIndex];
-            Vector3 spawnPosition = spawnPoint.position;
-            Quaternion spawnRotation = spawnPoint.rotation;
+        int spawnPointIndex = localPlayer.ActorNumber % spawnPoints.Length;
+        Transform spawnPoint = spawnPoints[spawnPointIndex];
+        Vector3 spawnPosition = spawnPoint.position;
+        Quaternion spawnRotation = spawnPoint.rotation;
 
-            string characterPrefabName = PlayerPrefs.GetString("LastEquippedCharacter", "DefaultCharacter");
+        string characterPrefabName = PlayerPrefs.GetString("LastEquippedCharacter", "DefaultCharacter");
 
-            if (!string.IsNullOrEmpty(characterPrefabName))
+        if (!string.IsNullOrEmpty(characterPrefabName))
+        {
+            GameObject character = PhotonNetwork.Instantiate(characterPrefabName, spawnPosition, spawnRotation);
+
+            if (character != null)
             {
-                GameObject character = PhotonNetwork.Instantiate(characterPrefabName, spawnPosition, spawnRotation);
-
-                if (character != null)
-                {
-                    Debug.Log("Character successfully spawned.");
-                }
-                else
-                {
-                    Debug.LogError("Failed to instantiate character.");
-                }
+                Debug.Log("Character successfully spawned.");
             }
             else
             {
-                Debug.LogError("Character prefab not found in PlayerPrefs.");
+                Debug.LogError("Failed to instantiate character.");
             }
+        }
+        else
+        {
+            Debug.LogError("Character prefab not found in PlayerPrefs.");
+        }
     }
 
     private void SetPlayerProfileImage()
     {
-        string playerImageName = PlayerPrefs.GetString("LastEquippedCharacter", "defaultProfileImage");
-        ExitGames.Client.Photon.Hashtable playerProperties = new ExitGames.Client.Photon.Hashtable();
-        playerProperties["profileImage"] = playerImageName;
+        string playerImageName = PlayerPrefs.GetString("LastEquippedCharacter");
+        ExitGames.Client.Photon.Hashtable playerProperties = new ExitGames.Client.Photon.Hashtable
+        {
+            { "profileImage", playerImageName }
+        };
         PhotonNetwork.LocalPlayer.SetCustomProperties(playerProperties);
     }
 
-    private void GameOver()
+    [PunRPC]
+    private void GameOver_RPC()
     {
         raceFinished = true;
         gameOverPanel.SetActive(true);
@@ -151,7 +181,7 @@ public class BarrelManager : MonoBehaviourPunCallbacks
         for (int i = 0; i < PhotonNetwork.PlayerList.Length; i++)
         {
             Player player = PhotonNetwork.PlayerList[i];
-            gameOverScoreTexts[i].text = player.NickName + ": " + GetPlayerScore(player).ToString("F1");
+            gameOverScoreTexts[i].text = GetPlayerScore(player).ToString("F0");
             gameOverProfileImages[i].sprite = GetProfileSprite(player);
             gameOverNickNames[i].text = player.NickName;
         }
@@ -176,8 +206,20 @@ public class BarrelManager : MonoBehaviourPunCallbacks
         }
     }
 
+    public override void OnMasterClientSwitched(Player newMasterClient)
+    {
+        Debug.Log("New MasterClient assigned: " + newMasterClient.NickName);
+
+        // Eðer oyun henüz bitmediyse, yeni MasterClient görevleri devralýr
+        if (!raceFinished && PhotonNetwork.LocalPlayer.IsMasterClient)
+        {
+            Debug.Log("I am the new MasterClient, taking over responsibilities.");
+            StartCoroutine(StartScoreCountingAfterDelay(0f));
+        }
+    }
+
     private void OnDestroy()
     {
-        GeriSayým.OnGameOver -= GameOver;
+        GeriSayým.OnGameOver -= GameOver_RPC;
     }
 }

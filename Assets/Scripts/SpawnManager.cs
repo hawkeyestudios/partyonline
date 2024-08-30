@@ -22,44 +22,43 @@ public class SpawnManager : MonoBehaviourPunCallbacks
         SpawnPlayer();
         SetPlayerProfileImage();
 
-        GeriSayým.OnGameOver += GameOver;
+        GeriSayým.OnGameOver += GameOver_RPC;
         geriSayým.StartCountdown();
     }
 
     private void SpawnPlayer()
     {
-            Player localPlayer = PhotonNetwork.LocalPlayer;
+        Player localPlayer = PhotonNetwork.LocalPlayer;
 
-            int spawnPointIndex = localPlayer.ActorNumber % spawnPoints.Length;
-            Transform spawnPoint = spawnPoints[spawnPointIndex];
-            Vector3 spawnPosition = spawnPoint.position;
-            Quaternion spawnRotation = spawnPoint.rotation;
-            
-            string characterPrefabName = PlayerPrefs.GetString("LastEquippedCharacter", "DefaultCharacter");
+        int spawnPointIndex = localPlayer.ActorNumber % spawnPoints.Length;
+        Transform spawnPoint = spawnPoints[spawnPointIndex];
+        Vector3 spawnPosition = spawnPoint.position;
+        Quaternion spawnRotation = spawnPoint.rotation;
 
-            if (!string.IsNullOrEmpty(characterPrefabName))
+        string characterPrefabName = PlayerPrefs.GetString("LastEquippedCharacter", "DefaultCharacter");
+
+        if (!string.IsNullOrEmpty(characterPrefabName))
+        {
+            GameObject character = PhotonNetwork.Instantiate(characterPrefabName, spawnPosition, spawnRotation);
+
+            if (character != null)
             {
-                GameObject character = PhotonNetwork.Instantiate(characterPrefabName, spawnPosition, spawnRotation);
-
-                if (character != null)
-                {
-                    Debug.Log("Character successfully spawned.");
-                }
-                else
-                {
-                    Debug.LogError("Failed to instantiate character.");
-                }
+                Debug.Log("Character successfully spawned.");
             }
             else
             {
-                Debug.LogError("Character prefab not found in PlayerPrefs.");
+                Debug.LogError("Failed to instantiate character.");
             }
+        }
+        else
+        {
+            Debug.LogError("Character prefab not found in PlayerPrefs.");
+        }
     }
-
 
     private void SetPlayerProfileImage()
     {
-        string playerImageName = PlayerPrefs.GetString("LastEquippedCharacter", "defaultProfileImage");
+        string playerImageName = PlayerPrefs.GetString("LastEquippedCharacter");
         ExitGames.Client.Photon.Hashtable playerProperties = new ExitGames.Client.Photon.Hashtable();
         playerProperties["profileImage"] = playerImageName;
         PhotonNetwork.LocalPlayer.SetCustomProperties(playerProperties);
@@ -67,8 +66,7 @@ public class SpawnManager : MonoBehaviourPunCallbacks
 
     private void OnTriggerEnter(Collider other)
     {
-        if (raceFinished)
-            return;
+        if (raceFinished || !PhotonNetwork.IsMasterClient) return;
 
         if (other.CompareTag("Player"))
         {
@@ -78,36 +76,39 @@ public class SpawnManager : MonoBehaviourPunCallbacks
             {
                 finishOrder.Add(player);
 
-                UpdatePlayerUI(player, true);  // Finish çizgisini geçen oyuncular için true gönder
+                photonView.RPC("UpdatePlayerUI_RPC", RpcTarget.All, player.ActorNumber, true);
+
                 if (finishOrder.Count == PhotonNetwork.PlayerList.Length)
                 {
                     raceFinished = true;
-                    geriSayým.StopAllCoroutines();
-                    GameOver();
+                    photonView.RPC("GameOver_RPC", RpcTarget.All);
                 }
             }
         }
     }
 
-    private void UpdatePlayerUI(Player player, bool passedFinish)
+    [PunRPC]
+    private void UpdatePlayerUI_RPC(int playerActorNumber, bool passedFinish)
     {
+        Player player = PhotonNetwork.CurrentRoom.GetPlayer(playerActorNumber);
+        if (player == null) return;
+
         int playerIndex = finishOrder.IndexOf(player);
         if (playerIndex >= 0 && playerIndex < profileImages.Length)
         {
             profileImages[playerIndex].sprite = GetProfileSprite(player);
 
-            int reward = passedFinish ? Mathf.Max(1000 - (playerIndex * 250), 0) : 0; 
+            int reward = passedFinish ? Mathf.Max(1000 - (playerIndex * 250), 0) : 0;
 
             rewardTexts[playerIndex].text = $"{reward}";
-            if (reward > 0)
-            {
-                CoinManager.Instance.AddCoins(reward);
-            }
+            //if (reward > 0 && player == PhotonNetwork.LocalPlayer)
+            //{
+                //CoinManager.Instance.AddCoins(reward);
+            //}
 
             nickNames[playerIndex].text = player.NickName;
         }
     }
-
     private Sprite GetProfileSprite(Player player)
     {
         if (player.CustomProperties.TryGetValue("profileImage", out object playerImageName))
@@ -127,7 +128,8 @@ public class SpawnManager : MonoBehaviourPunCallbacks
         }
     }
 
-    private void GameOver()
+    [PunRPC]
+    private void GameOver_RPC()
     {
         raceFinished = true;
         gameOverPanel.SetActive(true);
@@ -137,13 +139,12 @@ public class SpawnManager : MonoBehaviourPunCallbacks
             if (!finishOrder.Contains(player))
             {
                 finishOrder.Add(player);
-                UpdatePlayerUI(player, false); 
+                UpdatePlayerUI_RPC(player.ActorNumber, false);
             }
         }
     }
-
     private void OnDestroy()
     {
-        GeriSayým.OnGameOver -= GameOver;
+        GeriSayým.OnGameOver -= GameOver_RPC;
     }
 }

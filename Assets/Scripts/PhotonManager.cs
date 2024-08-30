@@ -24,8 +24,9 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     private int countdownTime = 10; 
     private Coroutine countdownCoroutine;
     private bool isCountdownActive = false;
-    private string[] mapNames = { "TrapPG", "GhostPG", "TntPG", "CrownPG" };
+    private string[] mapNames = { "TrapPG", "GhostPG", "TntPG" };
     public List<GameObject> loadingPanels;
+    private string mainMenu = "MainMenu";
     private void Start()
     {
         PhotonNetwork.AutomaticallySyncScene = true;
@@ -185,7 +186,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     {
         Debug.Log("Joined Lobby.");
 
-        RoomOptions roomOptions = new RoomOptions { MaxPlayers = 2 };
+        RoomOptions roomOptions = new RoomOptions { MaxPlayers = 1 }; //Lobi kiþi sayýsý
         PhotonNetwork.JoinOrCreateRoom("LobbyRoom", roomOptions, TypedLobby.Default);
     }
 
@@ -266,9 +267,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
             countdownTime--;
         }
 
-        photonView.RPC("ShowLoadingPanel", RpcTarget.All);
-        yield return new WaitForSeconds(3f);
-        photonView.RPC("StartGame", RpcTarget.All);
+        StartGame();
     }
 
     [PunRPC]
@@ -298,35 +297,88 @@ public class PhotonManager : MonoBehaviourPunCallbacks
             statusText.text = "Waiting for more players...";
         }
     }
-
-    [PunRPC]
-    void ShowLoadingPanel()
+    void StartGame()
     {
-        // Random harita seç
-        string randomMap = mapNames[Random.Range(0, mapNames.Length)];
-        int mapIndex = System.Array.IndexOf(mapNames, randomMap);
+        if (PhotonNetwork.IsMasterClient)
+        {
+            StartCoroutine(NextSceneLoading());
+        }
+    }
+
+    IEnumerator NextSceneLoading()
+    {
+        string nextMap = GetRandomUnvisitedMap();
+        if (!string.IsNullOrEmpty(nextMap))
+        {
+            photonView.RPC("LoadMapForAllPlayers", RpcTarget.All, nextMap);
+        }
+        else
+        {
+            ClearVisitedMapRecords();
+            SceneManager.LoadScene(mainMenu);
+        }
+
+        yield break;
+    }
+    [PunRPC]
+    void LoadMapForAllPlayers(string mapName)
+    {
+        int mapIndex = System.Array.IndexOf(mapNames, mapName);
 
         if (mapIndex >= 0 && mapIndex < loadingPanels.Count)
         {
             loadingPanels[mapIndex].SetActive(true);
         }
-        StartCoroutine(LoadSelectedMap(randomMap));
+
+        StartCoroutine(LoadMapAsync(mapName));
     }
 
-    IEnumerator LoadSelectedMap(string mapName)
+    IEnumerator LoadMapAsync(string mapName)
     {
         yield return new WaitForSeconds(3f);
-        PhotonNetwork.LoadLevel(mapName);
-    }
 
-    [PunRPC]
-    void StartGame()
+        AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(mapName);
+
+        while (!asyncLoad.isDone)
+        {
+            yield return null;
+        }
+    }
+    string GetRandomUnvisitedMap()
     {
-        string randomMap = mapNames[Random.Range(0, mapNames.Length)];
-        PhotonNetwork.LoadLevel(randomMap);
+        List<string> unvisitedMaps = new List<string>();
+
+        foreach (string mapName in mapNames)
+        {
+            if (PlayerPrefs.GetInt(mapName, 0) == 0)
+            {
+                unvisitedMaps.Add(mapName);
+            }
+        }
+
+        if (unvisitedMaps.Count > 0)
+        {
+            int randomIndex = Random.Range(0, unvisitedMaps.Count);
+            return unvisitedMaps[randomIndex];
+        }
+        else
+        {
+            return null;
+        }
     }
+    void ClearVisitedMapRecords()
+    {
+        foreach (string mapName in mapNames)
+        {
+            PlayerPrefs.DeleteKey(mapName);
+        }
+        PlayerPrefs.Save();
 
-
+        if (PhotonNetwork.InRoom)
+        {
+            PhotonNetwork.LeaveRoom();
+        }
+    }
     public override void OnMasterClientSwitched(Player newMasterClient)
     {
         Debug.Log($"New Master Client: {newMasterClient.NickName}");

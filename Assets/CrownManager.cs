@@ -13,7 +13,7 @@ public class CrownManager : MonoBehaviourPunCallbacks
 
     // Score system
     public Text[] playerScoreTexts;
-    public float scoreIncrement = 4f;
+    public float scoreIncrement = 1f;
 
     public Text[] nickNames;
     public GameObject gameOverPanel;
@@ -26,54 +26,72 @@ public class CrownManager : MonoBehaviourPunCallbacks
     private Player currentCrownHolder = null;
     private Dictionary<Player, Transform> playerTransforms = new Dictionary<Player, Transform>();
     private bool raceFinished = false;
-    private bool scoreCountingStarted = false;
 
     private void Start()
     {
+        ResetPlayerScores();
+        Debug.Log("Start() called");
         gameOverPanel.SetActive(false);
         SpawnPlayer();
         SetPlayerProfileImage();
-        GeriSayým.OnGameOver += GameOver;
+        GeriSayým.OnGameOver += GameOver_RPC;
         geriSayým.StartCountdown();
 
         StartCoroutine(StartScoreCountingAfterDelay(10f));
+        StartCoroutine(UpdateScores());
     }
 
     private IEnumerator StartScoreCountingAfterDelay(float delay)
     {
+        Debug.Log("Score counting will start after delay: " + delay + " seconds.");
         yield return new WaitForSeconds(delay);
-        scoreCountingStarted = true;
+        StartCoroutine(UpdateScores());
     }
 
     private void Update()
     {
-        if (!raceFinished && scoreCountingStarted)
+        photonView.RPC("UpdateCrownPosition_RPC", RpcTarget.All);
+    }
+
+    private IEnumerator UpdateScores()
+    {
+        while (!raceFinished && PhotonNetwork.IsMasterClient)
         {
-            UpdateScores();
-            UpdateScoreUI();
-            UpdateCrownPosition();
+            if (currentCrownHolder != null)
+            {
+                for (int i = 0; i < 10; i++)
+                {
+                    float currentScore = GetPlayerScore(currentCrownHolder);
+                    currentScore += 1f;  
+                    SetPlayerScore(currentCrownHolder, currentScore); 
+
+                } 
+                photonView.RPC("UpdateScoreUI_RPC", RpcTarget.All);
+            }
+            yield return new WaitForSeconds(0.1f); 
         }
     }
 
-    private void UpdateScores()
+    [PunRPC]
+    private void UpdateScoreUI_RPC()
     {
-        if (currentCrownHolder != null)
-        {
-            float currentScore = GetPlayerScore(currentCrownHolder);
-            currentScore += scoreIncrement * Time.deltaTime;
-            SetPlayerScore(currentCrownHolder, currentScore);
-        }
-    }
-
-    private void UpdateScoreUI()
-    {
+        Debug.Log("Updating UI for player scores.");
         for (int i = 0; i < PhotonNetwork.PlayerList.Length; i++)
         {
             Player player = PhotonNetwork.PlayerList[i];
-            playerScoreTexts[i].text = player.NickName + ": " + GetPlayerScore(player).ToString("F1");
+            playerScoreTexts[i].text = GetPlayerScore(player).ToString("F0");
+            Debug.Log("Score updated for " + player.NickName + ": " + playerScoreTexts[i].text);
         }
     }
+    private void ResetPlayerScores()
+    {
+        foreach (Player player in PhotonNetwork.PlayerList)
+        {
+            SetPlayerScore(player, 0f);
+        }
 
+        photonView.RPC("UpdateScoreUI_RPC", RpcTarget.All);
+    }
     private float GetPlayerScore(Player player)
     {
         if (player.CustomProperties.TryGetValue("PlayerScore", out object score))
@@ -85,6 +103,7 @@ public class CrownManager : MonoBehaviourPunCallbacks
 
     private void SetPlayerScore(Player player, float score)
     {
+        Debug.Log("Setting score for " + player.NickName + " | Score: " + score);
         ExitGames.Client.Photon.Hashtable playerProperties = new ExitGames.Client.Photon.Hashtable
         {
             { "PlayerScore", score }
@@ -94,59 +113,78 @@ public class CrownManager : MonoBehaviourPunCallbacks
 
     private void SpawnPlayer()
     {
-            Player localPlayer = PhotonNetwork.LocalPlayer;
+        Debug.Log("Spawning player...");
+        Player localPlayer = PhotonNetwork.LocalPlayer;
 
-            int spawnPointIndex = localPlayer.ActorNumber % spawnPoints.Length;
-            Transform spawnPoint = spawnPoints[spawnPointIndex];
-            Vector3 spawnPosition = spawnPoint.position;
-            Quaternion spawnRotation = spawnPoint.rotation;
+        int spawnPointIndex = localPlayer.ActorNumber % spawnPoints.Length;
+        Transform spawnPoint = spawnPoints[spawnPointIndex];
+        Vector3 spawnPosition = spawnPoint.position;
+        Quaternion spawnRotation = spawnPoint.rotation;
 
-            string characterPrefabName = PlayerPrefs.GetString("LastEquippedCharacter", "DefaultCharacter");
+        string characterPrefabName = PlayerPrefs.GetString("LastEquippedCharacter", "DefaultCharacter");
 
-            if (!string.IsNullOrEmpty(characterPrefabName))
+        if (!string.IsNullOrEmpty(characterPrefabName))
+        {
+            GameObject character = PhotonNetwork.Instantiate(characterPrefabName, spawnPosition, spawnRotation);
+            playerTransforms[localPlayer] = character.transform;
+
+            if (character != null)
             {
-                GameObject character = PhotonNetwork.Instantiate(characterPrefabName, spawnPosition, spawnRotation);
-                playerTransforms[localPlayer] = character.transform;
-
-                if (character != null)
-                {
-                    Debug.Log("Character successfully spawned.");
-                }
-                else
-                {
-                    Debug.LogError("Failed to instantiate character.");
-                }
+                Debug.Log("Character successfully spawned for player: " + localPlayer.NickName);
             }
             else
             {
-                Debug.LogError("Character prefab not found in PlayerPrefs.");
+                Debug.LogError("Failed to instantiate character.");
             }
+        }
+        else
+        {
+            Debug.LogError("Character prefab not found in PlayerPrefs.");
+        }
     }
 
     private void SetPlayerProfileImage()
     {
-        string playerImageName = PlayerPrefs.GetString("LastEquippedCharacter", "defaultProfileImage");
-        ExitGames.Client.Photon.Hashtable playerProperties = new ExitGames.Client.Photon.Hashtable();
-        playerProperties["profileImage"] = playerImageName;
+        string playerImageName = PlayerPrefs.GetString("LastEquippedCharacter");
+        ExitGames.Client.Photon.Hashtable playerProperties = new ExitGames.Client.Photon.Hashtable
+        {
+            { "profileImage", playerImageName }
+        };
         PhotonNetwork.LocalPlayer.SetCustomProperties(playerProperties);
+        Debug.Log("Profile image set for player: " + PhotonNetwork.LocalPlayer.NickName);
     }
 
-    private void UpdateCrownPosition()
+    [PunRPC]
+    private void UpdateCrownPosition_RPC()
     {
         if (currentCrownHolder != null && playerTransforms.ContainsKey(currentCrownHolder))
         {
             Transform crownTransform = crownPrefab.transform;
             Transform playerTransform = playerTransforms[currentCrownHolder];
 
-            crownTransform.position = playerTransform.position + new Vector3(0, 2.5f, 0); 
+            crownTransform.position = playerTransform.position + new Vector3(0, 2.5f, 0);
+            Debug.Log("Crown position updated for " + currentCrownHolder.NickName);
         }
     }
 
     public void OnPlayerInteractWithCrown(Player player)
     {
+        Debug.Log(player.NickName + " interacted with the crown.");
         if (currentCrownHolder == null || player != currentCrownHolder)
         {
+            Debug.Log("Crown transferred to " + player.NickName);
+            photonView.RPC("SetCrownHolder_RPC", RpcTarget.All, player.ActorNumber);
+        }
+    }
+
+    [PunRPC]
+    private void SetCrownHolder_RPC(int playerActorNumber)
+    {
+        Player player = PhotonNetwork.CurrentRoom.GetPlayer(playerActorNumber);
+        if (player != null)
+        {
             currentCrownHolder = player;
+            Debug.Log("Crown holder set to " + player.NickName);
         }
     }
 
@@ -154,26 +192,35 @@ public class CrownManager : MonoBehaviourPunCallbacks
     {
         if (other.CompareTag("Player"))
         {
-            Player player = other.GetComponent<PhotonView>().Owner;
-            OnPlayerInteractWithCrown(player);
+            PhotonView playerPhotonView = other.GetComponent<PhotonView>();
+            if (playerPhotonView != null)
+            {
+                Player player = playerPhotonView.Owner;
+                Debug.Log("Player " + player.NickName + " triggered crown interaction.");
+                OnPlayerInteractWithCrown(player);
+            }
         }
     }
 
-    private void GameOver()
+    [PunRPC]
+    private void GameOver_RPC()
     {
         raceFinished = true;
         gameOverPanel.SetActive(true);
+        Debug.Log("Game over. Displaying scores.");
         UpdateGameOverScores();
     }
 
     private void UpdateGameOverScores()
     {
+        Debug.Log("Updating game over scores.");
         for (int i = 0; i < PhotonNetwork.PlayerList.Length; i++)
         {
             Player player = PhotonNetwork.PlayerList[i];
-            gameOverScoreTexts[i].text = player.NickName + ": " + GetPlayerScore(player).ToString("F1");
+            gameOverScoreTexts[i].text = GetPlayerScore(player).ToString("F0");
             gameOverProfileImages[i].sprite = GetProfileSprite(player);
             gameOverNickNames[i].text = player.NickName;
+            Debug.Log("Game over score for " + player.NickName + ": " + gameOverScoreTexts[i].text);
         }
     }
 
@@ -198,6 +245,7 @@ public class CrownManager : MonoBehaviourPunCallbacks
 
     private void OnDestroy()
     {
-        GeriSayým.OnGameOver -= GameOver;
+        GeriSayým.OnGameOver -= GameOver_RPC;
+        Debug.Log("CrownManager destroyed. Cleanup done.");
     }
 }

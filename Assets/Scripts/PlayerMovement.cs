@@ -2,26 +2,27 @@ using UnityEngine;
 using Photon.Pun;
 using UnityEngine.UI;
 using System.Collections;
-using Unity.VisualScripting;
 using UnityEngine.SceneManagement;
-using UnityEngine.EventSystems;
 
 public class PlayerMovement : MonoBehaviour
 {
-    public float moveSpeed = 5f;
-    public float jumpForce = 7f;
+    public float moveSpeed = 3f;
+    public float jumpForce = 12f;
+
     //Speed
     private bool isSpeedBoosted = false;
     private GameObject speedIcon;
     private Image speedYellowBar;
     private Text speedCountdownText;
+
     //Revive
     private bool isRevived = false;
-    private int reviveCount = 1; // Toplanan kalp sayýsý
-    private const int maxReviveCount = 3; // Maksimum kalp sayýsý
+    private int reviveCount = 1;
+    private const int maxReviveCount = 3;
     private GameObject reviveIcon;
     private Text reviveCountdownText;
     private Image[] heartImages = new Image[3];
+
     //Attack
     private GameObject attackButton;
     private Text attackCountText;
@@ -35,6 +36,7 @@ public class PlayerMovement : MonoBehaviour
     private bool isGrounded;
     private bool canAnim = true;
     private bool hasCollided;
+    private bool hasJumped = false;
 
     private PhotonView photonView;
     private Animator animator;
@@ -47,19 +49,29 @@ public class PlayerMovement : MonoBehaviour
     public GameObject ghostPrefab;
     public ParticleSystem stepParticle;
 
-
     private void Start()
     {
         stepParticle.Stop();
+        if (SceneManager.GetActiveScene().name == "CrownPG")
+        {
+            moveSpeed = 6;
+        }
+
+        if (SceneManager.GetActiveScene().name == "TntPG")
+        {
+            jumpForce = 15;
+        }
+
         //Speed Özelliði
         if (SceneManager.GetActiveScene().name == "GhostPG")
         {
             speedIcon = GameObject.Find("Speed");
-           if (speedIcon != null)
-           {
-               speedIcon.SetActive(false);
-           }
-            speedYellowBar = speedIcon.transform.Find("YellowBar")?.GetComponent<Image>();
+
+            if (speedIcon != null)
+            {
+                speedIcon.SetActive(false);
+            }
+            speedYellowBar = speedIcon?.transform.Find("YellowBar")?.GetComponent<Image>();
             if (speedYellowBar == null)
             {
                 Debug.LogError("YellowBar bulunamadý.");
@@ -67,15 +79,15 @@ public class PlayerMovement : MonoBehaviour
 
             //Revive Özelliði
             isRevived = false;
-           reviveIcon = GameObject.Find("Revive");
-           reviveCountdownText = reviveIcon.transform.Find("ReviveCountdown")?.GetComponent<Text>();
-           if (reviveCountdownText == null)
-           {
-               Debug.LogError("CountdownText bulunamadý.");
-           }
-            heartImages[0] = reviveIcon.transform.Find("Heart1").GetComponent<Image>();
-            heartImages[1] = reviveIcon.transform.Find("Heart2").GetComponent<Image>();
-            heartImages[2] = reviveIcon.transform.Find("Heart3").GetComponent<Image>();
+            reviveIcon = GameObject.Find("Revive");
+            reviveCountdownText = reviveIcon?.transform.Find("ReviveCountdown")?.GetComponent<Text>();
+            if (reviveCountdownText == null)
+            {
+                Debug.LogError("CountdownText bulunamadý.");
+            }
+            heartImages[0] = reviveIcon?.transform.Find("Heart1")?.GetComponent<Image>();
+            heartImages[1] = reviveIcon?.transform.Find("Heart2")?.GetComponent<Image>();
+            heartImages[2] = reviveIcon?.transform.Find("Heart3")?.GetComponent<Image>();
 
             heartImages[0].enabled = true;
             heartImages[1].enabled = false;
@@ -86,10 +98,13 @@ public class PlayerMovement : MonoBehaviour
             if (attackButton != null)
             {
                 attackButton.SetActive(false);
-                attackButton.GetComponent<Button>().onClick.AddListener(OnAttackButtonClicked);
+                attackButton.GetComponent<Button>()?.onClick.AddListener(OnAttackButtonClicked);
             }
-            attackCountText = attackButton.transform.Find("AttackCountText")?.GetComponent<Text>();
-            attackCountText.text = attackCount.ToString();
+            attackCountText = attackButton?.transform.Find("AttackCountText")?.GetComponent<Text>();
+            if (attackCountText != null)
+            {
+                attackCountText.text = attackCount.ToString();
+            }
         }
 
         rb = GetComponent<Rigidbody>();
@@ -113,6 +128,7 @@ public class PlayerMovement : MonoBehaviour
         isMovementEnabled = false;
         StartCoroutine(EnableMovementAfterDelay(10f));
     }
+
     IEnumerator EnableMovementAfterDelay(float delay)
     {
         yield return new WaitForSeconds(delay);
@@ -123,53 +139,60 @@ public class PlayerMovement : MonoBehaviour
     {
         if (photonView.IsMine && isMovementEnabled)
         {
-            if (joystick != null)
+            HandleMovement();
+        }
+    }
+
+    private void HandleMovement()
+    {
+        if (joystick != null)
+        {
+            Vector3 moveDirection = new Vector3(joystick.Horizontal(), 0, joystick.Vertical()).normalized;
+
+            if (moveDirection != Vector3.zero)
             {
-                Vector3 moveDirection = new Vector3(joystick.Horizontal(), 0, joystick.Vertical()).normalized;
-
-                if (moveDirection != Vector3.zero)
+                Quaternion toRotation = Quaternion.LookRotation(moveDirection, Vector3.up);
+                transform.rotation = Quaternion.Lerp(transform.rotation, toRotation, Time.deltaTime * 10f);
+                animator.SetBool("Walking", true);
+                if (!stepParticle.isPlaying && isGrounded)
                 {
-                    Quaternion toRotation = Quaternion.LookRotation(moveDirection, Vector3.up);
-                    transform.rotation = Quaternion.Lerp(transform.rotation, toRotation, Time.deltaTime * 10f);
-                    animator.SetBool("Walking", true);
-                    if (!stepParticle.isPlaying && isGrounded)
-                    {
-                        stepParticle.Play();
-                    }
-                }
-                else
-                {
-                    animator.SetBool("Walking", false);
-                    if (!stepParticle.isPlaying)
-                    {
-                        stepParticle.Stop();
-                    }
-                }
-
-                if (rb != null)
-                {
-                    rb.velocity = new Vector3(moveDirection.x * moveSpeed, rb.velocity.y, moveDirection.z * moveSpeed);
-                }
-
-                if (Input.GetButtonDown("Jump") && isGrounded && isMovementEnabled)
-                {
-                    Jump();
-                }
-
-                if (!isGrounded && rb.velocity.y < 0)
-                {
-                    animator.SetBool("Walking", false);
-                    animator.SetBool("isGliding", true);
-                }
-                else
-                {
-                    animator.SetBool("isGliding", false);
+                    stepParticle.Play();
                 }
             }
             else
             {
-                Debug.LogError("Joystick referansý atanmadý.");
+                animator.SetBool("Walking", false);
+                if (!stepParticle.isPlaying)
+                {
+                    stepParticle.Stop();
+                }
             }
+
+            if (rb != null)
+            {
+                rb.velocity = new Vector3(moveDirection.x * moveSpeed, rb.velocity.y, moveDirection.z * moveSpeed);
+            }
+
+            if (Input.GetButtonDown("Jump") && isGrounded && isMovementEnabled)
+            {
+                Jump();
+            }
+
+            if (!isGrounded && rb.velocity.y < 0)
+            {
+                if (!hasJumped) 
+                {
+                    animator.SetBool("isGliding", true);
+                }
+            }
+            else
+            {
+                animator.SetBool("isGliding", false);
+            }
+        }
+        else
+        {
+            Debug.LogError("Joystick referansý atanmadý.");
         }
     }
 
@@ -178,8 +201,8 @@ public class PlayerMovement : MonoBehaviour
         Vector3 currentPosition = transform.position;
         Quaternion currentRotation = transform.rotation;
         canAnim = true;
-        if(canAnim)
-        {      
+        if (canAnim)
+        {
             animator.SetTrigger("Die");
         }
 
@@ -209,8 +232,8 @@ public class PlayerMovement : MonoBehaviour
             Debug.Log("Yeterli kalp yok, yeniden doðma baþarýsýz.");
             yield return new WaitForSeconds(2.2f);
             Destroy(gameObject);
-            // Eðer hiç kalp kalmamýþsa oyuncu artýk yeniden doðamaz.
-            GameObject ghost = PhotonNetwork.Instantiate(ghostPrefab.name, currentPosition, currentRotation);  
+
+            GameObject ghost = PhotonNetwork.Instantiate(ghostPrefab.name, currentPosition, currentRotation);
         }
     }
 
@@ -220,7 +243,8 @@ public class PlayerMovement : MonoBehaviour
 
         rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
         isGrounded = false;
-        if(animator != null)
+        hasJumped = true;
+        if (animator != null)
         {
             animator.SetTrigger("Jump");
         }
@@ -230,14 +254,16 @@ public class PlayerMovement : MonoBehaviour
             stepParticle.Stop();
         }
     }
-    IEnumerator WaitForSeconds(int seconds)
-    {
-        yield return new WaitForSeconds(seconds);
-        isMovementEnabled = true;
-    }
+
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("SpeedOzellik") && !isSpeedBoosted)
+        if (other.CompareTag("Ground") && !isGrounded)
+        {
+            isGrounded = true;
+            hasJumped = false;
+            animator.SetBool("isGliding", false);
+        }
+        else if (other.CompareTag("SpeedOzellik") && !isSpeedBoosted)
         {
             isSpeedBoosted = true;
             moveSpeed *= 2f;
@@ -255,22 +281,23 @@ public class PlayerMovement : MonoBehaviour
             if (reviveCount < maxReviveCount)
             {
                 reviveCount++;
-                heartImages[reviveCount -1].enabled = true;
+                heartImages[reviveCount - 1].enabled = true;
                 Debug.Log("Kalp alýndý, toplam kalp: " + reviveCount);
             }
         }
-        if (other.CompareTag("AttackOzellik"))
+        else if (other.CompareTag("AttackOzellik"))
         {
             attackButton.SetActive(true);
             attackCount++;
-            attackCountText.text = attackCount.ToString(); 
+            attackCountText.text = attackCount.ToString();
         }
     }
+
     private IEnumerator SpeedBoostCountdown(float duration)
     {
         float countdown = duration;
-        float initialFillAmount = speedYellowBar.fillAmount; 
-        float targetFillAmount = 0f; 
+        float initialFillAmount = speedYellowBar.fillAmount;
+        float targetFillAmount = 0f;
         float elapsedTime = 0f;
 
         while (countdown > 0)
@@ -317,6 +344,7 @@ public class PlayerMovement : MonoBehaviour
             }
         }
     }
+
     private void FindClosestGhost()
     {
         GameObject[] ghosts = GameObject.FindGameObjectsWithTag("Finish");
@@ -335,6 +363,7 @@ public class PlayerMovement : MonoBehaviour
 
         targetGhost = closestGhost;
     }
+
     private IEnumerator SendParticleToGhost()
     {
         Vector3 spawnPosition = transform.position + Vector3.up * 1.5f;
@@ -344,11 +373,11 @@ public class PlayerMovement : MonoBehaviour
 
         while (Vector3.Distance(particle.transform.position, targetGhost.position) > 0.1f)
         {
-            if(!particle.isPlaying)
+            if (!particle.isPlaying)
             {
-               particle.Play();
+                particle.Play();
             }
-            
+
             particle.transform.position = Vector3.MoveTowards(particle.transform.position, targetGhost.position, 5f * Time.deltaTime);
             yield return null;
         }
@@ -370,7 +399,7 @@ public class PlayerMovement : MonoBehaviour
             isGrounded = true;
             animator.SetBool("isGliding", false);
         }
-        else if (collision.gameObject.CompareTag("Obstacle") && !hasCollided)
+        else if (collision.gameObject.CompareTag("Obstacle") && !hasCollided)   // TrapPG Map için
         {
             hasCollided = true;
             canAnim = true;
@@ -401,30 +430,73 @@ public class PlayerMovement : MonoBehaviour
                 boomEffect.GetComponent<ParticleSystem>().Play();
             }
 
-            yield return new WaitForSeconds(2.2f);
-            canAnim = false;
-            hasCollided = false;
+            StartCoroutine(RespawnAfterDelay(2.2f));
+        }
+        else if(collision.gameObject.CompareTag("Barrel")) //Barrel Map için
+        {
+            canAnim = true;
+            if (canAnim)
+            {
+                animator.SetTrigger("Die");
+            }
+
+            if (!stepParticle.isPlaying)
+            {
+                stepParticle.Stop();
+            }
+
+            isMovementEnabled = false;
 
             if (photonView.IsMine)
             {
-                // Joystick'i tekrar görünür yap
                 if (joystick != null)
                 {
-                    joystick.gameObject.SetActive(true);
-                    // Joystick handle pozisyonunu sýfýrla
-                    joystick.ResetHandlePosition();
+                    joystick.gameObject.SetActive(false);
                 }
                 if (jumpButton != null)
                 {
-                    jumpButton.gameObject.SetActive(true);
+                    jumpButton.gameObject.SetActive(false);
                 }
+            }
 
-                Respawn();
-                if (!isMovementEnabled)
-                {
-                    isMovementEnabled = true;
-                }
-                    
+            if (boomEffect != null)
+            {
+                boomEffect.GetComponent<ParticleSystem>().Play();
+            }
+
+            if (photonView.IsMine)
+            {
+                BarrelManager barrelManager = FindObjectOfType<BarrelManager>();
+                barrelManager.OnPlayerDeath(photonView.Owner);
+            }
+            yield return new WaitForSeconds(2.2f);
+
+            Destroy(gameObject);
+        }
+    }
+
+    private IEnumerator RespawnAfterDelay(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        canAnim = false;
+        hasCollided = false;
+
+        if (photonView.IsMine)
+        {
+            if (joystick != null)
+            {
+                joystick.gameObject.SetActive(true);
+                joystick.ResetHandlePosition();
+            }
+            if (jumpButton != null)
+            {
+                jumpButton.gameObject.SetActive(true);
+            }
+
+            Respawn();
+            if (!isMovementEnabled)
+            {
+                isMovementEnabled = true;
             }
         }
     }
@@ -444,5 +516,4 @@ public class PlayerMovement : MonoBehaviour
             Jump();
         }
     }
-
 }

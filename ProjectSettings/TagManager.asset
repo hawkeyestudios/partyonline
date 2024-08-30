@@ -12,6 +12,7 @@ TagManager:
   - ReviveOzellik
   - AttackOzellik
   - Items
+  - Barrel
   layers:
   - Default
   - TransparentFX
