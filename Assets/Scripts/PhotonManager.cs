@@ -299,6 +299,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     }
     void StartGame()
     {
+        Debug.Log("StartGame called.");
         if (PhotonNetwork.IsMasterClient)
         {
             StartCoroutine(NextSceneLoading());
@@ -337,12 +338,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     {
         yield return new WaitForSeconds(3f);
 
-        AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(mapName);
-
-        while (!asyncLoad.isDone)
-        {
-            yield return null;
-        }
+        PhotonNetwork.LoadLevel(mapName);
     }
     string GetRandomUnvisitedMap()
     {
