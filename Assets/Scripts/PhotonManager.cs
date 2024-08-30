@@ -186,7 +186,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     {
         Debug.Log("Joined Lobby.");
 
-        RoomOptions roomOptions = new RoomOptions { MaxPlayers = 2 }; //Lobi kiþi sayýsý
+        RoomOptions roomOptions = new RoomOptions { MaxPlayers = 1 }; //Lobi kiþi sayýsý
         PhotonNetwork.JoinOrCreateRoom("LobbyRoom", roomOptions, TypedLobby.Default);
     }
 
@@ -302,6 +302,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         Debug.Log("StartGame called.");
         if (PhotonNetwork.IsMasterClient)
         {
+            Debug.Log("nextsceneayarlandý");
             StartCoroutine(NextSceneLoading());
         }
     }
