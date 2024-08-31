@@ -80,6 +80,7 @@ MonoBehaviour:
   - StartGame_RPC
   - DisplayLoadingPanel
   - UpdateCrownPosition_RPC
+  - ResetCharacterState_RPC
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

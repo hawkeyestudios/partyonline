@@ -111,10 +111,17 @@ public class PlayerMovement : MonoBehaviour
         photonView = GetComponent<PhotonView>();
         animator = GetComponent<Animator>();
 
-        deadPoint = GameObject.Find("DeadPoint").transform;
-        joystick = FindObjectOfType<Joystick>();
-        jumpButton = GameObject.Find("JumpButton").GetComponent<Button>();
+        if (SceneManager.GetActiveScene().name == "TrapPG")
+        {
+            deadPoint = GameObject.Find("DeadPoint").transform;
+        }
 
+        string currentSceneName = SceneManager.GetActiveScene().name;
+        if (currentSceneName != "MainMenu" && currentSceneName != "Customize")
+        {
+            joystick = FindObjectOfType<Joystick>();
+            jumpButton = GameObject.Find("JumpButton").GetComponent<Button>();
+        }
         if (joystick != null)
         {
             joystickHandle = joystick.transform.Find("Handle").GetComponent<RectTransform>();
@@ -304,7 +311,6 @@ public class PlayerMovement : MonoBehaviour
             }
         }
     }
-
     private IEnumerator SpeedBoostCountdown(float duration)
     {
         float countdown = duration;
@@ -411,79 +417,88 @@ public class PlayerMovement : MonoBehaviour
             isGrounded = true;
             animator.SetBool("isGliding", false);
         }
-        else if (collision.gameObject.CompareTag("Obstacle") && !hasCollided)   // TrapPG Map için
+
+        if (SceneManager.GetActiveScene().name == "TrapPG")   // TrapPG Map için
         {
-            hasCollided = true;
-            canAnim = true;
-            if (canAnim)
+            if (collision.gameObject.CompareTag("Obstacle") && !hasCollided)
             {
-                animator.SetTrigger("Die");
-            }
-            if (!stepParticle.isPlaying)
-            {
-                stepParticle.Stop();
-            }
-            isMovementEnabled = false;
-
-            if (photonView.IsMine)
-            {
-                if (joystick != null)
+                hasCollided = true;
+                canAnim = true;
+                if (canAnim)
                 {
-                    joystick.gameObject.SetActive(false);
+                    animator.SetTrigger("Die");
                 }
-                if (jumpButton != null)
+                if (!stepParticle.isPlaying)
                 {
-                    jumpButton.gameObject.SetActive(false);
+                    stepParticle.Stop();
                 }
+                isMovementEnabled = false;
+
+                if (photonView.IsMine)
+                {
+                    if (joystick != null)
+                    {
+                        joystick.gameObject.SetActive(false);
+                    }
+                    if (jumpButton != null)
+                    {
+                        jumpButton.gameObject.SetActive(false);
+                    }
+                }
+
+                if (boomEffect != null)
+                {
+                    boomEffect.GetComponent<ParticleSystem>().Play();
+                }
+
+                StartCoroutine(RespawnAfterDelay(2.2f));
             }
 
-            if (boomEffect != null)
-            {
-                boomEffect.GetComponent<ParticleSystem>().Play();
-            }
-
-            StartCoroutine(RespawnAfterDelay(2.2f));
         }
-        else if(collision.gameObject.CompareTag("Barrel")) //Barrel Map için
+
+        if (SceneManager.GetActiveScene().name == "TntPG") //Barrel Map için
         {
-            canAnim = true;
-            if (canAnim)
+            if (collision.gameObject.CompareTag("Barrel"))
             {
-                animator.SetTrigger("Die");
-            }
-
-            if (!stepParticle.isPlaying)
-            {
-                stepParticle.Stop();
-            }
-
-            isMovementEnabled = false;
-
-            if (photonView.IsMine)
-            {
-                if (joystick != null)
+                canAnim = true;
+                if (canAnim)
                 {
-                    joystick.gameObject.SetActive(false);
+                    animator.SetTrigger("Die");
                 }
-                if (jumpButton != null)
+
+                if (!stepParticle.isPlaying)
                 {
-                    jumpButton.gameObject.SetActive(false);
+                    stepParticle.Stop();
                 }
-            }
 
-            if (boomEffect != null)
-            {
-                boomEffect.GetComponent<ParticleSystem>().Play();
-            }
+                isMovementEnabled = false;
 
-            if (photonView.IsMine)
-            {
-                BarrelManager barrelManager = FindObjectOfType<BarrelManager>();
-                barrelManager.OnPlayerDeath(photonView.Owner);
-            }
-            yield return new WaitForSeconds(2.2f);
+                if (photonView.IsMine)
+                {
+                    if (joystick != null)
+                    {
+                        joystick.gameObject.SetActive(false);
+                    }
+                    if (jumpButton != null)
+                    {
+                        jumpButton.gameObject.SetActive(false);
+                    }
+                }
 
-            Destroy(gameObject);
+                if (boomEffect != null)
+                {
+                    boomEffect.GetComponent<ParticleSystem>().Play();
+                }
+
+                if (photonView.IsMine)
+                {
+                    BarrelManager barrelManager = FindObjectOfType<BarrelManager>();
+                    barrelManager.OnPlayerDeath(photonView.Owner);
+                }
+                yield return new WaitForSeconds(2.2f);
+
+                Destroy(gameObject);
+            }
         }
     }
 
@@ -518,6 +533,17 @@ public class PlayerMovement : MonoBehaviour
         if (deadPoint != null)
         {
             transform.position = deadPoint.position;
+            photonView.RPC("ResetCharacterState_RPC", RpcTarget.AllBuffered);
+        }
+    }
+    [PunRPC]
+    private void ResetCharacterState_RPC()
+    {
+        animator.ResetTrigger("Die");
+        canAnim = false;
+        if (boomEffect != null)
+        {
+            boomEffect.GetComponent<ParticleSystem>().Stop();
         }
     }
 

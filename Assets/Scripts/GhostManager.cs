@@ -143,6 +143,7 @@ public class GhostManager : MonoBehaviourPunCallbacks
         }
     }
 
+
     private void SetPlayerProfileImage()
     {
         string playerImageName = PlayerPrefs.GetString("LastEquippedCharacter");

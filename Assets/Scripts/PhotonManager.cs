@@ -186,10 +186,9 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     {
         Debug.Log("Joined Lobby.");
 
-        RoomOptions roomOptions = new RoomOptions { MaxPlayers = 2 }; //Lobi kiþi sayýsý
+        RoomOptions roomOptions = new RoomOptions { MaxPlayers = 1 }; //Lobi kiþi sayýsý
         PhotonNetwork.JoinOrCreateRoom("LobbyRoom", roomOptions, TypedLobby.Default);
     }
-
     public override void OnJoinedRoom()
     {
         Debug.Log("Joined Room.");
@@ -205,33 +204,41 @@ public class PhotonManager : MonoBehaviourPunCallbacks
             Debug.LogError("Cosmetics button is not assigned.");
         }
 
+        // Spawn oyuncu karakterini
         Transform spawnPoint = gridManager.GetRandomSpawnPoint();
 
-        string characterPrefabName = PlayerPrefs.GetString("LastEquippedCharacter", "DefaultCharacter"); 
-
-        if (!string.IsNullOrEmpty(characterPrefabName))
+        if (spawnPoint != null)
         {
-            // Karakteri spawn point'te instantiate et
-            GameObject character = PhotonNetwork.Instantiate(characterPrefabName, spawnPoint.position, Quaternion.identity);
+            string characterPrefabName = PlayerPrefs.GetString("LastEquippedCharacter", "DefaultCharacter");
 
-            if (character != null)
+            if (!string.IsNullOrEmpty(characterPrefabName))
             {
-                character.transform.rotation = Quaternion.Euler(0, 10, 0);
-                PhotonNetwork.LocalPlayer.TagObject = character;
+                // Karakteri seçilen spawn noktasýnda instantiate et
+                GameObject character = PhotonNetwork.Instantiate(characterPrefabName, spawnPoint.position, spawnPoint.rotation);
 
-                if (PhotonNetwork.IsMasterClient)
+                if (character != null)
                 {
-                    AssignCrownToMasterClient(character);
+                    character.transform.rotation = Quaternion.Euler(0, 10, 0);
+                    PhotonNetwork.LocalPlayer.TagObject = character;
+
+                    if (PhotonNetwork.IsMasterClient)
+                    {
+                        AssignCrownToMasterClient(character);
+                    }
+                }
+                else
+                {
+                    Debug.LogError("Failed to instantiate character.");
                 }
             }
             else
             {
-                Debug.LogError("Failed to instantiate character.");
+                Debug.LogError("Character prefab name is empty.");
             }
         }
         else
         {
-            Debug.LogError("Character prefab name is empty.");
+            Debug.LogError("No available spawn point.");
         }
 
         Debug.Log($"{PhotonNetwork.CurrentRoom.PlayerCount}");
@@ -245,10 +252,17 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         }
     }
 
-
     public override void OnPlayerLeftRoom(Player otherPlayer)
     {
         Debug.Log($"Player {otherPlayer.NickName} has left the room.");
+
+        GameObject playerObject = (GameObject)otherPlayer.TagObject;
+        if (playerObject != null)
+        {
+            Transform spawnPoint = playerObject.transform;
+            gridManager.ReleaseSpawnPoint(spawnPoint);
+        }
+
         if (PhotonNetwork.CurrentRoom.PlayerCount < PhotonNetwork.CurrentRoom.MaxPlayers)
         {
             if (isCountdownActive && PhotonNetwork.IsMasterClient)
@@ -257,6 +271,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
             }
         }
     }
+
     IEnumerator StartCountdown()
     {
         isCountdownActive = true;

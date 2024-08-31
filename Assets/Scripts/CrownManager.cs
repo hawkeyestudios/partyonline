@@ -42,7 +42,6 @@ public class CrownManager : MonoBehaviourPunCallbacks
         geriSayým.StartCountdown();
 
         StartCoroutine(StartScoreCountingAfterDelay(10f));
-        StartCoroutine(UpdateScores());
     }
 
     private IEnumerator StartScoreCountingAfterDelay(float delay)
@@ -92,9 +91,26 @@ public class CrownManager : MonoBehaviourPunCallbacks
 
     private void Update()
     {
-        photonView.RPC("UpdateCrownPosition_RPC", RpcTarget.All);
+        if (currentCrownHolder != null && playerTransforms.ContainsKey(currentCrownHolder))
+        {
+            UpdateCrownPosition();
+        }
     }
+    private void UpdateCrownPosition()
+    {
+        Transform crownTransform = crownPrefab.transform;
+        Transform playerTransform = playerTransforms[currentCrownHolder];
 
+        crownTransform.position = playerTransform.position + new Vector3(0, 2.5f, 0);
+        Debug.Log("Crown position updated for " + currentCrownHolder.NickName);
+
+        photonView.RPC("UpdateCrownPosition_RPC", RpcTarget.Others, crownTransform.position);
+    }
+    [PunRPC]
+    private void UpdateCrownPosition_RPC(Vector3 position)
+    {
+        crownPrefab.transform.position = position;
+    }
     private IEnumerator UpdateScores()
     {
         while (!raceFinished && PhotonNetwork.IsMasterClient)
@@ -193,20 +209,6 @@ public class CrownManager : MonoBehaviourPunCallbacks
         PhotonNetwork.LocalPlayer.SetCustomProperties(playerProperties);
         Debug.Log("Profile image set for player: " + PhotonNetwork.LocalPlayer.NickName);
     }
-
-    [PunRPC]
-    private void UpdateCrownPosition_RPC()
-    {
-        if (currentCrownHolder != null && playerTransforms.ContainsKey(currentCrownHolder))
-        {
-            Transform crownTransform = crownPrefab.transform;
-            Transform playerTransform = playerTransforms[currentCrownHolder];
-
-            crownTransform.position = playerTransform.position + new Vector3(0, 2.5f, 0);
-            Debug.Log("Crown position updated for " + currentCrownHolder.NickName);
-        }
-    }
-
     public void OnPlayerInteractWithCrown(Player player)
     {
         Debug.Log(player.NickName + " interacted with the crown.");

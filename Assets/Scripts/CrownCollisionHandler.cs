@@ -6,6 +6,11 @@ public class CrownCollisionHandler : MonoBehaviourPunCallbacks
 {
     private CrownManager crownManager;
 
+    private void Start()
+    {
+        crownManager = FindObjectOfType<CrownManager>();
+    }
+
     public void Initialize(CrownManager manager)
     {
         crownManager = manager;
