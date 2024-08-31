@@ -186,7 +186,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     {
         Debug.Log("Joined Lobby.");
 
-        RoomOptions roomOptions = new RoomOptions { MaxPlayers = 1 }; //Lobi kiþi sayýsý
+        RoomOptions roomOptions = new RoomOptions { MaxPlayers = 2 }; //Lobi kiþi sayýsý
         PhotonNetwork.JoinOrCreateRoom("LobbyRoom", roomOptions, TypedLobby.Default);
     }
 
@@ -262,11 +262,13 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         isCountdownActive = true;
         while (countdownTime > 0)
         {
+            Debug.Log("Countdown: " + countdownTime); // Geri sayýmýn düzgün çalýþtýðýný kontrol edin
             photonView.RPC("UpdateCountdown", RpcTarget.All, countdownTime);
             yield return new WaitForSeconds(1f);
             countdownTime--;
         }
 
+        Debug.Log("Countdown finished, starting game..."); // Geri sayýmýn tamamlandýðýný kontrol edin
         StartGame();
     }
 
@@ -299,12 +301,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     }
     void StartGame()
     {
-        Debug.Log("StartGame called.");
-        if (PhotonNetwork.IsMasterClient)
-        {
-            Debug.Log("nextsceneayarlandý");
-            StartCoroutine(NextSceneLoading());
-        }
+         StartCoroutine(NextSceneLoading());
     }
 
     IEnumerator NextSceneLoading()

@@ -71,7 +71,7 @@ public class PlayerMovement : MonoBehaviour
             {
                 speedIcon.SetActive(false);
             }
-            speedYellowBar = speedIcon?.transform.Find("YellowBar")?.GetComponent<Image>();
+            speedYellowBar = speedIcon.transform.Find("YellowBar").GetComponent<Image>();
             if (speedYellowBar == null)
             {
                 Debug.LogError("YellowBar bulunamadý.");
@@ -80,14 +80,14 @@ public class PlayerMovement : MonoBehaviour
             //Revive Özelliði
             isRevived = false;
             reviveIcon = GameObject.Find("Revive");
-            reviveCountdownText = reviveIcon?.transform.Find("ReviveCountdown")?.GetComponent<Text>();
+            reviveCountdownText = reviveIcon.transform.Find("ReviveCountdown").GetComponent<Text>();
             if (reviveCountdownText == null)
             {
                 Debug.LogError("CountdownText bulunamadý.");
             }
-            heartImages[0] = reviveIcon?.transform.Find("Heart1")?.GetComponent<Image>();
-            heartImages[1] = reviveIcon?.transform.Find("Heart2")?.GetComponent<Image>();
-            heartImages[2] = reviveIcon?.transform.Find("Heart3")?.GetComponent<Image>();
+            heartImages[0] = reviveIcon?.transform.Find("Heart1").GetComponent<Image>();
+            heartImages[1] = reviveIcon?.transform.Find("Heart2").GetComponent<Image>();
+            heartImages[2] = reviveIcon?.transform.Find("Heart3").GetComponent<Image>();
 
             heartImages[0].enabled = true;
             heartImages[1].enabled = false;
@@ -98,9 +98,9 @@ public class PlayerMovement : MonoBehaviour
             if (attackButton != null)
             {
                 attackButton.SetActive(false);
-                attackButton.GetComponent<Button>()?.onClick.AddListener(OnAttackButtonClicked);
+                attackButton.GetComponent<Button>().onClick.AddListener(OnAttackButtonClicked);
             }
-            attackCountText = attackButton?.transform.Find("AttackCountText")?.GetComponent<Text>();
+            attackCountText = attackButton.transform.Find("AttackCountText").GetComponent<Text>();
             if (attackCountText != null)
             {
                 attackCountText.text = attackCount.ToString();
@@ -111,13 +111,13 @@ public class PlayerMovement : MonoBehaviour
         photonView = GetComponent<PhotonView>();
         animator = GetComponent<Animator>();
 
-        deadPoint = GameObject.Find("DeadPoint")?.transform;
+        deadPoint = GameObject.Find("DeadPoint").transform;
         joystick = FindObjectOfType<Joystick>();
-        jumpButton = GameObject.Find("JumpButton")?.GetComponent<Button>();
+        jumpButton = GameObject.Find("JumpButton").GetComponent<Button>();
 
         if (joystick != null)
         {
-            joystickHandle = joystick.transform.Find("Handle")?.GetComponent<RectTransform>();
+            joystickHandle = joystick.transform.Find("Handle").GetComponent<RectTransform>();
         }
 
         if (jumpButton != null)
@@ -196,47 +196,6 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    public IEnumerator BecomeGhost()
-    {
-        Vector3 currentPosition = transform.position;
-        Quaternion currentRotation = transform.rotation;
-        canAnim = true;
-        if (canAnim)
-        {
-            animator.SetTrigger("Die");
-        }
-
-        if (!stepParticle.isPlaying)
-        {
-            stepParticle.Stop();
-        }
-        isMovementEnabled = false;
-        gameObject.tag = "Immune";
-
-        if (reviveCount > 1)
-        {
-            reviveCount--;
-            heartImages[reviveCount].enabled = false;
-            Debug.Log("Bir kalp kaybedildi, kalan kalp: " + reviveCount);
-
-            yield return new WaitForSeconds(3f);
-
-            canAnim = false;
-            isMovementEnabled = true;
-            gameObject.tag = "Player";
-        }
-        else
-        {
-            reviveCount--;
-            heartImages[reviveCount].enabled = false;
-            Debug.Log("Yeterli kalp yok, yeniden doðma baþarýsýz.");
-            yield return new WaitForSeconds(2.2f);
-            Destroy(gameObject);
-
-            GameObject ghost = PhotonNetwork.Instantiate(ghostPrefab.name, currentPosition, currentRotation);
-        }
-    }
-
     private void Jump()
     {
         if (!photonView.IsMine) return;
@@ -255,7 +214,7 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    private void OnTriggerEnter(Collider other)
+    private IEnumerator OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Ground") && !isGrounded)
         {
@@ -290,6 +249,59 @@ public class PlayerMovement : MonoBehaviour
             attackButton.SetActive(true);
             attackCount++;
             attackCountText.text = attackCount.ToString();
+        }
+        else if (other.gameObject.CompareTag("Ghost")) //GhostPG için
+        {
+            Vector3 currentPosition = transform.position;
+            Quaternion currentRotation = transform.rotation;
+            canAnim = true;
+            if (canAnim)
+            {
+                animator.SetTrigger("Die");
+            }
+            if (!stepParticle.isPlaying)
+            {
+                stepParticle.Stop();
+            }
+            isMovementEnabled = false;
+
+            if (photonView.IsMine)
+            {
+                if (joystick != null)
+                {
+                    joystick.gameObject.SetActive(false);
+                }
+                if (jumpButton != null)
+                {
+                    jumpButton.gameObject.SetActive(false);
+                }
+            }
+            if (boomEffect != null)
+            {
+                boomEffect.GetComponent<ParticleSystem>().Play();
+            }
+
+            if (reviveCount > 1)
+            {
+                reviveCount--;
+                heartImages[reviveCount].enabled = false;
+                Debug.Log("Bir kalp kaybedildi, kalan kalp: " + reviveCount);
+
+                yield return new WaitForSeconds(3f);
+
+                canAnim = false;
+                isMovementEnabled = true;
+            }
+            else
+            {
+                reviveCount--;
+                heartImages[reviveCount].enabled = false;
+                Debug.Log("Yeterli kalp yok, yeniden doðma baþarýsýz.");
+                yield return new WaitForSeconds(2.2f);
+                Destroy(gameObject);
+
+                GameObject ghost = PhotonNetwork.Instantiate(ghostPrefab.name, currentPosition, currentRotation);
+            }
         }
     }
 
@@ -347,7 +359,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void FindClosestGhost()
     {
-        GameObject[] ghosts = GameObject.FindGameObjectsWithTag("Finish");
+        GameObject[] ghosts = GameObject.FindGameObjectsWithTag("Ghost");
         float minDistance = Mathf.Infinity;
         Transform closestGhost = null;
 

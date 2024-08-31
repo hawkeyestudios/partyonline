@@ -76,7 +76,11 @@ public class SpawnManager : MonoBehaviourPunCallbacks
             {
                 finishOrder.Add(player);
 
-                photonView.RPC("UpdatePlayerUI_RPC", RpcTarget.All, player.ActorNumber, true);
+                int playerIndex = finishOrder.IndexOf(player);
+                int reward = Mathf.Max(1000 - (playerIndex * 250), 0);
+                SetPlayerScore(player, reward);
+
+                photonView.RPC("UpdatePlayerUI_RPC", RpcTarget.All, player.ActorNumber, reward);
 
                 if (finishOrder.Count == PhotonNetwork.PlayerList.Length)
                 {
@@ -88,7 +92,7 @@ public class SpawnManager : MonoBehaviourPunCallbacks
     }
 
     [PunRPC]
-    private void UpdatePlayerUI_RPC(int playerActorNumber, bool passedFinish)
+    private void UpdatePlayerUI_RPC(int playerActorNumber, int reward)
     {
         Player player = PhotonNetwork.CurrentRoom.GetPlayer(playerActorNumber);
         if (player == null) return;
@@ -97,17 +101,17 @@ public class SpawnManager : MonoBehaviourPunCallbacks
         if (playerIndex >= 0 && playerIndex < profileImages.Length)
         {
             profileImages[playerIndex].sprite = GetProfileSprite(player);
-
-            int reward = passedFinish ? Mathf.Max(1000 - (playerIndex * 250), 0) : 0;
-
             rewardTexts[playerIndex].text = $"{reward}";
-            //if (reward > 0 && player == PhotonNetwork.LocalPlayer)
-            //{
-                //CoinManager.Instance.AddCoins(reward);
-            //}
-
             nickNames[playerIndex].text = player.NickName;
         }
+    }
+    private void SetPlayerScore(Player player, int score)
+    {
+        ExitGames.Client.Photon.Hashtable playerProperties = new ExitGames.Client.Photon.Hashtable
+    {
+        { "PlayerScore", score }
+    };
+        player.SetCustomProperties(playerProperties);
     }
     private Sprite GetProfileSprite(Player player)
     {
@@ -139,12 +143,16 @@ public class SpawnManager : MonoBehaviourPunCallbacks
             if (!finishOrder.Contains(player))
             {
                 finishOrder.Add(player);
-                UpdatePlayerUI_RPC(player.ActorNumber, false);
+                int playerScore = (int)player.CustomProperties["PlayerScore"];
+                UpdatePlayerUI_RPC(player.ActorNumber, playerScore);
             }
         }
     }
+
+
     private void OnDestroy()
     {
         GeriSayým.OnGameOver -= GameOver_RPC;
     }
+
 }

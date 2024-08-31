@@ -9,6 +9,7 @@ public class CrownManager : MonoBehaviourPunCallbacks
 {
     public Transform[] spawnPoints;
     public Image[] profileImages;
+    public Transform crownSpawnPoint;
     public GameObject crownPrefab;
 
     // Score system
@@ -29,7 +30,10 @@ public class CrownManager : MonoBehaviourPunCallbacks
 
     private void Start()
     {
+        SpawnCrownAtAssignedPosition();
+
         ResetPlayerScores();
+        ResetScoreTexts();
         Debug.Log("Start() called");
         gameOverPanel.SetActive(false);
         SpawnPlayer();
@@ -46,6 +50,44 @@ public class CrownManager : MonoBehaviourPunCallbacks
         Debug.Log("Score counting will start after delay: " + delay + " seconds.");
         yield return new WaitForSeconds(delay);
         StartCoroutine(UpdateScores());
+    }
+    public void ResetScoreTexts()
+    {
+        foreach (Text scoreText in playerScoreTexts)
+        {
+            scoreText.text = "0";
+        }
+        foreach (Text scoreText in gameOverScoreTexts)
+        {
+            scoreText.text = "0";
+        }
+    }
+    private void SpawnCrownAtAssignedPosition()
+    {
+        if (crownSpawnPoint != null && crownPrefab != null)
+        {
+            Vector3 spawnPosition = crownSpawnPoint.position;
+            Quaternion spawnRotation = crownSpawnPoint.rotation;
+
+            // Crown'u belirtilen pozisyonda ve rotasyonda instantiate et
+            GameObject crown = PhotonNetwork.Instantiate(crownPrefab.name, spawnPosition, spawnRotation);
+            Debug.Log("Crown spawned at assigned position: " + spawnPosition);
+
+            // CrownCollisionHandler script'ini alýn ve CrownManager'ý baþlatýn
+            CrownCollisionHandler collisionHandler = crown.GetComponent<CrownCollisionHandler>();
+            if (collisionHandler != null)
+            {
+                collisionHandler.Initialize(this);  // CrownManager referansýný gönderin
+            }
+            else
+            {
+                Debug.LogError("CrownCollisionHandler not found on crownPrefab.");
+            }
+        }
+        else
+        {
+            Debug.LogError("Crown prefab or spawn point is not assigned.");
+        }
     }
 
     private void Update()
@@ -113,7 +155,6 @@ public class CrownManager : MonoBehaviourPunCallbacks
 
     private void SpawnPlayer()
     {
-        Debug.Log("Spawning player...");
         Player localPlayer = PhotonNetwork.LocalPlayer;
 
         int spawnPointIndex = localPlayer.ActorNumber % spawnPoints.Length;
@@ -126,11 +167,10 @@ public class CrownManager : MonoBehaviourPunCallbacks
         if (!string.IsNullOrEmpty(characterPrefabName))
         {
             GameObject character = PhotonNetwork.Instantiate(characterPrefabName, spawnPosition, spawnRotation);
-            playerTransforms[localPlayer] = character.transform;
 
             if (character != null)
             {
-                Debug.Log("Character successfully spawned for player: " + localPlayer.NickName);
+                Debug.Log("Character successfully spawned.");
             }
             else
             {

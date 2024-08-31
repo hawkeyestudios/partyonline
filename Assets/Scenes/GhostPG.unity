@@ -19131,6 +19131,78 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 400150, guid: 4e5d9824dc45f724690777e573f84304, type: 3}
   m_PrefabInstance: {fileID: 514550373}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &995156921
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 995156922}
+  - component: {fileID: 995156923}
+  m_Layer: 0
+  m_Name: GhostManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &995156922
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 995156921}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -8.919122, y: 5.2657547, z: -44.47858}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 11
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &995156923
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 995156921}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0d83bd2f240f34d478e9cafa0328e837, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  spawnPoints:
+  - {fileID: 925625341}
+  - {fileID: 1625530573}
+  - {fileID: 1365445590}
+  - {fileID: 354192485}
+  profileImages:
+  - {fileID: 1903622187}
+  - {fileID: 1903622186}
+  - {fileID: 1903622185}
+  - {fileID: 1903622184}
+  playerScoreTexts:
+  - {fileID: 1219558178}
+  - {fileID: 1606462062}
+  - {fileID: 1052420840}
+  - {fileID: 1414494771}
+  scoreIncrement: 10
+  nickNames:
+  - {fileID: 1903622179}
+  - {fileID: 1903622178}
+  - {fileID: 1903622177}
+  - {fileID: 1903622176}
+  gameOverPanel: {fileID: 1903622175}
+  "geriSay\u0131m": {fileID: 46666245}
+  gameOverScoreTexts:
+  - {fileID: 1075604295}
+  - {fileID: 1075604294}
+  - {fileID: 1075604293}
+  - {fileID: 1075604292}
 --- !u!1001 &1000098124
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -43556,6 +43628,22 @@ PrefabInstance:
       propertyPath: m_LocalRotation.z
       value: 0.39864406
       objectReference: {fileID: 0}
+    - target: {fileID: 591804554557824537, guid: f28f7b115a46a2a4aadd51143d3131d3, type: 3}
+      propertyPath: m_Radius
+      value: 0.26906392
+      objectReference: {fileID: 0}
+    - target: {fileID: 591804554557824537, guid: f28f7b115a46a2a4aadd51143d3131d3, type: 3}
+      propertyPath: m_Center.x
+      value: 0.0015430048
+      objectReference: {fileID: 0}
+    - target: {fileID: 591804554557824537, guid: f28f7b115a46a2a4aadd51143d3131d3, type: 3}
+      propertyPath: m_Center.z
+      value: 0.017532608
+      objectReference: {fileID: 0}
+    - target: {fileID: 591804554557824537, guid: f28f7b115a46a2a4aadd51143d3131d3, type: 3}
+      propertyPath: m_IsTrigger
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 1040831600991041542, guid: f28f7b115a46a2a4aadd51143d3131d3, type: 3}
       propertyPath: m_LocalRotation.w
       value: 0.98799634
@@ -44160,13 +44248,17 @@ PrefabInstance:
       propertyPath: m_Name
       value: Ghost
       objectReference: {fileID: 0}
+    - target: {fileID: 8555421485844250906, guid: f28f7b115a46a2a4aadd51143d3131d3, type: 3}
+      propertyPath: m_TagString
+      value: Ghost
+      objectReference: {fileID: 0}
     - target: {fileID: 9075076711154817952, guid: f28f7b115a46a2a4aadd51143d3131d3, type: 3}
       propertyPath: m_RootOrder
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 9075076711154817952, guid: f28f7b115a46a2a4aadd51143d3131d3, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -3
+      value: -3.25
       objectReference: {fileID: 0}
     - target: {fileID: 9075076711154817952, guid: f28f7b115a46a2a4aadd51143d3131d3, type: 3}
       propertyPath: m_LocalPosition.y
@@ -44210,56 +44302,8 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 9075076711154817952, guid: f28f7b115a46a2a4aadd51143d3131d3, type: 3}
       insertIndex: -1
       addedObject: {fileID: 675550756}
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 8555421485844250906, guid: f28f7b115a46a2a4aadd51143d3131d3, type: 3}
-      insertIndex: 7
-      addedObject: {fileID: 4665773982566416427}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f28f7b115a46a2a4aadd51143d3131d3, type: 3}
---- !u!1 &4665773982566416426 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 8555421485844250906, guid: f28f7b115a46a2a4aadd51143d3131d3, type: 3}
-  m_PrefabInstance: {fileID: 4665773982566416425}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &4665773982566416427
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4665773982566416426}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0d83bd2f240f34d478e9cafa0328e837, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  spawnPoints:
-  - {fileID: 925625341}
-  - {fileID: 1625530573}
-  - {fileID: 1365445590}
-  - {fileID: 354192485}
-  profileImages:
-  - {fileID: 1903622187}
-  - {fileID: 1903622186}
-  - {fileID: 1903622185}
-  - {fileID: 1903622184}
-  playerScoreTexts:
-  - {fileID: 1219558178}
-  - {fileID: 1606462062}
-  - {fileID: 1052420840}
-  - {fileID: 1414494771}
-  scoreIncrement: 0.2
-  nickNames:
-  - {fileID: 1903622179}
-  - {fileID: 1903622178}
-  - {fileID: 1903622177}
-  - {fileID: 1903622176}
-  gameOverPanel: {fileID: 1903622175}
-  "geriSay\u0131m": {fileID: 46666245}
-  gameOverScoreTexts:
-  - {fileID: 1075604295}
-  - {fileID: 1075604294}
-  - {fileID: 1075604293}
-  - {fileID: 1075604292}
 --- !u!4 &4665773982566416428 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 9075076711154817952, guid: f28f7b115a46a2a4aadd51143d3131d3, type: 3}

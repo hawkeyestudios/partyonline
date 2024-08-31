@@ -54,7 +54,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 9a95ead26cd13c442982b8e6f8253ee9, type: 3}
       propertyPath: m_Name
-      value: Crown
+      value: LobbyCrown
       objectReference: {fileID: 0}
     - target: {fileID: 9029392768159634559, guid: 9a95ead26cd13c442982b8e6f8253ee9, type: 3}
       propertyPath: m_IsActive
@@ -66,20 +66,20 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 9a95ead26cd13c442982b8e6f8253ee9, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 3596}
+      addedObject: {fileID: 3618}
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 9a95ead26cd13c442982b8e6f8253ee9, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 4126}
+      addedObject: {fileID: 4162}
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 9a95ead26cd13c442982b8e6f8253ee9, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 4127}
+      addedObject: {fileID: 4163}
   m_SourcePrefab: {fileID: 100100000, guid: 9a95ead26cd13c442982b8e6f8253ee9, type: 3}
 --- !u!1 &7091542277816529902 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 9a95ead26cd13c442982b8e6f8253ee9, type: 3}
   m_PrefabInstance: {fileID: 7974557660431650495}
   m_PrefabAsset: {fileID: 0}
---- !u!95 &3596
+--- !u!95 &3618
 Animator:
   serializedVersion: 5
   m_ObjectHideFlags: 0
@@ -100,7 +100,7 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!114 &4126
+--- !u!114 &4162
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -119,11 +119,11 @@ MonoBehaviour:
   OwnershipTransfer: 0
   observableSearch: 2
   ObservedComponents:
-  - {fileID: 4127}
+  - {fileID: 4163}
   sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
---- !u!114 &4127
+--- !u!114 &4163
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

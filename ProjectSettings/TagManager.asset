@@ -13,6 +13,8 @@ TagManager:
   - AttackOzellik
   - Items
   - Barrel
+  - Crown
+  - Ghost
   layers:
   - Default
   - TransparentFX

@@ -16378,7 +16378,7 @@ MonoBehaviour:
   - {fileID: 670054892}
   - {fileID: 55165626}
   - {fileID: 1406009428}
-  scoreIncrement: 0.2
+  scoreIncrement: 10
   nickNames:
   - {fileID: 833147712}
   - {fileID: 833147711}

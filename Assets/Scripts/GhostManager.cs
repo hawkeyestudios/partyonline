@@ -27,6 +27,7 @@ public class GhostManager : MonoBehaviourPunCallbacks
     private void Start()
     {
         ResetPlayerScores();
+        ResetScoreTexts();
         gameOverPanel.SetActive(false);
         SpawnPlayer();
         GeriSayým.OnGameOver += GameOver_RPC;
@@ -41,6 +42,17 @@ public class GhostManager : MonoBehaviourPunCallbacks
         yield return new WaitForSeconds(delay);
         scoreCountingStarted = true;
         StartCoroutine(UpdateScores());
+    }
+    public void ResetScoreTexts()
+    {
+        foreach (Text scoreText in playerScoreTexts)
+        {
+            scoreText.text = "0";
+        }
+        foreach (Text scoreText in gameOverScoreTexts)
+        {
+            scoreText.text = "0";
+        }
     }
     private IEnumerator UpdateScores()
     {

@@ -61,28 +61,6 @@ public class GhostController : MonoBehaviourPun
         Quaternion lookRotation = Quaternion.LookRotation(new Vector3(direction.x, 0, direction.z));
         transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * rotationSpeed);
     }
-
-    private void OnTriggerEnter(Collider other)
-    {
-        if (other.CompareTag("Player"))
-        {
-            PhotonView playerPhotonView = other.GetComponent<PhotonView>();
-            if (playerPhotonView != null && playerPhotonView.IsMine)
-            {
-                PlayerMovement playerMovement = other.gameObject.GetComponent<PlayerMovement>();
-
-                if (playerMovement != null)
-                {
-                    playerMovement.StartCoroutine(playerMovement.BecomeGhost());
-                }
-                else
-                {
-                    Debug.LogError("PlayerMovement bileþeni bulunamadý.");
-                }
-            }
-        }
-    }
-
     public IEnumerator StopMovementForSeconds(float duration)
     {
         isStopped = true;
