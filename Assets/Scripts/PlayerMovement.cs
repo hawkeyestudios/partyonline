@@ -80,11 +80,6 @@ public class PlayerMovement : MonoBehaviour
             //Revive Özelliði
             isRevived = false;
             reviveIcon = GameObject.Find("Revive");
-            reviveCountdownText = reviveIcon.transform.Find("ReviveCountdown").GetComponent<Text>();
-            if (reviveCountdownText == null)
-            {
-                Debug.LogError("CountdownText bulunamadý.");
-            }
             heartImages[0] = reviveIcon?.transform.Find("Heart1").GetComponent<Image>();
             heartImages[1] = reviveIcon?.transform.Find("Heart2").GetComponent<Image>();
             heartImages[2] = reviveIcon?.transform.Find("Heart3").GetComponent<Image>();
@@ -261,11 +256,6 @@ public class PlayerMovement : MonoBehaviour
         {
             Vector3 currentPosition = transform.position;
             Quaternion currentRotation = transform.rotation;
-            canAnim = true;
-            if (canAnim)
-            {
-                animator.SetTrigger("Die");
-            }
             if (!stepParticle.isPlaying)
             {
                 stepParticle.Stop();
@@ -283,9 +273,20 @@ public class PlayerMovement : MonoBehaviour
                     jumpButton.gameObject.SetActive(false);
                 }
             }
+            yield return new WaitForSeconds(0.8f);
+
             if (boomEffect != null)
             {
-                boomEffect.GetComponent<ParticleSystem>().Play();
+                if(!boomEffect.GetComponent<ParticleSystem>().isPlaying)
+                {
+                    boomEffect.GetComponent<ParticleSystem>().Play();
+                }
+                
+            }
+            canAnim = true;
+            if (canAnim)
+            {
+                animator.SetTrigger("Die");
             }
 
             if (reviveCount > 1)
@@ -294,10 +295,23 @@ public class PlayerMovement : MonoBehaviour
                 heartImages[reviveCount].enabled = false;
                 Debug.Log("Bir kalp kaybedildi, kalan kalp: " + reviveCount);
 
-                yield return new WaitForSeconds(3f);
+                yield return new WaitForSeconds(2.2f);
 
                 canAnim = false;
                 isMovementEnabled = true;
+                if(photonView.IsMine)
+                {
+                    if (joystick != null)
+                    {
+                        joystick.ResetHandlePosition();
+                        joystick.gameObject.SetActive(true);
+                    }
+                    if (jumpButton != null)
+                    {
+                        jumpButton.gameObject.SetActive(true);
+                    }
+                }
+
             }
             else
             {
@@ -510,6 +524,12 @@ public class PlayerMovement : MonoBehaviour
 
         if (photonView.IsMine)
         {
+            animator.ResetTrigger("Die");
+            animator.SetBool("isGliding", false);
+            animator.SetBool("Walking", false);
+
+            isGrounded = false;
+
             if (joystick != null)
             {
                 joystick.gameObject.SetActive(true);
@@ -521,6 +541,7 @@ public class PlayerMovement : MonoBehaviour
             }
 
             Respawn();
+
             if (!isMovementEnabled)
             {
                 isMovementEnabled = true;
@@ -536,9 +557,11 @@ public class PlayerMovement : MonoBehaviour
             photonView.RPC("ResetCharacterState_RPC", RpcTarget.AllBuffered);
         }
     }
+
     [PunRPC]
     private void ResetCharacterState_RPC()
     {
+        // Animasyon ve efekt durumlarýný sýfýrla
         animator.ResetTrigger("Die");
         canAnim = false;
         if (boomEffect != null)
@@ -546,6 +569,7 @@ public class PlayerMovement : MonoBehaviour
             boomEffect.GetComponent<ParticleSystem>().Stop();
         }
     }
+
 
     private void OnJumpButtonClicked()
     {

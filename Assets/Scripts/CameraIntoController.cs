@@ -79,20 +79,7 @@ public class CameraIntroController : MonoBehaviourPunCallbacks
         {
             Debug.LogError("cameraFollow is not assigned.");
         }
-
-
-        if (PhotonNetwork.IsMasterClient)
-        {
-            photonView.RPC("StartGame_RPC", RpcTarget.AllBuffered);
-        }
     }
-
-    [PunRPC]
-    void StartGame_RPC()
-    {
-        Debug.Log("Game Started");
-    }
-
     public override void OnMasterClientSwitched(Player newMasterClient)
     {
         Debug.Log("New MasterClient assigned: " + newMasterClient.NickName);

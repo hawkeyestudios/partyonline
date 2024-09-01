@@ -27,7 +27,9 @@ public class CrownManager : MonoBehaviourPunCallbacks
     private Player currentCrownHolder = null;
     private Dictionary<Player, Transform> playerTransforms = new Dictionary<Player, Transform>();
     private bool raceFinished = false;
+    private GameObject currentCrown;
 
+    public Color[] playerColors = { Color.red, new Color(0.25f, 0.88f, 0.82f), Color.yellow, new Color(0.63f, 0.13f, 0.94f) };
     private void Start()
     {
         SpawnCrownAtAssignedPosition();
@@ -61,6 +63,7 @@ public class CrownManager : MonoBehaviourPunCallbacks
             scoreText.text = "0";
         }
     }
+
     private void SpawnCrownAtAssignedPosition()
     {
         if (crownSpawnPoint != null && crownPrefab != null)
@@ -69,19 +72,8 @@ public class CrownManager : MonoBehaviourPunCallbacks
             Quaternion spawnRotation = crownSpawnPoint.rotation;
 
             // Crown'u belirtilen pozisyonda ve rotasyonda instantiate et
-            GameObject crown = PhotonNetwork.Instantiate(crownPrefab.name, spawnPosition, spawnRotation);
+            currentCrown = PhotonNetwork.Instantiate(crownPrefab.name, spawnPosition, spawnRotation);
             Debug.Log("Crown spawned at assigned position: " + spawnPosition);
-
-            // CrownCollisionHandler script'ini alýn ve CrownManager'ý baþlatýn
-            CrownCollisionHandler collisionHandler = crown.GetComponent<CrownCollisionHandler>();
-            if (collisionHandler != null)
-            {
-                collisionHandler.Initialize(this);  // CrownManager referansýný gönderin
-            }
-            else
-            {
-                Debug.LogError("CrownCollisionHandler not found on crownPrefab.");
-            }
         }
         else
         {
@@ -91,26 +83,21 @@ public class CrownManager : MonoBehaviourPunCallbacks
 
     private void Update()
     {
+        // Tacý alan oyuncu hareket ediyorsa, tacýn pozisyonunu güncelle
         if (currentCrownHolder != null && playerTransforms.ContainsKey(currentCrownHolder))
         {
             UpdateCrownPosition();
         }
     }
+
     private void UpdateCrownPosition()
     {
-        Transform crownTransform = crownPrefab.transform;
+        // Tacý sahibinin pozisyonuna göre güncelle
         Transform playerTransform = playerTransforms[currentCrownHolder];
-
-        crownTransform.position = playerTransform.position + new Vector3(0, 2.5f, 0);
+        currentCrown.transform.position = playerTransform.position + new Vector3(0, 2.5f, 0);
         Debug.Log("Crown position updated for " + currentCrownHolder.NickName);
+    }
 
-        photonView.RPC("UpdateCrownPosition_RPC", RpcTarget.Others, crownTransform.position);
-    }
-    [PunRPC]
-    private void UpdateCrownPosition_RPC(Vector3 position)
-    {
-        crownPrefab.transform.position = position;
-    }
     private IEnumerator UpdateScores()
     {
         while (!raceFinished && PhotonNetwork.IsMasterClient)
@@ -120,13 +107,12 @@ public class CrownManager : MonoBehaviourPunCallbacks
                 for (int i = 0; i < 10; i++)
                 {
                     float currentScore = GetPlayerScore(currentCrownHolder);
-                    currentScore += 1f;  
-                    SetPlayerScore(currentCrownHolder, currentScore); 
-
-                } 
+                    currentScore += 1f;
+                    SetPlayerScore(currentCrownHolder, currentScore);
+                }
                 photonView.RPC("UpdateScoreUI_RPC", RpcTarget.All);
             }
-            yield return new WaitForSeconds(0.1f); 
+            yield return new WaitForSeconds(0.1f);
         }
     }
 
@@ -141,6 +127,7 @@ public class CrownManager : MonoBehaviourPunCallbacks
             Debug.Log("Score updated for " + player.NickName + ": " + playerScoreTexts[i].text);
         }
     }
+
     private void ResetPlayerScores()
     {
         foreach (Player player in PhotonNetwork.PlayerList)
@@ -150,6 +137,7 @@ public class CrownManager : MonoBehaviourPunCallbacks
 
         photonView.RPC("UpdateScoreUI_RPC", RpcTarget.All);
     }
+
     private float GetPlayerScore(Player player)
     {
         if (player.CustomProperties.TryGetValue("PlayerScore", out object score))
@@ -187,6 +175,13 @@ public class CrownManager : MonoBehaviourPunCallbacks
             if (character != null)
             {
                 Debug.Log("Character successfully spawned.");
+                playerTransforms[localPlayer] = character.transform;  // Karakterin transformunu kaydediyoruz
+                int playerIndex = PhotonNetwork.LocalPlayer.ActorNumber - 1;
+                Renderer circleRenderer = character.transform.Find("CirclePrefabName").GetComponent<Renderer>(); // Circle prefabýna eriþ
+                if (circleRenderer != null && playerIndex >= 0 && playerIndex < playerColors.Length)
+                {
+                    circleRenderer.material.color = playerColors[playerIndex];
+                }
             }
             else
             {
@@ -209,6 +204,7 @@ public class CrownManager : MonoBehaviourPunCallbacks
         PhotonNetwork.LocalPlayer.SetCustomProperties(playerProperties);
         Debug.Log("Profile image set for player: " + PhotonNetwork.LocalPlayer.NickName);
     }
+
     public void OnPlayerInteractWithCrown(Player player)
     {
         Debug.Log(player.NickName + " interacted with the crown.");
@@ -227,19 +223,12 @@ public class CrownManager : MonoBehaviourPunCallbacks
         {
             currentCrownHolder = player;
             Debug.Log("Crown holder set to " + player.NickName);
-        }
-    }
 
-    private void OnTriggerEnter(Collider other)
-    {
-        if (other.CompareTag("Player"))
-        {
-            PhotonView playerPhotonView = other.GetComponent<PhotonView>();
-            if (playerPhotonView != null)
+            // Tacý yeni crown holder'ýn karakterine baðla
+            if (playerTransforms.ContainsKey(player))
             {
-                Player player = playerPhotonView.Owner;
-                Debug.Log("Player " + player.NickName + " triggered crown interaction.");
-                OnPlayerInteractWithCrown(player);
+                currentCrown.transform.SetParent(playerTransforms[player]);  // Taç yeni sahibine baðlanýyor
+                currentCrown.transform.localPosition = new Vector3(0, 2.5f, 0); // Taç, oyuncunun kafasýnda konumlandýrýlýr
             }
         }
     }

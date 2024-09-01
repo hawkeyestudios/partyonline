@@ -24,11 +24,14 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     private int countdownTime = 10; 
     private Coroutine countdownCoroutine;
     private bool isCountdownActive = false;
-    private string[] mapNames = { "TrapPG", "GhostPG", "TntPG" };
+    private string[] mapNames = { "TrapPG", "GhostPG", "TntPG", "CrownPG"};
     public List<GameObject> loadingPanels;
     private string mainMenu = "MainMenu";
+
+    public Color[] playerColors = { Color.red, new Color(0.25f, 0.88f, 0.82f), Color.yellow, new Color(0.63f, 0.13f, 0.94f) };
     private void Start()
     {
+        ClearVisitedMapRecords();
         PhotonNetwork.AutomaticallySyncScene = true;
         Debug.Log($"{PhotonNetwork.NickName}");
         ShowLastEquippedCharacter();
@@ -186,7 +189,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     {
         Debug.Log("Joined Lobby.");
 
-        RoomOptions roomOptions = new RoomOptions { MaxPlayers = 1 }; //Lobi kiþi sayýsý
+        RoomOptions roomOptions = new RoomOptions { MaxPlayers = 1}; //Lobi kiþi sayýsý
         PhotonNetwork.JoinOrCreateRoom("LobbyRoom", roomOptions, TypedLobby.Default);
     }
     public override void OnJoinedRoom()
@@ -224,6 +227,13 @@ public class PhotonManager : MonoBehaviourPunCallbacks
                     if (PhotonNetwork.IsMasterClient)
                     {
                         AssignCrownToMasterClient(character);
+                    }
+
+                    int playerIndex = PhotonNetwork.LocalPlayer.ActorNumber - 1;
+                    Renderer circleRenderer = character.transform.Find("Circle").GetComponent<Renderer>();
+                    if (circleRenderer != null)
+                    {
+                        circleRenderer.enabled = false;
                     }
                 }
                 else

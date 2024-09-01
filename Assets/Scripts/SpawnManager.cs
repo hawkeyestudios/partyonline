@@ -16,6 +16,7 @@ public class SpawnManager : MonoBehaviourPunCallbacks
     private List<Player> finishOrder = new List<Player>();
     private bool raceFinished = false;
 
+    public Color[] playerColors = { Color.red, new Color(0.25f, 0.88f, 0.82f), Color.yellow, new Color(0.63f, 0.13f, 0.94f) };
     private void Start()
     {
         gameOverPanel.SetActive(false);
@@ -43,6 +44,12 @@ public class SpawnManager : MonoBehaviourPunCallbacks
 
             if (character != null)
             {
+                int playerIndex = PhotonNetwork.LocalPlayer.ActorNumber - 1;
+                Renderer circleRenderer = character.transform.Find("CirclePrefabName").GetComponent<Renderer>(); // Circle prefabýna eriþ
+                if (circleRenderer != null && playerIndex >= 0 && playerIndex < playerColors.Length)
+                {
+                    circleRenderer.material.color = playerColors[playerIndex];
+                }
                 Debug.Log("Character successfully spawned.");
             }
             else

@@ -24,6 +24,7 @@ public class GhostManager : MonoBehaviourPunCallbacks
     private bool raceFinished = false;
     private bool scoreCountingStarted = false;
 
+    public Color[] playerColors = { Color.red, new Color(0.25f, 0.88f, 0.82f), Color.yellow, new Color(0.63f, 0.13f, 0.94f) };
     private void Start()
     {
         ResetPlayerScores();
@@ -99,10 +100,28 @@ public class GhostManager : MonoBehaviourPunCallbacks
     {
         if (player.CustomProperties.TryGetValue("PlayerScore", out object score))
         {
-            return (float)score;
+            // score nesnesi float deðilse dönüþtürme yapýlmalý
+            if (score is float)
+            {
+                return (float)score;
+            }
+            else if (score is int)
+            {
+                return (int)score;
+            }
+            else if (score is double)
+            {
+                return (float)(double)score; // double'ý float'a dönüþtür
+            }
+            else
+            {
+                Debug.LogError("PlayerScore has an unexpected type: " + score.GetType());
+                return 0f;
+            }
         }
         return 0f;
     }
+
 
     private void SetPlayerScore(Player player, float score)
     {
@@ -130,6 +149,12 @@ public class GhostManager : MonoBehaviourPunCallbacks
 
             if (character != null)
             {
+                int playerIndex = PhotonNetwork.LocalPlayer.ActorNumber - 1;
+                Renderer circleRenderer = character.transform.Find("CirclePrefabName").GetComponent<Renderer>(); // Circle prefabýna eriþ
+                if (circleRenderer != null && playerIndex >= 0 && playerIndex < playerColors.Length)
+                {
+                    circleRenderer.material.color = playerColors[playerIndex];
+                }
                 Debug.Log("Character successfully spawned.");
             }
             else
