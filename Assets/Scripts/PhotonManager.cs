@@ -6,6 +6,7 @@ using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine.TextCore.Text;
 
 public class PhotonManager : MonoBehaviourPunCallbacks
 {
@@ -87,6 +88,11 @@ public class PhotonManager : MonoBehaviourPunCallbacks
                 if (currentCharacter != null)
                 {
                     currentCharacter.transform.rotation = Quaternion.Euler(0, 10, 0);
+                    Renderer circleRenderer = currentCharacter.transform.Find("Circle").GetComponent<Renderer>();
+                    if (circleRenderer != null)
+                    {
+                        circleRenderer.enabled = false;
+                    }
                 }
                 else
                 {
