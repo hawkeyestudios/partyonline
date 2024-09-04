@@ -26,6 +26,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/TntPG.unity
     guid: 82673d6a45f9f3b468e49710684dd2d3
+  - enabled: 1
+    path: Assets/Scenes/SumoPG.unity
+    guid: 4581a92fbfb2cf741b1c3fba700987d8
   m_configObjects:
     com.unity.adaptiveperformance.loader_settings: {fileID: 11400000, guid: b324b24d466040d499503a8d9ba1047f, type: 2}
     com.unity.adaptiveperformance.simulator.provider_settings: {fileID: 11400000, guid: 4491cbb253a5be2498f18d51e91b0e6b, type: 2}
