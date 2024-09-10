@@ -195,7 +195,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     {
         Debug.Log("Joined Lobby.");
 
-        RoomOptions roomOptions = new RoomOptions { MaxPlayers = 1}; //Lobi kiþi sayýsý
+        RoomOptions roomOptions = new RoomOptions { MaxPlayers = 2}; //Lobi kiþi sayýsý
         PhotonNetwork.JoinOrCreateRoom("LobbyRoom", roomOptions, TypedLobby.Default);
     }
     public override void OnJoinedRoom()
@@ -236,11 +236,11 @@ public class PhotonManager : MonoBehaviourPunCallbacks
                     }
 
                     int playerIndex = PhotonNetwork.LocalPlayer.ActorNumber - 1;
-                    Renderer circleRenderer = character.transform.Find("Circle").GetComponent<Renderer>();
-                    if (circleRenderer != null)
-                    {
-                        circleRenderer.enabled = false;
-                    }
+                    //Renderer circleRenderer = character.transform.Find("Circle").GetComponent<Renderer>();
+                    //if (circleRenderer != null)
+                    //{
+                        //circleRenderer.enabled = false;
+                    //}
                 }
                 else
                 {

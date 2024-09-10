@@ -42,6 +42,7 @@ public class GhostController : MonoBehaviourPun
         {
             animator.SetTrigger("Attack");
             StartCoroutine(HandleAttackOnPlayer(other.transform));
+            speed += 0.2f;
         }
     }
 

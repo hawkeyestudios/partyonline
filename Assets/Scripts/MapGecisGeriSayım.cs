@@ -17,10 +17,19 @@ public class MapGecisGeriSayim : MonoBehaviourPunCallbacks
 
     private string[] mapNames = { "TrapPG", "GhostPG", "TntPG", "CrownPG" };
 
+    // Oyuncularýn hazýr olup olmadýðýný takip etmek için
+    private bool allPlayersReady = false;
+
     void Start()
     {
         SaveCurrentScene();
         UpdateCountdownText();
+
+        if (PhotonNetwork.IsMasterClient)
+        {
+            // MasterClient tüm oyuncularýn hazýr olup olmadýðýný kontrol etmeye baþlar
+            StartCoroutine(CheckAllPlayersReady());
+        }
     }
 
     void Update()
@@ -30,7 +39,7 @@ public class MapGecisGeriSayim : MonoBehaviourPunCallbacks
             timeRemaining -= Time.deltaTime;
             UpdateCountdownText();
         }
-        else if (!hasLoaded && PhotonNetwork.IsMasterClient)
+        else if (!hasLoaded && PhotonNetwork.IsMasterClient && allPlayersReady)
         {
             StartCoroutine(NextSceneLoading());
             hasLoaded = true;
@@ -57,7 +66,6 @@ public class MapGecisGeriSayim : MonoBehaviourPunCallbacks
 
         yield break;
     }
-
 
     [PunRPC]
     void LoadMapForAllPlayers(string mapName)
@@ -126,5 +134,22 @@ public class MapGecisGeriSayim : MonoBehaviourPunCallbacks
         {
             PhotonNetwork.LeaveRoom();
         }
+    }
+
+    // Oyuncularýn hazýr olup olmadýðýný kontrol eden coroutine
+    IEnumerator CheckAllPlayersReady()
+    {
+        while (!allPlayersReady)
+        {
+            yield return new WaitForSeconds(1f); // Her saniye bir kontrol yap
+            photonView.RPC("PlayerIsReady", RpcTarget.AllBuffered);
+        }
+    }
+
+    [PunRPC]
+    void PlayerIsReady()
+    {
+        // Tüm oyuncularýn hazýr olup olmadýðýný kontrol et
+        allPlayersReady = PhotonNetwork.PlayerList.Length == PhotonNetwork.CurrentRoom.PlayerCount;
     }
 }

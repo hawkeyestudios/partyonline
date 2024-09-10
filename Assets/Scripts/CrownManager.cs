@@ -4,6 +4,7 @@ using Photon.Realtime;
 using UnityEngine.UI;
 using System.Collections.Generic;
 using System.Collections;
+using System.Linq;
 
 public class CrownManager : MonoBehaviourPunCallbacks
 {
@@ -38,7 +39,11 @@ public class CrownManager : MonoBehaviourPunCallbacks
         ResetScoreTexts();
         Debug.Log("Start() called");
         gameOverPanel.SetActive(false);
-        SpawnPlayer();
+
+        if (PhotonNetwork.IsMasterClient)
+        {
+            StartCoroutine(SpawnPlayersForAll());
+        }
         SetPlayerProfileImage();
         GeriSayým.OnGameOver += GameOver_RPC;
         geriSayým.StartCountdown();
@@ -66,14 +71,17 @@ public class CrownManager : MonoBehaviourPunCallbacks
 
     private void SpawnCrownAtAssignedPosition()
     {
-        if (crownSpawnPoint != null && crownPrefab != null)
+        if (currentCrown == null && crownSpawnPoint != null && crownPrefab != null)
         {
             Vector3 spawnPosition = crownSpawnPoint.position;
             Quaternion spawnRotation = crownSpawnPoint.rotation;
 
-            // Crown'u belirtilen pozisyonda ve rotasyonda instantiate et
             currentCrown = PhotonNetwork.Instantiate(crownPrefab.name, spawnPosition, spawnRotation);
             Debug.Log("Crown spawned at assigned position: " + spawnPosition);
+        }
+        else if (currentCrown != null)
+        {
+            Debug.LogWarning("Crown already exists, not spawning a new one.");
         }
         else
         {
@@ -83,7 +91,6 @@ public class CrownManager : MonoBehaviourPunCallbacks
 
     private void Update()
     {
-        // Tacý alan oyuncu hareket ediyorsa, tacýn pozisyonunu güncelle
         if (currentCrownHolder != null && playerTransforms.ContainsKey(currentCrownHolder))
         {
             UpdateCrownPosition();
@@ -92,11 +99,14 @@ public class CrownManager : MonoBehaviourPunCallbacks
 
     private void UpdateCrownPosition()
     {
-        // Tacý sahibinin pozisyonuna göre güncelle
         Transform playerTransform = playerTransforms[currentCrownHolder];
-        currentCrown.transform.position = playerTransform.position + new Vector3(0, 2.5f, 0);
-        Debug.Log("Crown position updated for " + currentCrownHolder.NickName);
+        if (currentCrown != null && playerTransform != null)
+        {
+            currentCrown.transform.position = playerTransform.position + new Vector3(0, 2.5f, 0);
+            Debug.Log("Crown position updated for " + currentCrownHolder.NickName);
+        }
     }
+
 
     private IEnumerator UpdateScores()
     {
@@ -157,40 +167,53 @@ public class CrownManager : MonoBehaviourPunCallbacks
         player.SetCustomProperties(playerProperties);
     }
 
-    private void SpawnPlayer()
+    private IEnumerator SpawnPlayersForAll()
     {
-        Player localPlayer = PhotonNetwork.LocalPlayer;
-
-        int spawnPointIndex = localPlayer.ActorNumber % spawnPoints.Length;
-        Transform spawnPoint = spawnPoints[spawnPointIndex];
-        Vector3 spawnPosition = spawnPoint.position;
-        Quaternion spawnRotation = spawnPoint.rotation;
-
-        string characterPrefabName = PlayerPrefs.GetString("LastEquippedCharacter", "DefaultCharacter");
-
-        if (!string.IsNullOrEmpty(characterPrefabName))
+        foreach (Player player in PhotonNetwork.PlayerList)
         {
-            GameObject character = PhotonNetwork.Instantiate(characterPrefabName, spawnPosition, spawnRotation);
+            photonView.RPC("SpawnPlayerForAll", RpcTarget.AllBuffered, player.ActorNumber);
+            yield return new WaitForSeconds(0.5f);  // Spawn iþlemleri arasýnda kýsa bir gecikme
+        }
+    }
 
-            if (character != null)
+    [PunRPC]
+    private void SpawnPlayerForAll(int playerActorNumber)
+    {
+        Player player = PhotonNetwork.PlayerList.FirstOrDefault(p => p.ActorNumber == playerActorNumber);
+
+        if (player != null && player == PhotonNetwork.LocalPlayer)
+        {
+            int spawnPointIndex = player.ActorNumber % spawnPoints.Length;
+            Transform spawnPoint = spawnPoints[spawnPointIndex];
+            Vector3 spawnPosition = spawnPoint.position;
+            Quaternion spawnRotation = spawnPoint.rotation;
+
+            string characterPrefabName = PlayerPrefs.GetString("LastEquippedCharacter", "DefaultCharacter");
+
+            if (!string.IsNullOrEmpty(characterPrefabName))
             {
-                Debug.Log("Character successfully spawned.");
-                playerTransforms[localPlayer] = character.transform;  // Karakterin transformunu kaydediyoruz
-                int playerIndex = PhotonNetwork.LocalPlayer.ActorNumber - 1;
-                Renderer circleRenderer = character.transform.Find("CirclePrefabName").GetComponent<Renderer>(); // Circle prefabýna eriþ
-                if (circleRenderer != null && playerIndex >= 0 && playerIndex < playerColors.Length)
+                GameObject character = PhotonNetwork.Instantiate(characterPrefabName, spawnPosition, spawnRotation);
+
+                if (character != null)
                 {
-                    circleRenderer.material.color = playerColors[playerIndex];
+                    // Oyuncunun rengi ayarlanýyor
+                    int playerIndex = PhotonNetwork.LocalPlayer.ActorNumber - 1;
+                    Renderer circleRenderer = character.transform.Find("Circle").GetComponent<Renderer>(); // Circle prefabýna eriþ
+                    if (circleRenderer != null && playerIndex >= 0 && playerIndex < playerColors.Length)
+                    {
+                        circleRenderer.material.color = playerColors[playerIndex];
+                    }
+                    Debug.Log("Character successfully spawned.");
+                }
+                else
+                {
+                    Debug.LogError("Failed to instantiate character.");
                 }
             }
             else
             {
-                Debug.LogError("Failed to instantiate character.");
+                Debug.LogError("Character prefab not found in PlayerPrefs.");
             }
-        }
-        else
-        {
-            Debug.LogError("Character prefab not found in PlayerPrefs.");
         }
     }
 
@@ -224,11 +247,10 @@ public class CrownManager : MonoBehaviourPunCallbacks
             currentCrownHolder = player;
             Debug.Log("Crown holder set to " + player.NickName);
 
-            // Tacý yeni crown holder'ýn karakterine baðla
+            // Sadece tacý yeni crown holder'ýn pozisyonuna güncelle, Parent yapma
             if (playerTransforms.ContainsKey(player))
             {
-                currentCrown.transform.SetParent(playerTransforms[player]);  // Taç yeni sahibine baðlanýyor
-                currentCrown.transform.localPosition = new Vector3(0, 2.5f, 0); // Taç, oyuncunun kafasýnda konumlandýrýlýr
+                UpdateCrownPosition(); // Taç, yeni sahibinin pozisyonuna taþýnacak
             }
         }
     }

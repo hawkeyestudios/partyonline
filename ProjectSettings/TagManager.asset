@@ -15,6 +15,7 @@ TagManager:
   - Barrel
   - Crown
   - Ghost
+  - BarrelGround
   layers:
   - Default
   - TransparentFX

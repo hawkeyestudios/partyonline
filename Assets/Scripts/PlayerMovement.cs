@@ -319,9 +319,7 @@ public class PlayerMovement : MonoBehaviour
                 heartImages[reviveCount].enabled = false;
                 Debug.Log("Yeterli kalp yok, yeniden doðma baþarýsýz.");
                 yield return new WaitForSeconds(2.2f);
-                Destroy(gameObject);
-
-                GameObject ghost = PhotonNetwork.Instantiate(ghostPrefab.name, currentPosition, currentRotation);
+                PhotonNetwork.Destroy(gameObject);
             }
         }
     }

@@ -4,6 +4,8 @@ using Photon.Realtime;
 using UnityEngine.UI;
 using System.Collections.Generic;
 using System.Collections;
+using System.Linq;
+using UnityEngine.TextCore.Text;
 
 public class GhostManager : MonoBehaviourPunCallbacks
 {
@@ -30,7 +32,10 @@ public class GhostManager : MonoBehaviourPunCallbacks
         ResetPlayerScores();
         ResetScoreTexts();
         gameOverPanel.SetActive(false);
-        SpawnPlayer();
+        if (PhotonNetwork.IsMasterClient)
+        {
+            StartCoroutine(SpawnPlayersForAll());
+        }
         GeriSayým.OnGameOver += GameOver_RPC;
         SetPlayerProfileImage();
         geriSayým.StartCountdown();
@@ -132,42 +137,55 @@ public class GhostManager : MonoBehaviourPunCallbacks
         player.SetCustomProperties(playerProperties);
     }
 
-    private void SpawnPlayer()
+    private IEnumerator SpawnPlayersForAll()
     {
-        Player localPlayer = PhotonNetwork.LocalPlayer;
-
-        int spawnPointIndex = localPlayer.ActorNumber % spawnPoints.Length;
-        Transform spawnPoint = spawnPoints[spawnPointIndex];
-        Vector3 spawnPosition = spawnPoint.position;
-        Quaternion spawnRotation = spawnPoint.rotation;
-
-        string characterPrefabName = PlayerPrefs.GetString("LastEquippedCharacter", "DefaultCharacter");
-
-        if (!string.IsNullOrEmpty(characterPrefabName))
+        foreach (Player player in PhotonNetwork.PlayerList)
         {
-            GameObject character = PhotonNetwork.Instantiate(characterPrefabName, spawnPosition, spawnRotation);
-
-            if (character != null)
-            {
-                int playerIndex = PhotonNetwork.LocalPlayer.ActorNumber - 1;
-                Renderer circleRenderer = character.transform.Find("CirclePrefabName").GetComponent<Renderer>(); // Circle prefabýna eriþ
-                if (circleRenderer != null && playerIndex >= 0 && playerIndex < playerColors.Length)
-                {
-                    circleRenderer.material.color = playerColors[playerIndex];
-                }
-                Debug.Log("Character successfully spawned.");
-            }
-            else
-            {
-                Debug.LogError("Failed to instantiate character.");
-            }
-        }
-        else
-        {
-            Debug.LogError("Character prefab not found in PlayerPrefs.");
+            photonView.RPC("SpawnPlayerForAll", RpcTarget.AllBuffered, player.ActorNumber);
+            yield return new WaitForSeconds(0.5f);  // Spawn iþlemleri arasýnda kýsa bir gecikme
         }
     }
 
+    [PunRPC]
+    private void SpawnPlayerForAll(int playerActorNumber)
+    {
+        Player player = PhotonNetwork.PlayerList.FirstOrDefault(p => p.ActorNumber == playerActorNumber);
+
+        if (player != null && player == PhotonNetwork.LocalPlayer)
+        {
+            int spawnPointIndex = player.ActorNumber % spawnPoints.Length;
+            Transform spawnPoint = spawnPoints[spawnPointIndex];
+            Vector3 spawnPosition = spawnPoint.position;
+            Quaternion spawnRotation = spawnPoint.rotation;
+
+            string characterPrefabName = PlayerPrefs.GetString("LastEquippedCharacter", "DefaultCharacter");
+
+            if (!string.IsNullOrEmpty(characterPrefabName))
+            {
+                GameObject character = PhotonNetwork.Instantiate(characterPrefabName, spawnPosition, spawnRotation);
+
+                if (character != null)
+                {
+                    // Oyuncunun rengi ayarlanýyor
+                    int playerIndex = PhotonNetwork.LocalPlayer.ActorNumber - 1;
+                    Renderer circleRenderer = character.transform.Find("Circle").GetComponent<Renderer>(); // Circle prefabýna eriþ
+                    if (circleRenderer != null && playerIndex >= 0 && playerIndex < playerColors.Length)
+                    {
+                        circleRenderer.material.color = playerColors[playerIndex];
+                    }
+                    Debug.Log("Character successfully spawned.");
+                }
+                else
+                {
+                    Debug.LogError("Failed to instantiate character.");
+                }
+            }
+            else
+            {
+                Debug.LogError("Character prefab not found in PlayerPrefs.");
+            }
+        }
+    }
 
     private void SetPlayerProfileImage()
     {
