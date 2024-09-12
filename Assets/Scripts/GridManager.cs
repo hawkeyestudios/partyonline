@@ -31,7 +31,7 @@ public class GridManager : MonoBehaviour
         else
         {
             Debug.LogWarning("Tüm spawn noktalarý dolu!");
-            return null; // Ya da dolu bir sahne için baþka bir fallback seçeneði
+            return null;
         }
     }
 

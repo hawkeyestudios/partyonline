@@ -195,7 +195,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     {
         Debug.Log("Joined Lobby.");
 
-        RoomOptions roomOptions = new RoomOptions { MaxPlayers = 2}; //Lobi kiþi sayýsý
+        RoomOptions roomOptions = new RoomOptions { MaxPlayers = 1}; //Lobi kiþi sayýsý
         PhotonNetwork.JoinOrCreateRoom("LobbyRoom", roomOptions, TypedLobby.Default);
     }
     public override void OnJoinedRoom()
@@ -213,7 +213,6 @@ public class PhotonManager : MonoBehaviourPunCallbacks
             Debug.LogError("Cosmetics button is not assigned.");
         }
 
-        // Spawn oyuncu karakterini
         Transform spawnPoint = gridManager.GetRandomSpawnPoint();
 
         if (spawnPoint != null)
@@ -222,7 +221,6 @@ public class PhotonManager : MonoBehaviourPunCallbacks
 
             if (!string.IsNullOrEmpty(characterPrefabName))
             {
-                // Karakteri seçilen spawn noktasýnda instantiate et
                 GameObject character = PhotonNetwork.Instantiate(characterPrefabName, spawnPoint.position, spawnPoint.rotation);
 
                 if (character != null)
@@ -293,13 +291,13 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         isCountdownActive = true;
         while (countdownTime > 0)
         {
-            Debug.Log("Countdown: " + countdownTime); // Geri sayýmýn düzgün çalýþtýðýný kontrol edin
+            Debug.Log("Countdown: " + countdownTime);
             photonView.RPC("UpdateCountdown", RpcTarget.All, countdownTime);
             yield return new WaitForSeconds(1f);
             countdownTime--;
         }
 
-        Debug.Log("Countdown finished, starting game..."); // Geri sayýmýn tamamlandýðýný kontrol edin
+        Debug.Log("Countdown finished, starting game..."); 
         StartGame();
     }
 

@@ -4,8 +4,8 @@ using UnityEngine.UI;
 
 public class CharacterShop : MonoBehaviour
 {
-    public Text coinText; // Karakter maðazasýnda coin miktarýný gösteren Text
-    public Text gemText; // Karakter maðazasýnda gem miktarýný gösteren Text
+    public Text coinText;
+    public Text gemText; 
 
     private void Start()
     {

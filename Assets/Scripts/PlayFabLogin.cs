@@ -35,7 +35,7 @@ namespace KnoxGameStudios
             LoadingText.SetActive(false);
             if (string.IsNullOrEmpty(PlayFabSettings.TitleId))
             {
-                PlayFabSettings.TitleId = "DC6A9"; // Your PlayFab TitleId
+                PlayFabSettings.TitleId = "DC6A9"; //PlayFab TitleId
             }
         }
         public void TapToStart()
@@ -79,7 +79,7 @@ namespace KnoxGameStudios
 
         private bool IsValidPassword()
         {
-            return !string.IsNullOrEmpty(password) && password.Length >= 6; // Minimum password length check
+            return !string.IsNullOrEmpty(password) && password.Length >= 6; // Minimum password length
         }
 
         private void LoginWithEmail()
@@ -125,7 +125,7 @@ namespace KnoxGameStudios
         {
             isPasswordVisible = !isPasswordVisible;
             passwordInput.contentType = isPasswordVisible ? InputField.ContentType.Standard : InputField.ContentType.Password;
-            passwordInput.ForceLabelUpdate(); // Ensure the input field updates its display
+            passwordInput.ForceLabelUpdate(); 
         }
         #endregion
 
@@ -199,7 +199,6 @@ namespace KnoxGameStudios
 
                 Debug.Log($"DisplayName retrieved from PlayFab: {displayName}");
 
-                // Kullanýcýyý baþka bir sahneye yönlendirin
                 SceneController.LoadScene("MainMenu");
             }
             else
@@ -212,11 +211,10 @@ namespace KnoxGameStudios
         {
             Debug.Log($"You have successfully registered with PlayFab using email {email}");
 
-            // Oyuncunun ilk kez kayýt olduðunu belirle
             PlayerPrefs.SetInt("FirstTimeRegistration", 1);
             PlayerPrefs.Save();
 
-            UpdateDisplayName(username); // Update display name after successful registration
+            UpdateDisplayName(username);
         }
 
 

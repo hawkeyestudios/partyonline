@@ -6,30 +6,101 @@ using System.Collections.Generic;
 using System.Collections;
 using System.Linq;
 
-public class SpawnManager : MonoBehaviourPunCallbacks
+public class SumoManager : MonoBehaviourPunCallbacks
 {
     public Transform[] spawnPoints;
     public Image[] profileImages;
-    public Text[] rewardTexts;
+
+    // Score system
+    public Text[] playerScoreTexts;
+    public float scoreIncrement = 1f;
+
     public Text[] nickNames;
     public GameObject gameOverPanel;
     public GeriSayým geriSayým;
 
-    private List<Player> finishOrder = new List<Player>();
+    public Text[] gameOverScoreTexts;
+    public Image[] gameOverProfileImages;
+    public Text[] gameOverNickNames;
+
     private bool raceFinished = false;
 
     public Color[] playerColors = { Color.red, new Color(0.25f, 0.88f, 0.82f), Color.yellow, new Color(0.63f, 0.13f, 0.94f) };
     private void Start()
     {
+
+        ResetPlayerScores();
+        ResetScoreTexts();
+        Debug.Log("Start() called");
         gameOverPanel.SetActive(false);
+
         if (PhotonNetwork.IsMasterClient)
         {
             StartCoroutine(SpawnPlayersForAll());
         }
         SetPlayerProfileImage();
-
         GeriSayým.OnGameOver += GameOver_RPC;
         geriSayým.StartCountdown();
+
+        StartCoroutine(StartScoreCountingAfterDelay(10f));
+    }
+
+    private IEnumerator StartScoreCountingAfterDelay(float delay)
+    {
+        Debug.Log("Score counting will start after delay: " + delay + " seconds.");
+        yield return new WaitForSeconds(delay);
+    }
+    public void ResetScoreTexts()
+    {
+        foreach (Text scoreText in playerScoreTexts)
+        {
+            scoreText.text = "0";
+        }
+        foreach (Text scoreText in gameOverScoreTexts)
+        {
+            scoreText.text = "0";
+        }
+    }
+
+    [PunRPC]
+    private void UpdateScoreUI_RPC()
+    {
+        Debug.Log("Updating UI for player scores.");
+        for (int i = 0; i < PhotonNetwork.PlayerList.Length; i++)
+        {
+            Player player = PhotonNetwork.PlayerList[i];
+            playerScoreTexts[i].text = GetPlayerScore(player).ToString("F0");
+            Debug.Log("Score updated for " + player.NickName + ": " + playerScoreTexts[i].text);
+        }
+    }
+
+    private void ResetPlayerScores()
+    {
+        foreach (Player player in PhotonNetwork.PlayerList)
+        {
+            SetPlayerScore(player, 0f);
+        }
+
+        photonView.RPC("UpdateScoreUI_RPC", RpcTarget.All);
+    }
+
+    private float GetPlayerScore(Player player)
+    {
+        if (player.CustomProperties.TryGetValue("PlayerScore", out object score))
+        {
+            return (float)score;
+        }
+        return 0f;
+    }
+
+    private void SetPlayerScore(Player player, float score)
+    {
+        Debug.Log("Setting score for " + player.NickName + " | Score: " + score);
+        ExitGames.Client.Photon.Hashtable playerProperties = new ExitGames.Client.Photon.Hashtable
+        {
+            { "PlayerScore", score }
+        };
+        player.SetCustomProperties(playerProperties);
     }
 
     private IEnumerator SpawnPlayersForAll()
@@ -37,7 +108,7 @@ public class SpawnManager : MonoBehaviourPunCallbacks
         foreach (Player player in PhotonNetwork.PlayerList)
         {
             photonView.RPC("SpawnPlayerForAll", RpcTarget.AllBuffered, player.ActorNumber);
-            yield return new WaitForSeconds(0.5f);
+            yield return new WaitForSeconds(0.5f); 
         }
     }
 
@@ -62,7 +133,7 @@ public class SpawnManager : MonoBehaviourPunCallbacks
                 if (character != null)
                 {
                     int playerIndex = PhotonNetwork.LocalPlayer.ActorNumber - 1;
-                    Renderer circleRenderer = character.transform.Find("Circle").GetComponent<Renderer>(); 
+                    Renderer circleRenderer = character.transform.Find("Circle").GetComponent<Renderer>();
                     if (circleRenderer != null && playerIndex >= 0 && playerIndex < playerColors.Length)
                     {
                         circleRenderer.material.color = playerColors[playerIndex];
@@ -84,60 +155,36 @@ public class SpawnManager : MonoBehaviourPunCallbacks
     private void SetPlayerProfileImage()
     {
         string playerImageName = PlayerPrefs.GetString("LastEquippedCharacter");
-        ExitGames.Client.Photon.Hashtable playerProperties = new ExitGames.Client.Photon.Hashtable();
-        playerProperties["profileImage"] = playerImageName;
-        PhotonNetwork.LocalPlayer.SetCustomProperties(playerProperties);
-    }
-
-    private void OnTriggerEnter(Collider other)
-    {
-        if (raceFinished || !PhotonNetwork.IsMasterClient) return;
-
-        if (other.CompareTag("Player"))
+        ExitGames.Client.Photon.Hashtable playerProperties = new ExitGames.Client.Photon.Hashtable
         {
-            Player player = other.GetComponent<PhotonView>().Owner;
-
-            if (!finishOrder.Contains(player))
-            {
-                finishOrder.Add(player);
-
-                int playerIndex = finishOrder.IndexOf(player);
-                int reward = Mathf.Max(1000 - (playerIndex * 250), 0);
-                SetPlayerScore(player, reward);
-
-                photonView.RPC("UpdatePlayerUI_RPC", RpcTarget.All, player.ActorNumber, reward);
-
-                if (finishOrder.Count == PhotonNetwork.PlayerList.Length)
-                {
-                    raceFinished = true;
-                    photonView.RPC("GameOver_RPC", RpcTarget.All);
-                }
-            }
-        }
+            { "profileImage", playerImageName }
+        };
+        PhotonNetwork.LocalPlayer.SetCustomProperties(playerProperties);
+        Debug.Log("Profile image set for player: " + PhotonNetwork.LocalPlayer.NickName);
     }
 
     [PunRPC]
-    private void UpdatePlayerUI_RPC(int playerActorNumber, int reward)
+    private void GameOver_RPC()
     {
-        Player player = PhotonNetwork.CurrentRoom.GetPlayer(playerActorNumber);
-        if (player == null) return;
+        raceFinished = true;
+        gameOverPanel.SetActive(true);
+        Debug.Log("Game over. Displaying scores.");
+        UpdateGameOverScores();
+    }
 
-        int playerIndex = finishOrder.IndexOf(player);
-        if (playerIndex >= 0 && playerIndex < profileImages.Length)
+    private void UpdateGameOverScores()
+    {
+        Debug.Log("Updating game over scores.");
+        for (int i = 0; i < PhotonNetwork.PlayerList.Length; i++)
         {
-            profileImages[playerIndex].sprite = GetProfileSprite(player);
-            rewardTexts[playerIndex].text = $"{reward}";
-            nickNames[playerIndex].text = player.NickName;
+            Player player = PhotonNetwork.PlayerList[i];
+            gameOverScoreTexts[i].text = GetPlayerScore(player).ToString("F0");
+            gameOverProfileImages[i].sprite = GetProfileSprite(player);
+            gameOverNickNames[i].text = player.NickName;
+            Debug.Log("Game over score for " + player.NickName + ": " + gameOverScoreTexts[i].text);
         }
     }
-    private void SetPlayerScore(Player player, int score)
-    {
-        ExitGames.Client.Photon.Hashtable playerProperties = new ExitGames.Client.Photon.Hashtable
-    {
-        { "PlayerScore", score }
-    };
-        player.SetCustomProperties(playerProperties);
-    }
+
     private Sprite GetProfileSprite(Player player)
     {
         if (player.CustomProperties.TryGetValue("profileImage", out object playerImageName))
@@ -157,27 +204,9 @@ public class SpawnManager : MonoBehaviourPunCallbacks
         }
     }
 
-    [PunRPC]
-    private void GameOver_RPC()
-    {
-        raceFinished = true;
-        gameOverPanel.SetActive(true);
-
-        foreach (Player player in PhotonNetwork.PlayerList)
-        {
-            if (!finishOrder.Contains(player))
-            {
-                finishOrder.Add(player);
-                int playerScore = (int)player.CustomProperties["PlayerScore"];
-                UpdatePlayerUI_RPC(player.ActorNumber, playerScore);
-            }
-        }
-    }
-
-
     private void OnDestroy()
     {
         GeriSayým.OnGameOver -= GameOver_RPC;
+        Debug.Log("CrownManager destroyed. Cleanup done.");
     }
-
 }

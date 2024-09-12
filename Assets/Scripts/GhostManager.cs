@@ -19,7 +19,6 @@ public class GhostManager : MonoBehaviourPunCallbacks
     public GameObject gameOverPanel;
     public GeriSayým geriSayým;
 
-    // GameOverPanel'deki Score Text'leri
     public Text[] gameOverScoreTexts;
 
     private List<Player> frozenPlayers = new List<Player>();
@@ -105,7 +104,6 @@ public class GhostManager : MonoBehaviourPunCallbacks
     {
         if (player.CustomProperties.TryGetValue("PlayerScore", out object score))
         {
-            // score nesnesi float deðilse dönüþtürme yapýlmalý
             if (score is float)
             {
                 return (float)score;
@@ -116,7 +114,7 @@ public class GhostManager : MonoBehaviourPunCallbacks
             }
             else if (score is double)
             {
-                return (float)(double)score; // double'ý float'a dönüþtür
+                return (float)(double)score;
             }
             else
             {
@@ -142,7 +140,7 @@ public class GhostManager : MonoBehaviourPunCallbacks
         foreach (Player player in PhotonNetwork.PlayerList)
         {
             photonView.RPC("SpawnPlayerForAll", RpcTarget.AllBuffered, player.ActorNumber);
-            yield return new WaitForSeconds(0.5f);  // Spawn iþlemleri arasýnda kýsa bir gecikme
+            yield return new WaitForSeconds(0.5f);
         }
     }
 
@@ -166,9 +164,8 @@ public class GhostManager : MonoBehaviourPunCallbacks
 
                 if (character != null)
                 {
-                    // Oyuncunun rengi ayarlanýyor
                     int playerIndex = PhotonNetwork.LocalPlayer.ActorNumber - 1;
-                    Renderer circleRenderer = character.transform.Find("Circle").GetComponent<Renderer>(); // Circle prefabýna eriþ
+                    Renderer circleRenderer = character.transform.Find("Circle").GetComponent<Renderer>();
                     if (circleRenderer != null && playerIndex >= 0 && playerIndex < playerColors.Length)
                     {
                         circleRenderer.material.color = playerColors[playerIndex];

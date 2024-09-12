@@ -69,7 +69,6 @@ public class BarrelManager : MonoBehaviourPunCallbacks
             {
                 if (!frozenPlayers.Contains(player))
                 {
-                    // Sadece oyuncu kendi skorunu arttýrýr
                     if (player == PhotonNetwork.LocalPlayer)
                     {
                         for (int i = 0; i < 10; i++)
@@ -131,7 +130,6 @@ public class BarrelManager : MonoBehaviourPunCallbacks
         {
             frozenPlayers.Add(player);
 
-            // Sadece ölen oyuncunun skorunu durdurmak için bir RPC çaðrýsý yapýyoruz.
             photonView.RPC("FreezePlayerScore_RPC", RpcTarget.All, player.ActorNumber);
 
             CheckForGameOver();
@@ -142,7 +140,6 @@ public class BarrelManager : MonoBehaviourPunCallbacks
     {
         Player player = PhotonNetwork.CurrentRoom.GetPlayer(playerActorNumber);
 
-        // Eðer bu player o anki yerel oyuncuysa, onun skorunu durdur
         if (player != null && player == PhotonNetwork.LocalPlayer)
         {
             scoreCountingStarted = false;
@@ -168,7 +165,7 @@ public class BarrelManager : MonoBehaviourPunCallbacks
         foreach (Player player in PhotonNetwork.PlayerList)
         {
             photonView.RPC("SpawnPlayerForAll", RpcTarget.AllBuffered, player.ActorNumber);
-            yield return new WaitForSeconds(0.5f);  // Spawn iþlemleri arasýnda kýsa bir gecikme
+            yield return new WaitForSeconds(0.5f); 
         }
     }
 
@@ -192,9 +189,8 @@ public class BarrelManager : MonoBehaviourPunCallbacks
 
                 if (character != null)
                 {
-                    // Oyuncunun rengi ayarlanýyor
                     int playerIndex = PhotonNetwork.LocalPlayer.ActorNumber - 1;
-                    Renderer circleRenderer = character.transform.Find("Circle").GetComponent<Renderer>(); // Circle prefabýna eriþ
+                    Renderer circleRenderer = character.transform.Find("Circle").GetComponent<Renderer>(); 
                     if (circleRenderer != null && playerIndex >= 0 && playerIndex < playerColors.Length)
                     {
                         circleRenderer.material.color = playerColors[playerIndex];

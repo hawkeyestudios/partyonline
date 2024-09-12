@@ -17,7 +17,6 @@ public class MapGecisGeriSayim : MonoBehaviourPunCallbacks
 
     private string[] mapNames = { "TrapPG", "GhostPG", "TntPG", "CrownPG" };
 
-    // Oyuncularýn hazýr olup olmadýðýný takip etmek için
     private bool allPlayersReady = false;
 
     void Start()
@@ -27,7 +26,6 @@ public class MapGecisGeriSayim : MonoBehaviourPunCallbacks
 
         if (PhotonNetwork.IsMasterClient)
         {
-            // MasterClient tüm oyuncularýn hazýr olup olmadýðýný kontrol etmeye baþlar
             StartCoroutine(CheckAllPlayersReady());
         }
     }
@@ -136,12 +134,11 @@ public class MapGecisGeriSayim : MonoBehaviourPunCallbacks
         }
     }
 
-    // Oyuncularýn hazýr olup olmadýðýný kontrol eden coroutine
     IEnumerator CheckAllPlayersReady()
     {
         while (!allPlayersReady)
         {
-            yield return new WaitForSeconds(1f); // Her saniye bir kontrol yap
+            yield return new WaitForSeconds(1f);
             photonView.RPC("PlayerIsReady", RpcTarget.AllBuffered);
         }
     }
@@ -149,7 +146,6 @@ public class MapGecisGeriSayim : MonoBehaviourPunCallbacks
     [PunRPC]
     void PlayerIsReady()
     {
-        // Tüm oyuncularýn hazýr olup olmadýðýný kontrol et
         allPlayersReady = PhotonNetwork.PlayerList.Length == PhotonNetwork.CurrentRoom.PlayerCount;
     }
 }

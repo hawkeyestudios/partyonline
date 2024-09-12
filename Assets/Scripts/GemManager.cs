@@ -6,7 +6,7 @@ public class GemManager : MonoBehaviour
     public static GemManager Instance;
 
     private int currentGems;
-    public Text gemText; // UI'daki gem miktarýný gösteren Text
+    public Text gemText; 
 
     private void Awake()
     {
@@ -14,7 +14,7 @@ public class GemManager : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
-            DontDestroyOnLoad(gameObject); // Oyun sahnesi deðiþse bile bu objeyi yok etme
+            DontDestroyOnLoad(gameObject); 
         }
         else
         {
@@ -24,7 +24,7 @@ public class GemManager : MonoBehaviour
 
     private void Start()
     {
-        currentGems = PlayerPrefs.GetInt("Gems", 5000); // Varsayýlan gem miktarý 100
+        currentGems = PlayerPrefs.GetInt("Gems", 5000); 
         UpdateGemUI();
     }
 
@@ -70,7 +70,7 @@ public class GemManager : MonoBehaviour
     public void SetCurrentGems(int gems)
     {
         currentGems = gems;
-        UpdateGemUI(); // UI'yi güncelle
+        UpdateGemUI(); 
     }
 
 

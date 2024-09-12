@@ -7,11 +7,10 @@ public class CoinManager : MonoBehaviour
     public static CoinManager Instance;
 
     private int currentCoins;
-    public Text coinText; // UI'daki coin miktarýný gösteren Text
+    public Text coinText; 
 
     private void Awake()
     {
-        // Singleton tasarým deseni
         if (Instance == null)
         {
             Instance = this;
@@ -70,7 +69,7 @@ public class CoinManager : MonoBehaviour
     public void SetCurrentCoins(int coins)
     {
         currentCoins = coins;
-        UpdateCoinUI(); // UI'yi güncelle
+        UpdateCoinUI();
     }
 
 

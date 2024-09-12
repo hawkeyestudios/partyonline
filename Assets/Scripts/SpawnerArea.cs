@@ -57,7 +57,6 @@
             Quaternion randomRotation1 = GetRandomRotation();
             Quaternion randomRotation2 = GetRandomRotation();
 
-            // Obje adýný string olarak kullanarak PhotonNetwork.Instantiate çaðrýsý
             PhotonNetwork.Instantiate(objectToSpawn.name, spawnPosition1, randomRotation1);
             PhotonNetwork.Instantiate(objectToSpawn.name, spawnPosition2, randomRotation2);
         }

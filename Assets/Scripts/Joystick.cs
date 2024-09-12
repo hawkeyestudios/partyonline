@@ -5,7 +5,7 @@ public class Joystick : MonoBehaviour, IDragHandler, IPointerUpHandler, IPointer
 {
     private RectTransform background;
     private RectTransform handle;
-    private RectTransform highlight; // Highlight nesnesi
+    private RectTransform highlight; 
     private Vector2 inputVector;
     private bool isActive = true;
 
@@ -13,7 +13,7 @@ public class Joystick : MonoBehaviour, IDragHandler, IPointerUpHandler, IPointer
     {
         background = GetComponent<RectTransform>();
         handle = transform.GetChild(1).GetComponent<RectTransform>();
-        highlight = transform.GetChild(0).GetComponent<RectTransform>(); // Highlight nesnesini al
+        highlight = transform.GetChild(0).GetComponent<RectTransform>(); 
     }
 
     public void OnDrag(PointerEventData eventData)
@@ -30,7 +30,6 @@ public class Joystick : MonoBehaviour, IDragHandler, IPointerUpHandler, IPointer
 
         handle.anchoredPosition = new Vector2(inputVector.x * (background.sizeDelta.x / 5), inputVector.y * (background.sizeDelta.y / 5));
 
-        // Highlight'ý güncelle
         UpdateHighlight();
     }
 
@@ -58,7 +57,7 @@ public class Joystick : MonoBehaviour, IDragHandler, IPointerUpHandler, IPointer
     {
         inputVector = Vector2.zero;
         handle.anchoredPosition = Vector2.zero;
-        UpdateHighlight(); // Highlight'ý sýfýrla
+        UpdateHighlight(); 
     }
 
     public void SetActive(bool active)
@@ -70,16 +69,14 @@ public class Joystick : MonoBehaviour, IDragHandler, IPointerUpHandler, IPointer
     {
         if (inputVector == Vector2.zero)
         {
-            highlight.gameObject.SetActive(false); // Joystick ortada ise highlight'ý gizle
+            highlight.gameObject.SetActive(false);
             return;
         }
 
         highlight.gameObject.SetActive(true);
 
-        // Açýyý hesapla
         float angle = Mathf.Atan2(inputVector.y, inputVector.x) * Mathf.Rad2Deg;
 
-        // Highlight'ýn açýsýný güncelle
         highlight.localEulerAngles = new Vector3(0, 0, angle-45);
     }
 }

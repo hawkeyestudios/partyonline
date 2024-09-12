@@ -16,6 +16,7 @@ TagManager:
   - Crown
   - Ghost
   - BarrelGround
+  - BallControl
   layers:
   - Default
   - TransparentFX

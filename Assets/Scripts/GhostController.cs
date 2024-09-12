@@ -66,7 +66,7 @@ public class GhostController : MonoBehaviourPun
         {
             Transform playerTransform = player.transform;
             if (recentlyAttackedPlayers.Contains(playerTransform))
-                continue; // Skip players that were recently attacked
+                continue;
 
             float distance = Vector3.Distance(transform.position, playerTransform.position);
             if (distance < minDistance)

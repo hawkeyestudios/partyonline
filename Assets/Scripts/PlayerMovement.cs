@@ -559,7 +559,6 @@ public class PlayerMovement : MonoBehaviour
     [PunRPC]
     private void ResetCharacterState_RPC()
     {
-        // Animasyon ve efekt durumlarýný sýfýrla
         animator.ResetTrigger("Die");
         canAnim = false;
         if (boomEffect != null)

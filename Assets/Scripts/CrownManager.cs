@@ -172,7 +172,7 @@ public class CrownManager : MonoBehaviourPunCallbacks
         foreach (Player player in PhotonNetwork.PlayerList)
         {
             photonView.RPC("SpawnPlayerForAll", RpcTarget.AllBuffered, player.ActorNumber);
-            yield return new WaitForSeconds(0.5f);  // Spawn iþlemleri arasýnda kýsa bir gecikme
+            yield return new WaitForSeconds(0.5f); 
         }
     }
 
@@ -196,9 +196,8 @@ public class CrownManager : MonoBehaviourPunCallbacks
 
                 if (character != null)
                 {
-                    // Oyuncunun rengi ayarlanýyor
                     int playerIndex = PhotonNetwork.LocalPlayer.ActorNumber - 1;
-                    Renderer circleRenderer = character.transform.Find("Circle").GetComponent<Renderer>(); // Circle prefabýna eriþ
+                    Renderer circleRenderer = character.transform.Find("Circle").GetComponent<Renderer>();
                     if (circleRenderer != null && playerIndex >= 0 && playerIndex < playerColors.Length)
                     {
                         circleRenderer.material.color = playerColors[playerIndex];
@@ -247,10 +246,9 @@ public class CrownManager : MonoBehaviourPunCallbacks
             currentCrownHolder = player;
             Debug.Log("Crown holder set to " + player.NickName);
 
-            // Sadece tacý yeni crown holder'ýn pozisyonuna güncelle, Parent yapma
             if (playerTransforms.ContainsKey(player))
             {
-                UpdateCrownPosition(); // Taç, yeni sahibinin pozisyonuna taþýnacak
+                UpdateCrownPosition(); 
             }
         }
     }

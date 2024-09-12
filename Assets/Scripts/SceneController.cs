@@ -15,6 +15,7 @@ public class SceneController : MonoBehaviour
     public GameObject profilePanel;
     public Animator profilePanelAnim;
     public GameObject notificationPanel;
+    public Animator notificationsAnim;
     public GameObject settingsPanel;
     public GameObject gamemodepanel;
     public GameObject signuppanel;
@@ -44,8 +45,9 @@ public class SceneController : MonoBehaviour
 
     public void OpenFriendSystem()
     {
-        FriendSystemanim.SetTrigger("FriendSystem");
         friendSystemPanel.SetActive(true);
+        FriendSystemanim.SetTrigger("FriendSystem");
+        
     }
     public void OpenAddFriend()
     {
@@ -91,10 +93,11 @@ public class SceneController : MonoBehaviour
     public void NotificationsPanel()
     {
         notificationPanel.SetActive(true);
+        notificationsAnim.SetTrigger("Notifications");
     }
     public void CloseNotificationsPanel()
     {
-        notificationPanel.SetActive(false);
+        notificationsAnim.SetTrigger("NotificationsClose");
     }
     public void SettingsPanel()
     {
