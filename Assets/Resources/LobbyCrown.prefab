@@ -66,20 +66,20 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 9a95ead26cd13c442982b8e6f8253ee9, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 3811}
+      addedObject: {fileID: 3813}
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 9a95ead26cd13c442982b8e6f8253ee9, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 4378}
+      addedObject: {fileID: 4380}
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 9a95ead26cd13c442982b8e6f8253ee9, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 4379}
+      addedObject: {fileID: 4381}
   m_SourcePrefab: {fileID: 100100000, guid: 9a95ead26cd13c442982b8e6f8253ee9, type: 3}
 --- !u!1 &7091542277816529902 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 9a95ead26cd13c442982b8e6f8253ee9, type: 3}
   m_PrefabInstance: {fileID: 7974557660431650495}
   m_PrefabAsset: {fileID: 0}
---- !u!95 &3811
+--- !u!95 &3813
 Animator:
   serializedVersion: 5
   m_ObjectHideFlags: 0
@@ -100,7 +100,7 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!114 &4378
+--- !u!114 &4380
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -119,11 +119,11 @@ MonoBehaviour:
   OwnershipTransfer: 0
   observableSearch: 2
   ObservedComponents:
-  - {fileID: 4379}
+  - {fileID: 4381}
   sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
---- !u!114 &4379
+--- !u!114 &4381
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

@@ -8,7 +8,6 @@ public class PlayerMovement : MonoBehaviour
 {
     public float moveSpeed = 3f;
     public float jumpForce = 12f;
-
     //Speed
     private bool isSpeedBoosted = false;
     private GameObject speedIcon;
@@ -49,9 +48,24 @@ public class PlayerMovement : MonoBehaviour
     public GameObject ghostPrefab;
     public ParticleSystem stepParticle;
 
+    //Sumo Map için eklenenler
+    [HideInInspector]
+    public GameObject ball;
+
+    public float maxSpeed = 6f;
+    public float speedIncreaseFactor = 0.1f;
+    public float rotationSpeed = 100f;
+    private float currentSpeed;
+    private Image momentumImage;
+
     private void Start()
     {
         stepParticle.Stop();
+        currentSpeed = moveSpeed;
+        rb = GetComponent<Rigidbody>();
+        photonView = GetComponent<PhotonView>();
+        animator = GetComponent<Animator>();
+
         if (SceneManager.GetActiveScene().name == "CrownPG")
         {
             moveSpeed = 6;
@@ -61,8 +75,30 @@ public class PlayerMovement : MonoBehaviour
         {
             jumpForce = 15;
         }
+        if (SceneManager.GetActiveScene().name == "SumoPG")
+        {
+            momentumImage = GameObject.Find("Momentum")?.GetComponent<Image>();
+            if (momentumImage == null)
+            {
+                Debug.LogError("momentumImage bulunamadý.");
+            }
 
-        //Speed Özelliði
+            if (photonView.IsMine)
+            {
+                if (ball == null)
+                {
+                    GameObject instantiatedBall = PhotonNetwork.Instantiate("Ball", transform.position, Quaternion.identity);
+
+                    ball = instantiatedBall;
+
+                    int ballViewID = instantiatedBall.GetComponent<PhotonView>().ViewID;
+                    int playerViewID = photonView.ViewID;
+
+                    photonView.RPC("SetBallParent_RPC", RpcTarget.AllBuffered, ballViewID, playerViewID);
+                }
+            }
+        }
+            //Speed Özelliði
         if (SceneManager.GetActiveScene().name == "GhostPG")
         {
             speedIcon = GameObject.Find("Speed");
@@ -101,10 +137,6 @@ public class PlayerMovement : MonoBehaviour
                 attackCountText.text = attackCount.ToString();
             }
         }
-
-        rb = GetComponent<Rigidbody>();
-        photonView = GetComponent<PhotonView>();
-        animator = GetComponent<Animator>();
 
         if (SceneManager.GetActiveScene().name == "TrapPG")
         {
@@ -160,6 +192,17 @@ public class PlayerMovement : MonoBehaviour
                 {
                     stepParticle.Play();
                 }
+
+                if (ball != null)
+                {
+                    float moveInputMagnitude = new Vector2(joystick.Horizontal(), joystick.Vertical()).magnitude;
+                    float rotationAmount = rotationSpeed * moveInputMagnitude * Time.deltaTime;
+                    ball.transform.Rotate(Vector3.right, rotationAmount);
+
+                    // Hýzý artýr
+                    currentSpeed += speedIncreaseFactor * moveInputMagnitude * Time.deltaTime;
+                    currentSpeed = Mathf.Clamp(currentSpeed, moveSpeed, maxSpeed);
+                }
             }
             else
             {
@@ -168,6 +211,8 @@ public class PlayerMovement : MonoBehaviour
                 {
                     stepParticle.Stop();
                 }
+
+                currentSpeed = moveSpeed;
             }
 
             if (rb != null)
@@ -175,6 +220,14 @@ public class PlayerMovement : MonoBehaviour
                 rb.velocity = new Vector3(moveDirection.x * moveSpeed, rb.velocity.y, moveDirection.z * moveSpeed);
             }
 
+            if (momentumImage != null)
+            {
+                float extraSpeed = currentSpeed - moveSpeed;
+                float maxExtraSpeed = maxSpeed - moveSpeed;
+                float fillAmount = extraSpeed / maxExtraSpeed;
+                fillAmount = Mathf.Clamp01(fillAmount);
+                momentumImage.fillAmount = fillAmount;
+            }  
             if (Input.GetButtonDown("Jump") && isGrounded && isMovementEnabled)
             {
                 Jump();
@@ -512,8 +565,92 @@ public class PlayerMovement : MonoBehaviour
                 Destroy(gameObject);
             }
         }
-    }
+        if (SceneManager.GetActiveScene().name == "SumoPG") //Sumo Map için
+        {
+            if (collision.gameObject.CompareTag("Player"))
+            {
+                if (!photonView.IsMine)
+                    yield break;
 
+                PhotonView targetPhotonView = collision.gameObject.GetComponent<PhotonView>();
+
+                if (targetPhotonView != null)
+                {
+                    Vector3 forceDirection = collision.transform.position - transform.position;
+                    forceDirection.y = 0;
+                    forceDirection.Normalize();
+
+                    float forceMagnitude = currentSpeed * 1.3f;
+                    Vector3 force = forceDirection * forceMagnitude;
+
+                    targetPhotonView.RPC("ApplyForce", RpcTarget.All, force);
+
+                    Debug.Log("Oyuncuya çarpýldý: " + collision.gameObject.name + " Kuvvet: " + forceMagnitude);
+                }
+            }
+            else if (collision.gameObject.CompareTag("Sumo"))
+            {
+                canAnim = true;
+                if (canAnim)
+                {
+                    animator.SetTrigger("Die");
+                }
+
+                if (!stepParticle.isPlaying)
+                {
+                    stepParticle.Stop();
+                }
+
+                isMovementEnabled = false;
+
+                if (photonView.IsMine)
+                {
+                    if (joystick != null)
+                    {
+                        joystick.gameObject.SetActive(false);
+                    }
+                    if (jumpButton != null)
+                    {
+                        jumpButton.gameObject.SetActive(false);
+                    }
+                }
+
+                if (boomEffect != null)
+                {
+                    boomEffect.GetComponent<ParticleSystem>().Play();
+                }
+
+                if (photonView.IsMine)
+                {
+                    SumoManager sumoManager = FindObjectOfType<SumoManager>();
+                    sumoManager.photonView.RPC("PlayerEliminated_RPC", RpcTarget.All, photonView.Owner.ActorNumber);
+                }
+                yield return new WaitForSeconds(2.2f);
+
+                Destroy(gameObject);
+            }
+        }
+    }
+    [PunRPC]
+    public void SetBallParent_RPC(int ballViewID, int playerViewID)
+    {
+        PhotonView ballView = PhotonView.Find(ballViewID);
+        PhotonView playerView = PhotonView.Find(playerViewID);
+
+        if (ballView != null && playerView != null)
+        {
+            ballView.transform.SetParent(playerView.transform);
+            ballView.transform.localPosition = Vector3.zero; 
+        }
+    }
+    [PunRPC]
+    public void ApplyForce(Vector3 force)
+    {
+        if (rb != null)
+        {
+            rb.AddForce(force, ForceMode.Impulse);
+        }
+    }
     private IEnumerator RespawnAfterDelay(float delay)
     {
         yield return new WaitForSeconds(delay);

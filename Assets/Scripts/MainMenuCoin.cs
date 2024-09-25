@@ -3,8 +3,8 @@ using UnityEngine.UI;
 
 public class MainMenuCoin : MonoBehaviour
 {
-    public Text coinText; // Ana menüdeki coin miktarýný gösteren Text
-    public Text gemText; // Ana menüdeki gem miktarýný gösteren Text
+    public Text coinText;
+    public Text gemText; 
     public GameObject announcementPanel;
     public Button okButton;
 
@@ -15,19 +15,19 @@ public class MainMenuCoin : MonoBehaviour
 
         if (PlayerPrefs.GetInt("FirstTimeRegistration", 0) == 1)
         {
-            // Paneli aç
+
             if (announcementPanel != null)
             {
                 announcementPanel.SetActive(true);
             }
 
-            // Ýlk kaydýn tamamlandýðýný belirt
+
             PlayerPrefs.SetInt("FirstTimeRegistration", 0);
             PlayerPrefs.Save();
         }
         else
         {
-            // Daha önce kayýt olmuþsa paneli gizle
+
             if (announcementPanel != null)
             {
                 announcementPanel.SetActive(false);

@@ -151,8 +151,7 @@ public class BarrelManager : MonoBehaviourPunCallbacks
 
         if (frozenPlayers.Count == PhotonNetwork.CurrentRoom.PlayerCount)
         {
-            Debug.Log("Oyun bitti fakat gameoverpanel açýlmadýysa oyuncu sayýsý hesaplanamadýðý maç bitmedi");
-            photonView.RPC("GameOver_RPC", RpcTarget.All);
+            DelayedGameOver();
         }
     }
     private IEnumerator DelayedGameOver()

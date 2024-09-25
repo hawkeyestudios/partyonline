@@ -17,6 +17,8 @@ TagManager:
   - Ghost
   - BarrelGround
   - BallControl
+  - Ball
+  - Sumo
   layers:
   - Default
   - TransparentFX

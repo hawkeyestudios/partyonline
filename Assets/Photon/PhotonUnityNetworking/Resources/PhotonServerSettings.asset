@@ -85,6 +85,9 @@ MonoBehaviour:
   - FreezePlayerScore_RPC
   - SpawnPlayerForAll
   - PlayerIsReady
+  - PlayerEliminated_RPC
+  - ApplyForce
+  - SetBallParent_RPC
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

@@ -26,13 +26,21 @@ public class SumoManager : MonoBehaviourPunCallbacks
     private bool raceFinished = false;
 
     public Color[] playerColors = { Color.red, new Color(0.25f, 0.88f, 0.82f), Color.yellow, new Color(0.63f, 0.13f, 0.94f) };
+
+    private Dictionary<Player, bool> playerIsActive;
+
     private void Start()
     {
-
         ResetPlayerScores();
         ResetScoreTexts();
         Debug.Log("Start() called");
         gameOverPanel.SetActive(false);
+
+        playerIsActive = new Dictionary<Player, bool>();
+        foreach (Player player in PhotonNetwork.PlayerList)
+        {
+            playerIsActive[player] = true;
+        }
 
         if (PhotonNetwork.IsMasterClient)
         {
@@ -49,7 +57,27 @@ public class SumoManager : MonoBehaviourPunCallbacks
     {
         Debug.Log("Score counting will start after delay: " + delay + " seconds.");
         yield return new WaitForSeconds(delay);
+        StartCoroutine(IncrementScoresOverTime());
     }
+
+    private IEnumerator IncrementScoresOverTime()
+    {
+        while (!raceFinished)
+        {
+            foreach (Player player in PhotonNetwork.PlayerList)
+            {
+                if (playerIsActive[player])
+                {
+                    float currentScore = GetPlayerScore(player);
+                    float newScore = currentScore + scoreIncrement;
+                    SetPlayerScore(player, newScore);
+                }
+            }
+            photonView.RPC("UpdateScoreUI_RPC", RpcTarget.All);
+            yield return new WaitForSeconds(1f);
+        }
+    }
+
     public void ResetScoreTexts()
     {
         foreach (Text scoreText in playerScoreTexts)
@@ -108,7 +136,7 @@ public class SumoManager : MonoBehaviourPunCallbacks
         foreach (Player player in PhotonNetwork.PlayerList)
         {
             photonView.RPC("SpawnPlayerForAll", RpcTarget.AllBuffered, player.ActorNumber);
-            yield return new WaitForSeconds(0.5f); 
+            yield return new WaitForSeconds(0.5f);
         }
     }
 
@@ -132,13 +160,27 @@ public class SumoManager : MonoBehaviourPunCallbacks
 
                 if (character != null)
                 {
+                    spawnPosition.z = 0.7f;
+                    GameObject ball = PhotonNetwork.Instantiate("Ball", spawnPosition, spawnRotation, 0);
+                    ball.transform.SetParent(character.transform);
+                    ball.transform.localPosition = Vector3.zero;
+
+                    PhotonView ballPhotonView = ball.GetComponent<PhotonView>();
+                    ballPhotonView.TransferOwnership(PhotonNetwork.LocalPlayer);
+
+                    PlayerMovement playerMovement = character.GetComponent<PlayerMovement>();
+                    if (playerMovement != null)
+                    {
+                        playerMovement.ball = ball;
+                    }
+
                     int playerIndex = PhotonNetwork.LocalPlayer.ActorNumber - 1;
                     Renderer circleRenderer = character.transform.Find("Circle").GetComponent<Renderer>();
                     if (circleRenderer != null && playerIndex >= 0 && playerIndex < playerColors.Length)
                     {
                         circleRenderer.material.color = playerColors[playerIndex];
                     }
-                    Debug.Log("Character successfully spawned.");
+                    Debug.Log("Character and ball successfully spawned.");
                 }
                 else
                 {
@@ -207,6 +249,34 @@ public class SumoManager : MonoBehaviourPunCallbacks
     private void OnDestroy()
     {
         GeriSayým.OnGameOver -= GameOver_RPC;
-        Debug.Log("CrownManager destroyed. Cleanup done.");
+        Debug.Log("SumoManager destroyed. Cleanup done.");
+    }
+
+
+    [PunRPC]
+    public void PlayerEliminated_RPC(int actorNumber)
+    {
+        Player player = PhotonNetwork.CurrentRoom.GetPlayer(actorNumber);
+        if (player != null)
+        {
+            if (playerIsActive.ContainsKey(player) && playerIsActive[player])
+            {
+                playerIsActive[player] = false;
+                Debug.Log("Player " + player.NickName + " has been eliminated.");
+
+
+                int activePlayerCount = playerIsActive.Values.Count(active => active);
+                if (activePlayerCount <= 1)
+                {
+                    StartCoroutine(EndGameAfterDelay(2f));
+                }
+            }
+        }
+    }
+
+    private IEnumerator EndGameAfterDelay(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        photonView.RPC("GameOver_RPC", RpcTarget.All);
     }
 }

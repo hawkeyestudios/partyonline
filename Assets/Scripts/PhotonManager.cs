@@ -25,7 +25,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     private int countdownTime = 10; 
     private Coroutine countdownCoroutine;
     private bool isCountdownActive = false;
-    private string[] mapNames = { "TrapPG", "GhostPG", "TntPG", "CrownPG"};
+    private string[] mapNames = { "TrapPG", "GhostPG", "TntPG", "CrownPG", "SumoPG"};
     public List<GameObject> loadingPanels;
     private string mainMenu = "MainMenu";
 
