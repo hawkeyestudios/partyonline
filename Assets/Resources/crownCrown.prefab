@@ -56,6 +56,14 @@ PrefabInstance:
       propertyPath: ObservedComponents.Array.data[1]
       value: 
       objectReference: {fileID: 5663051299913803364}
+    - target: {fileID: 4380, guid: 5d8f1118ea3b24b439a3c353c9553ccd, type: 3}
+      propertyPath: ObservedComponents.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4380, guid: 5d8f1118ea3b24b439a3c353c9553ccd, type: 3}
+      propertyPath: ObservedComponents.Array.data[1]
+      value: 
+      objectReference: {fileID: 5663051299913803364}
     - target: {fileID: 7091542277816529902, guid: 5d8f1118ea3b24b439a3c353c9553ccd, type: 3}
       propertyPath: m_Name
       value: crownCrown

@@ -26,11 +26,15 @@ public class SumoManager : MonoBehaviourPunCallbacks
     private bool raceFinished = false;
 
     public Color[] playerColors = { Color.red, new Color(0.25f, 0.88f, 0.82f), Color.yellow, new Color(0.63f, 0.13f, 0.94f) };
+    public PlayerScoreData playerScoreData;
+    public LevelData levelData;
+
 
     private Dictionary<Player, bool> playerIsActive;
 
     private void Start()
     {
+        PhotonNetwork.AutomaticallySyncScene = true;
         ResetPlayerScores();
         ResetScoreTexts();
         Debug.Log("Start() called");
@@ -44,7 +48,7 @@ public class SumoManager : MonoBehaviourPunCallbacks
 
         if (PhotonNetwork.IsMasterClient)
         {
-            StartCoroutine(SpawnPlayersForAll());
+            SpawnPlayersForAll();
         }
         SetPlayerProfileImage();
         GeriSayým.OnGameOver += GameOver_RPC;
@@ -70,11 +74,12 @@ public class SumoManager : MonoBehaviourPunCallbacks
                 {
                     float currentScore = GetPlayerScore(player);
                     float newScore = currentScore + scoreIncrement;
+                    playerScoreData.AddScore(1f);
                     SetPlayerScore(player, newScore);
                 }
             }
             photonView.RPC("UpdateScoreUI_RPC", RpcTarget.All);
-            yield return new WaitForSeconds(1f);
+            yield return new WaitForSeconds(0.1f);
         }
     }
 
@@ -131,23 +136,21 @@ public class SumoManager : MonoBehaviourPunCallbacks
         player.SetCustomProperties(playerProperties);
     }
 
-    private IEnumerator SpawnPlayersForAll()
+    private void SpawnPlayersForAll()
     {
-        foreach (Player player in PhotonNetwork.PlayerList)
+        foreach (var player in PhotonNetwork.PlayerList)
         {
-            photonView.RPC("SpawnPlayerForAll", RpcTarget.AllBuffered, player.ActorNumber);
-            yield return new WaitForSeconds(0.5f);
+            SpawnPlayerForAll(player.ActorNumber);
         }
     }
 
-    [PunRPC]
     private void SpawnPlayerForAll(int playerActorNumber)
     {
         Player player = PhotonNetwork.PlayerList.FirstOrDefault(p => p.ActorNumber == playerActorNumber);
 
-        if (player != null && player == PhotonNetwork.LocalPlayer)
+        if (player != null)
         {
-            int spawnPointIndex = player.ActorNumber % spawnPoints.Length;
+            int spawnPointIndex = (player.ActorNumber - 1) % spawnPoints.Length;
             Transform spawnPoint = spawnPoints[spawnPointIndex];
             Vector3 spawnPosition = spawnPoint.position;
             Quaternion spawnRotation = spawnPoint.rotation;
@@ -156,31 +159,17 @@ public class SumoManager : MonoBehaviourPunCallbacks
 
             if (!string.IsNullOrEmpty(characterPrefabName))
             {
-                GameObject character = PhotonNetwork.Instantiate(characterPrefabName, spawnPosition, spawnRotation);
+                GameObject character = PhotonNetwork.Instantiate(characterPrefabName, spawnPosition, spawnRotation, 0);
 
                 if (character != null)
                 {
-                    spawnPosition.z = 0.7f;
-                    GameObject ball = PhotonNetwork.Instantiate("Ball", spawnPosition, spawnRotation, 0);
-                    ball.transform.SetParent(character.transform);
-                    ball.transform.localPosition = Vector3.zero;
-
-                    PhotonView ballPhotonView = ball.GetComponent<PhotonView>();
-                    ballPhotonView.TransferOwnership(PhotonNetwork.LocalPlayer);
-
-                    PlayerMovement playerMovement = character.GetComponent<PlayerMovement>();
-                    if (playerMovement != null)
-                    {
-                        playerMovement.ball = ball;
-                    }
-
-                    int playerIndex = PhotonNetwork.LocalPlayer.ActorNumber - 1;
+                    int playerIndex = player.ActorNumber - 1;
                     Renderer circleRenderer = character.transform.Find("Circle").GetComponent<Renderer>();
                     if (circleRenderer != null && playerIndex >= 0 && playerIndex < playerColors.Length)
                     {
                         circleRenderer.material.color = playerColors[playerIndex];
                     }
-                    Debug.Log("Character and ball successfully spawned.");
+                    Debug.Log("Character successfully spawned.");
                 }
                 else
                 {
@@ -263,7 +252,6 @@ public class SumoManager : MonoBehaviourPunCallbacks
             {
                 playerIsActive[player] = false;
                 Debug.Log("Player " + player.NickName + " has been eliminated.");
-
 
                 int activePlayerCount = playerIsActive.Values.Count(active => active);
                 if (activePlayerCount <= 1)

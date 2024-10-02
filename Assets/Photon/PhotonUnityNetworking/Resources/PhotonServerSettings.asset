@@ -88,6 +88,9 @@ MonoBehaviour:
   - PlayerEliminated_RPC
   - ApplyForce
   - SetBallParent_RPC
+  - PlayerKilled_RPC
+  - SetGunToPlayerHand_RPC
+  - SyncBulletStatus
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

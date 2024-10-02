@@ -3075,6 +3075,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3568733163502039438, guid: 8de0c12cd53fdba4c8f77e971ef97f96, type: 3}
+      propertyPath: m_Text
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 3568733163502039438, guid: 8de0c12cd53fdba4c8f77e971ef97f96, type: 3}
       propertyPath: m_FontData.m_MaxSize
       value: 60
       objectReference: {fileID: 0}
@@ -4257,6 +4261,8 @@ MonoBehaviour:
   profilePanelAnim: {fileID: 0}
   notificationPanel: {fileID: 0}
   notificationsAnim: {fileID: 0}
+  leaderboardPanel: {fileID: 0}
+  leaderboardAnim: {fileID: 0}
   settingsPanel: {fileID: 0}
   gamemodepanel: {fileID: 0}
   signuppanel: {fileID: 0}
@@ -6449,6 +6455,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   coinText: {fileID: 1873726936}
   gemText: {fileID: 628232171}
+  coin: {fileID: 11400000, guid: db72d6ace7e79c746bbf7d7229bf05ec, type: 2}
+  gem: {fileID: 11400000, guid: 8d082801485ed7c49a5490ee6dcfd0b3, type: 2}
 --- !u!4 &1260200312
 Transform:
   m_ObjectHideFlags: 0
@@ -7497,6 +7505,8 @@ MonoBehaviour:
   warningText: {fileID: 1312102911}
   itemButtonPrefab: {fileID: 7283577263959050187, guid: ca1763579026ce34883134a1cb88d41c, type: 3}
   itemsContainer: {fileID: 110255473}
+  coin: {fileID: 11400000, guid: db72d6ace7e79c746bbf7d7229bf05ec, type: 2}
+  coinText: {fileID: 1873726936}
 --- !u!1 &1381944262
 GameObject:
   m_ObjectHideFlags: 0
@@ -10835,7 +10845,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1670165160052056485, guid: 1cd5fce278f64b04ab56f5aa08229698, type: 3}
       propertyPath: m_Text
-      value: 100000
+      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 1670165160052056485, guid: 1cd5fce278f64b04ab56f5aa08229698, type: 3}
       propertyPath: m_FontData.m_MaxSize

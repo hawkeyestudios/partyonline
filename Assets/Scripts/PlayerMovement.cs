@@ -53,7 +53,7 @@ public class PlayerMovement : MonoBehaviour
     public GameObject ball;
 
     public float maxSpeed = 6f;
-    public float speedIncreaseFactor = 0.1f;
+    public float speedIncreaseFactor = 0.25f;
     public float rotationSpeed = 100f;
     private float currentSpeed;
     private Image momentumImage;
@@ -87,7 +87,9 @@ public class PlayerMovement : MonoBehaviour
             {
                 if (ball == null)
                 {
-                    GameObject instantiatedBall = PhotonNetwork.Instantiate("Ball", transform.position, Quaternion.identity);
+                    Vector3 spawnPosition = transform.position + transform.forward * 2f;
+
+                    GameObject instantiatedBall = PhotonNetwork.Instantiate("Ball", spawnPosition, Quaternion.identity);
 
                     ball = instantiatedBall;
 
@@ -98,7 +100,8 @@ public class PlayerMovement : MonoBehaviour
                 }
             }
         }
-            //Speed Özelliði
+
+        //Speed Özelliði
         if (SceneManager.GetActiveScene().name == "GhostPG")
         {
             speedIcon = GameObject.Find("Speed");
@@ -368,11 +371,57 @@ public class PlayerMovement : MonoBehaviour
             }
             else
             {
+                GhostManager ghostManager = FindObjectOfType<GhostManager>();
+                ghostManager.MarkPlayerAsFinished(photonView.Owner);
+
                 reviveCount--;
                 heartImages[reviveCount].enabled = false;
                 Debug.Log("Yeterli kalp yok, yeniden doðma baþarýsýz.");
                 yield return new WaitForSeconds(2.2f);
+
                 PhotonNetwork.Destroy(gameObject);
+            }
+
+            if (other.CompareTag("Sumo"))
+            {
+                canAnim = true;
+                if (canAnim)
+                {
+                    animator.SetTrigger("Die");
+                }
+
+                if (!stepParticle.isPlaying)
+                {
+                    stepParticle.Stop();
+                }
+
+                isMovementEnabled = false;
+
+                if (photonView.IsMine)
+                {
+                    if (joystick != null)
+                    {
+                        joystick.gameObject.SetActive(false);
+                    }
+                    if (jumpButton != null)
+                    {
+                        jumpButton.gameObject.SetActive(false);
+                    }
+                }
+
+                if (boomEffect != null)
+                {
+                    boomEffect.GetComponent<ParticleSystem>().Play();
+                }
+
+                if (photonView.IsMine)
+                {
+                    SumoManager sumoManager = FindObjectOfType<SumoManager>();
+                    sumoManager.photonView.RPC("PlayerEliminated_RPC", RpcTarget.All, photonView.Owner.ActorNumber);
+                }
+                yield return new WaitForSeconds(2.2f);
+
+                Destroy(gameObject);
             }
         }
     }
@@ -587,47 +636,6 @@ public class PlayerMovement : MonoBehaviour
 
                     Debug.Log("Oyuncuya çarpýldý: " + collision.gameObject.name + " Kuvvet: " + forceMagnitude);
                 }
-            }
-            else if (collision.gameObject.CompareTag("Sumo"))
-            {
-                canAnim = true;
-                if (canAnim)
-                {
-                    animator.SetTrigger("Die");
-                }
-
-                if (!stepParticle.isPlaying)
-                {
-                    stepParticle.Stop();
-                }
-
-                isMovementEnabled = false;
-
-                if (photonView.IsMine)
-                {
-                    if (joystick != null)
-                    {
-                        joystick.gameObject.SetActive(false);
-                    }
-                    if (jumpButton != null)
-                    {
-                        jumpButton.gameObject.SetActive(false);
-                    }
-                }
-
-                if (boomEffect != null)
-                {
-                    boomEffect.GetComponent<ParticleSystem>().Play();
-                }
-
-                if (photonView.IsMine)
-                {
-                    SumoManager sumoManager = FindObjectOfType<SumoManager>();
-                    sumoManager.photonView.RPC("PlayerEliminated_RPC", RpcTarget.All, photonView.Owner.ActorNumber);
-                }
-                yield return new WaitForSeconds(2.2f);
-
-                Destroy(gameObject);
             }
         }
     }

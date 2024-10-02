@@ -25,7 +25,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     private int countdownTime = 10; 
     private Coroutine countdownCoroutine;
     private bool isCountdownActive = false;
-    private string[] mapNames = { "TrapPG", "GhostPG", "TntPG", "CrownPG", "SumoPG"};
+    private string[] mapNames = { "TrapPG", "GhostPG", "TntPG", "CrownPG", "SumoPG", "RoulettePG"};
     public List<GameObject> loadingPanels;
     private string mainMenu = "MainMenu";
 
@@ -194,7 +194,6 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     public override void OnJoinedLobby()
     {
         Debug.Log("Joined Lobby.");
-
         RoomOptions roomOptions = new RoomOptions { MaxPlayers = 1}; //Lobi kiþi sayýsý
         PhotonNetwork.JoinOrCreateRoom("LobbyRoom", roomOptions, TypedLobby.Default);
     }

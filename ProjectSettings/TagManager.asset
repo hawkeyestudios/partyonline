@@ -19,6 +19,7 @@ TagManager:
   - BallControl
   - Ball
   - Sumo
+  - Gun
   layers:
   - Default
   - TransparentFX

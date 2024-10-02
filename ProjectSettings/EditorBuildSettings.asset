@@ -25,10 +25,14 @@ EditorBuildSettings:
     guid: 6cbdc0d3bddb27f4287b87efa9eb3d15
   - enabled: 1
     path: Assets/Scenes/TntPG.unity
-    guid: daaa97061bbc0fe47a588d7a9858bc17
+    guid: 62c3f511ee50c1a489af3409c227ab87
   - enabled: 1
     path: Assets/Scenes/SumoPG.unity
     guid: 4581a92fbfb2cf741b1c3fba700987d8
+  - enabled: 1
+    path: Assets/Scenes/RoulettePG.unity
+    guid: 1f95c5c4de13ecf4ebd315243ce90ddd
   m_configObjects:
     com.unity.adaptiveperformance.loader_settings: {fileID: 11400000, guid: b324b24d466040d499503a8d9ba1047f, type: 2}
     com.unity.adaptiveperformance.simulator.provider_settings: {fileID: 11400000, guid: 4491cbb253a5be2498f18d51e91b0e6b, type: 2}
+    com.unity.xr.management.loader_settings: {fileID: 11400000, guid: b846e41d939201b45be9dcf555496cc8, type: 2}

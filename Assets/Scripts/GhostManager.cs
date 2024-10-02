@@ -26,14 +26,18 @@ public class GhostManager : MonoBehaviourPunCallbacks
     private bool scoreCountingStarted = false;
 
     public Color[] playerColors = { Color.red, new Color(0.25f, 0.88f, 0.82f), Color.yellow, new Color(0.63f, 0.13f, 0.94f) };
+
+    public PlayerScoreData playerScoreData;
+    public LevelData levelData;
     private void Start()
     {
+        PhotonNetwork.AutomaticallySyncScene = true;
         ResetPlayerScores();
         ResetScoreTexts();
         gameOverPanel.SetActive(false);
         if (PhotonNetwork.IsMasterClient)
         {
-            StartCoroutine(SpawnPlayersForAll());
+            SpawnPlayersForAll();
         }
         GeriSayým.OnGameOver += GameOver_RPC;
         SetPlayerProfileImage();
@@ -71,6 +75,7 @@ public class GhostManager : MonoBehaviourPunCallbacks
                     {
                         float currentScore = GetPlayerScore(player);
                         currentScore += 1f;
+                        playerScoreData.AddScore(0.1f);
                         SetPlayerScore(player, currentScore);
                     }
                 }
@@ -135,23 +140,21 @@ public class GhostManager : MonoBehaviourPunCallbacks
         player.SetCustomProperties(playerProperties);
     }
 
-    private IEnumerator SpawnPlayersForAll()
+    private void SpawnPlayersForAll()
     {
-        foreach (Player player in PhotonNetwork.PlayerList)
+        foreach (var player in PhotonNetwork.PlayerList)
         {
-            photonView.RPC("SpawnPlayerForAll", RpcTarget.AllBuffered, player.ActorNumber);
-            yield return new WaitForSeconds(0.5f);
+            SpawnPlayerForAll(player.ActorNumber);
         }
     }
 
-    [PunRPC]
     private void SpawnPlayerForAll(int playerActorNumber)
     {
         Player player = PhotonNetwork.PlayerList.FirstOrDefault(p => p.ActorNumber == playerActorNumber);
 
-        if (player != null && player == PhotonNetwork.LocalPlayer)
+        if (player != null)
         {
-            int spawnPointIndex = player.ActorNumber % spawnPoints.Length;
+            int spawnPointIndex = (player.ActorNumber - 1) % spawnPoints.Length;
             Transform spawnPoint = spawnPoints[spawnPointIndex];
             Vector3 spawnPosition = spawnPoint.position;
             Quaternion spawnRotation = spawnPoint.rotation;
@@ -160,11 +163,11 @@ public class GhostManager : MonoBehaviourPunCallbacks
 
             if (!string.IsNullOrEmpty(characterPrefabName))
             {
-                GameObject character = PhotonNetwork.Instantiate(characterPrefabName, spawnPosition, spawnRotation);
+                GameObject character = PhotonNetwork.Instantiate(characterPrefabName, spawnPosition, spawnRotation, 0);
 
                 if (character != null)
                 {
-                    int playerIndex = PhotonNetwork.LocalPlayer.ActorNumber - 1;
+                    int playerIndex = player.ActorNumber - 1;
                     Renderer circleRenderer = character.transform.Find("Circle").GetComponent<Renderer>();
                     if (circleRenderer != null && playerIndex >= 0 && playerIndex < playerColors.Length)
                     {
@@ -191,30 +194,17 @@ public class GhostManager : MonoBehaviourPunCallbacks
         playerProperties["profileImage"] = playerImageName;
         PhotonNetwork.LocalPlayer.SetCustomProperties(playerProperties);
     }
-
-    private void OnTriggerEnter(Collider other)
+    public void MarkPlayerAsFinished(Player player)
     {
-        if (raceFinished || !PhotonNetwork.IsMasterClient) return;
-
-        if (other.CompareTag("Player"))
+        if (!frozenPlayers.Contains(player))
         {
-            PhotonView playerPhotonView = other.GetComponent<PhotonView>();
-            if (playerPhotonView != null)
-            {
-                Player player = playerPhotonView.Owner;
+            frozenPlayers.Add(player);
+        }
 
-                if (!frozenPlayers.Contains(player))
-                {
-                    frozenPlayers.Add(player);
-                    photonView.RPC("UpdateScoreUI_RPC", RpcTarget.All);
-                }
-
-                if (frozenPlayers.Count == PhotonNetwork.PlayerList.Length)
-                {
-                    raceFinished = true;
-                    photonView.RPC("GameOver_RPC", RpcTarget.All);
-                }
-            }
+        if (frozenPlayers.Count == PhotonNetwork.PlayerList.Length)
+        {
+            raceFinished = true;
+            photonView.RPC("GameOver_RPC", RpcTarget.All);
         }
     }
 

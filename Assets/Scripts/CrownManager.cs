@@ -31,8 +31,12 @@ public class CrownManager : MonoBehaviourPunCallbacks
     private GameObject currentCrown;
 
     public Color[] playerColors = { Color.red, new Color(0.25f, 0.88f, 0.82f), Color.yellow, new Color(0.63f, 0.13f, 0.94f) };
+
+    public PlayerScoreData playerScoreData;
+    public LevelData levelData;
     private void Start()
     {
+        PhotonNetwork.AutomaticallySyncScene = true;
         SpawnCrownAtAssignedPosition();
 
         ResetPlayerScores();
@@ -42,7 +46,7 @@ public class CrownManager : MonoBehaviourPunCallbacks
 
         if (PhotonNetwork.IsMasterClient)
         {
-            StartCoroutine(SpawnPlayersForAll());
+            SpawnPlayersForAll();
         }
         SetPlayerProfileImage();
         GeriSayým.OnGameOver += GameOver_RPC;
@@ -99,15 +103,21 @@ public class CrownManager : MonoBehaviourPunCallbacks
 
     private void UpdateCrownPosition()
     {
-        Transform playerTransform = playerTransforms[currentCrownHolder];
-        if (currentCrown != null && playerTransform != null)
+        if (currentCrownHolder != null && playerTransforms.ContainsKey(currentCrownHolder))
         {
-            currentCrown.transform.position = playerTransform.position + new Vector3(0, 2.5f, 0);
-            Debug.Log("Crown position updated for " + currentCrownHolder.NickName);
+            Transform playerTransform = playerTransforms[currentCrownHolder];
+
+            if (currentCrown != null && playerTransform != null)
+            {
+                Vector3 crownPosition = playerTransform.position + new Vector3(0, 2.5f, 0);
+                currentCrown.transform.position = crownPosition;
+
+                currentCrown.transform.rotation = playerTransform.rotation;
+
+                Debug.Log("Crown position updated for " + currentCrownHolder.NickName);
+            }
         }
     }
-
-
     private IEnumerator UpdateScores()
     {
         while (!raceFinished && PhotonNetwork.IsMasterClient)
@@ -118,6 +128,7 @@ public class CrownManager : MonoBehaviourPunCallbacks
                 {
                     float currentScore = GetPlayerScore(currentCrownHolder);
                     currentScore += 1f;
+                    playerScoreData.AddScore(1f);
                     SetPlayerScore(currentCrownHolder, currentScore);
                 }
                 photonView.RPC("UpdateScoreUI_RPC", RpcTarget.All);
@@ -167,23 +178,21 @@ public class CrownManager : MonoBehaviourPunCallbacks
         player.SetCustomProperties(playerProperties);
     }
 
-    private IEnumerator SpawnPlayersForAll()
+    private void SpawnPlayersForAll()
     {
-        foreach (Player player in PhotonNetwork.PlayerList)
+        foreach (var player in PhotonNetwork.PlayerList)
         {
-            photonView.RPC("SpawnPlayerForAll", RpcTarget.AllBuffered, player.ActorNumber);
-            yield return new WaitForSeconds(0.5f); 
+            SpawnPlayerForAll(player.ActorNumber);
         }
     }
 
-    [PunRPC]
     private void SpawnPlayerForAll(int playerActorNumber)
     {
         Player player = PhotonNetwork.PlayerList.FirstOrDefault(p => p.ActorNumber == playerActorNumber);
 
-        if (player != null && player == PhotonNetwork.LocalPlayer)
+        if (player != null)
         {
-            int spawnPointIndex = player.ActorNumber % spawnPoints.Length;
+            int spawnPointIndex = (player.ActorNumber - 1) % spawnPoints.Length;
             Transform spawnPoint = spawnPoints[spawnPointIndex];
             Vector3 spawnPosition = spawnPoint.position;
             Quaternion spawnRotation = spawnPoint.rotation;
@@ -192,11 +201,11 @@ public class CrownManager : MonoBehaviourPunCallbacks
 
             if (!string.IsNullOrEmpty(characterPrefabName))
             {
-                GameObject character = PhotonNetwork.Instantiate(characterPrefabName, spawnPosition, spawnRotation);
+                GameObject character = PhotonNetwork.Instantiate(characterPrefabName, spawnPosition, spawnRotation, 0);
 
                 if (character != null)
                 {
-                    int playerIndex = PhotonNetwork.LocalPlayer.ActorNumber - 1;
+                    int playerIndex = player.ActorNumber - 1;
                     Renderer circleRenderer = character.transform.Find("Circle").GetComponent<Renderer>();
                     if (circleRenderer != null && playerIndex >= 0 && playerIndex < playerColors.Length)
                     {
@@ -248,7 +257,7 @@ public class CrownManager : MonoBehaviourPunCallbacks
 
             if (playerTransforms.ContainsKey(player))
             {
-                UpdateCrownPosition(); 
+                UpdateCrownPosition();
             }
         }
     }
@@ -297,6 +306,5 @@ public class CrownManager : MonoBehaviourPunCallbacks
     private void OnDestroy()
     {
         GeriSayým.OnGameOver -= GameOver_RPC;
-        Debug.Log("CrownManager destroyed. Cleanup done.");
     }
 }

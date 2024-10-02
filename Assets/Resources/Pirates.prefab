@@ -457,6 +457,10 @@ MonoBehaviour:
   boomEffect: {fileID: 1056378566910805146}
   ghostPrefab: {fileID: 723031826207185394, guid: 7750fa26d2bd35a44af80fd3a8f5985b, type: 3}
   stepParticle: {fileID: 2804325321339218115}
+  ball: {fileID: 0}
+  maxSpeed: 15
+  speedIncreaseFactor: 0.1
+  rotationSpeed: 100
 --- !u!114 &4459369459186971427
 MonoBehaviour:
   m_ObjectHideFlags: 0

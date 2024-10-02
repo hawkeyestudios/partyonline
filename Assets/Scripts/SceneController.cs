@@ -16,6 +16,8 @@ public class SceneController : MonoBehaviour
     public Animator profilePanelAnim;
     public GameObject notificationPanel;
     public Animator notificationsAnim;
+    public GameObject leaderboardPanel;
+    public Animator leaderboardAnim;
     public GameObject settingsPanel;
     public GameObject gamemodepanel;
     public GameObject signuppanel;
@@ -98,6 +100,15 @@ public class SceneController : MonoBehaviour
     public void CloseNotificationsPanel()
     {
         notificationsAnim.SetTrigger("NotificationsClose");
+    }
+    public void LeaderboardPanel()
+    {
+        notificationPanel.SetActive(true);
+        leaderboardAnim.SetTrigger("Leaderboard");
+    }
+    public void CloseLeaderboardPanel()
+    {
+        leaderboardAnim.SetTrigger("LeaderboardClose");
     }
     public void SettingsPanel()
     {

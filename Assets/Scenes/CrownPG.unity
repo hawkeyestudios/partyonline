@@ -5366,6 +5366,7 @@ RectTransform:
   - {fileID: 715781377}
   - {fileID: 440767776}
   - {fileID: 1171648640}
+  - {fileID: 1306528369}
   m_Father: {fileID: 0}
   m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -18919,7 +18920,7 @@ MonoBehaviour:
   - {fileID: 1221774748}
   - {fileID: 1840420091}
   - {fileID: 1852605301}
-  scoreIncrement: 10
+  scoreIncrement: 1
   nickNames:
   - {fileID: 844843322}
   - {fileID: 844843319}
@@ -18947,6 +18948,8 @@ MonoBehaviour:
   - {r: 0.14509805, g: 0.9568628, b: 0.85098046, a: 1}
   - {r: 0.9607844, g: 0.9607844, b: 0.45882356, a: 1}
   - {r: 0.83921576, g: 0.28235295, b: 0.83921576, a: 1}
+  playerScoreData: {fileID: 11400000, guid: fcff8e0a55452fb47b4fc109c28cd13f, type: 2}
+  levelData: {fileID: 11400000, guid: d9e313624124cce46bee91846a15bea2, type: 2}
 --- !u!114 &687453865
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -23068,7 +23071,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2847817097394945670, guid: aba89676883c85b44b04336160c76c36, type: 3}
       propertyPath: loadingPanels.Array.size
-      value: 5
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 2847817097394945670, guid: aba89676883c85b44b04336160c76c36, type: 3}
       propertyPath: loadingPanels.Array.data[0]
@@ -23090,6 +23093,10 @@ PrefabInstance:
       propertyPath: loadingPanels.Array.data[4]
       value: 
       objectReference: {fileID: 1171648639}
+    - target: {fileID: 2847817097394945670, guid: aba89676883c85b44b04336160c76c36, type: 3}
+      propertyPath: loadingPanels.Array.data[5]
+      value: 
+      objectReference: {fileID: 1306528368}
     - target: {fileID: 3264471392649531122, guid: aba89676883c85b44b04336160c76c36, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -37245,6 +37252,82 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c4c2f2cd68566504d841b2fcd72704a6, type: 3}
+--- !u!1 &1306528368
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1306528369}
+  - component: {fileID: 1306528371}
+  - component: {fileID: 1306528370}
+  m_Layer: 5
+  m_Name: RoulettePGLoading
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!224 &1306528369
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1306528368}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 186028010}
+  m_RootOrder: -1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 576, y: 288}
+  m_SizeDelta: {x: 2919.7258, y: 1459.8629}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1306528370
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1306528368}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 0}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &1306528371
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1306528368}
+  m_CullTransparentMesh: 1
 --- !u!4 &1308257192 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 496054, guid: 066c29b35f638204aaa1355e15ed2c4f, type: 3}

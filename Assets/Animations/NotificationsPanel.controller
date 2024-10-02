@@ -9,7 +9,7 @@ AnimatorStateTransition:
   m_Name: 
   m_Conditions:
   - m_ConditionMode: 1
-    m_ConditionEvent: Notifications
+    m_ConditionEvent: Leaderboard
     m_EventTreshold: 0
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: -6056843674679458821}
@@ -139,13 +139,13 @@ AnimatorController:
   m_Name: NotificationsPanel
   serializedVersion: 5
   m_AnimatorParameters:
-  - m_Name: Notifications
+  - m_Name: Leaderboard
     m_Type: 9
     m_DefaultFloat: 0
     m_DefaultInt: 0
     m_DefaultBool: 0
     m_Controller: {fileID: 0}
-  - m_Name: NotificationsClose
+  - m_Name: LeaderboardClose
     m_Type: 9
     m_DefaultFloat: 0
     m_DefaultInt: 0
@@ -173,7 +173,7 @@ AnimatorStateTransition:
   m_Name: 
   m_Conditions:
   - m_ConditionMode: 1
-    m_ConditionEvent: NotificationsClose
+    m_ConditionEvent: LeaderboardClose
     m_EventTreshold: 0
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: -1919693051269067656}
