@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using Photon.Pun;
 using Photon.Realtime;
 using UnityEngine.UI;
@@ -13,7 +13,7 @@ public class SpawnManager : MonoBehaviourPunCallbacks
     public Text[] rewardTexts;
     public Text[] nickNames;
     public GameObject gameOverPanel;
-    public GeriSayým geriSayým;
+    public GeriSayim geriSayim;
 
     private List<Player> finishOrder = new List<Player>();
     private bool raceFinished = false;
@@ -28,8 +28,8 @@ public class SpawnManager : MonoBehaviourPunCallbacks
         }
         SetPlayerProfileImage();
 
-        GeriSayým.OnGameOver += GameOver_RPC;
-        geriSayým.StartCountdown();
+        GeriSayim.OnGameOver += GameOver_RPC;
+        geriSayim.StartCountdown();
     }
 
     private IEnumerator SpawnPlayersForAll()
@@ -177,7 +177,7 @@ public class SpawnManager : MonoBehaviourPunCallbacks
 
     private void OnDestroy()
     {
-        GeriSayým.OnGameOver -= GameOver_RPC;
+        GeriSayim.OnGameOver -= GameOver_RPC;
     }
 
 }

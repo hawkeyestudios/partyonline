@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 580429579771389618}
   - component: {fileID: 8801975932569507998}
   m_Layer: 5
-  m_Name: Text
+  m_Name: NameText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -166,10 +166,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1138227987719589037}
-  - component: {fileID: 9039524362396398521}
   m_Layer: 5
   m_Name: UIFriend
-  m_TagString: Untagged
+  m_TagString: GameUI
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -199,22 +198,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 3.9}
   m_SizeDelta: {x: 478.14, y: 93.48001}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &9039524362396398521
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3367589709973181334}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b7be18b2f537f4428b8e4cd92373a1e0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  NameText: {fileID: 8801975932569507998}
-  OnlineFlag: {fileID: 1790957736536320413}
-  inRoomText: {fileID: 6849787547855369685}
-  JoinButton: {fileID: 7470407785934357610}
 --- !u!1 &4380937144801377522
 GameObject:
   m_ObjectHideFlags: 0

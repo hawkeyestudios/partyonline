@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using Photon.Pun;
 using Photon.Realtime;
 using UnityEngine.UI;
@@ -17,7 +17,7 @@ public class SumoManager : MonoBehaviourPunCallbacks
 
     public Text[] nickNames;
     public GameObject gameOverPanel;
-    public GeriSayým geriSayým;
+    public GeriSayim geriSayim;
 
     public Text[] gameOverScoreTexts;
     public Image[] gameOverProfileImages;
@@ -39,8 +39,8 @@ public class SumoManager : MonoBehaviourPunCallbacks
             StartCoroutine(SpawnPlayersForAll());
         }
         SetPlayerProfileImage();
-        GeriSayým.OnGameOver += GameOver_RPC;
-        geriSayým.StartCountdown();
+        GeriSayim.OnGameOver += GameOver_RPC;
+        geriSayim.StartCountdown();
 
         StartCoroutine(StartScoreCountingAfterDelay(10f));
     }
@@ -206,7 +206,7 @@ public class SumoManager : MonoBehaviourPunCallbacks
 
     private void OnDestroy()
     {
-        GeriSayým.OnGameOver -= GameOver_RPC;
+        GeriSayim.OnGameOver -= GameOver_RPC;
         Debug.Log("CrownManager destroyed. Cleanup done.");
     }
 }

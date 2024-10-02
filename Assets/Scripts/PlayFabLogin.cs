@@ -1,8 +1,9 @@
-using System;
+﻿using System;
 using Photon.Pun;
 using Photon.Realtime;
 using PlayFab;
 using PlayFab.ClientModels;
+//using UnityEditor.PackageManager.Requests;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -10,6 +11,8 @@ namespace KnoxGameStudios
 {
     public class PlayfabLogin : MonoBehaviour
     {
+        [SerializeField] public static string playFabId;
+
         [SerializeField] private InputField usernameInput;
         [SerializeField] private InputField emailInput;
         [SerializeField] private InputField passwordInput;
@@ -40,7 +43,7 @@ namespace KnoxGameStudios
         }
         public void TapToStart()
         {
-            Debug.Log("Bas�ld�");
+            Debug.Log("Basýldý");
             if (PlayerPrefs.HasKey(EMAIL_PREF_KEY) && PlayerPrefs.HasKey(PASSWORD_PREF_KEY))
             {
                 LoadingImage.SetActive(false);
@@ -181,13 +184,29 @@ namespace KnoxGameStudios
             ShowFeedback("Login successful!");
             SaveCredentials();
             GetUserAccountInfo();
+
+            var request = new LoginWithEmailAddressRequest
+            {
+                Email = email,
+                Password = password,
+                InfoRequestParameters = new GetPlayerCombinedInfoRequestParams
+                {
+                    GetUserAccountInfo = true // Oyuncu bilgilerini almak için bu gerekli
+                }
+            };
+
+            PlayFabClientAPI.LoginWithEmailAddress(request, OnLoginSuccess, OnFailure);
         }
         private void GetUserAccountInfo()
         {
             var request = new GetAccountInfoRequest();
             PlayFabClientAPI.GetAccountInfo(request, OnGetAccountInfoSuccess, OnFailure);
         }
-
+        private void OnLoginSuccess(LoginResult result)
+        {
+            playFabId = result.PlayFabId;  // PlayFab ID'yi burada alıyoruz
+            Debug.Log("Login successful! PlayFab ID: " + playFabId);
+        }
         private void OnGetAccountInfoSuccess(GetAccountInfoResult result)
         {
             if (result.AccountInfo != null)

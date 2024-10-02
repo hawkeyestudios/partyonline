@@ -19,7 +19,7 @@ public class CrownManager : MonoBehaviourPunCallbacks
 
     public Text[] nickNames;
     public GameObject gameOverPanel;
-    public GeriSayým geriSayým;
+    public GeriSayim geriSayim;
 
     public Text[] gameOverScoreTexts;
     public Image[] gameOverProfileImages;
@@ -45,8 +45,8 @@ public class CrownManager : MonoBehaviourPunCallbacks
             StartCoroutine(SpawnPlayersForAll());
         }
         SetPlayerProfileImage();
-        GeriSayým.OnGameOver += GameOver_RPC;
-        geriSayým.StartCountdown();
+        GeriSayim.OnGameOver += GameOver_RPC;
+        geriSayim.StartCountdown();
 
         StartCoroutine(StartScoreCountingAfterDelay(10f));
     }
@@ -296,7 +296,7 @@ public class CrownManager : MonoBehaviourPunCallbacks
 
     private void OnDestroy()
     {
-        GeriSayým.OnGameOver -= GameOver_RPC;
+        GeriSayim.OnGameOver -= GameOver_RPC;
         Debug.Log("CrownManager destroyed. Cleanup done.");
     }
 }

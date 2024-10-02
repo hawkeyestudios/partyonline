@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using Photon.Pun;
 using Photon.Realtime;
 using UnityEngine.UI;
@@ -17,7 +17,7 @@ public class BarrelManager : MonoBehaviourPunCallbacks
 
     public Text[] nickNames;
     public GameObject gameOverPanel;
-    public GeriSayým geriSayým;
+    public GeriSayim geriSayim;
 
     public Text[] gameOverScoreTexts;
     public Image[] gameOverProfileImages;
@@ -38,8 +38,8 @@ public class BarrelManager : MonoBehaviourPunCallbacks
             StartCoroutine(SpawnPlayersForAll());
         }
         SetPlayerProfileImage();
-        GeriSayým.OnGameOver += GameOver_RPC;
-        geriSayým.StartCountdown();
+        GeriSayim.OnGameOver += GameOver_RPC;
+        geriSayim.StartCountdown();
 
         StartCoroutine(StartScoreCountingAfterDelay(10f));
     }
@@ -151,7 +151,7 @@ public class BarrelManager : MonoBehaviourPunCallbacks
 
         if (frozenPlayers.Count == PhotonNetwork.CurrentRoom.PlayerCount)
         {
-            Debug.Log("Oyun bitti fakat gameoverpanel açýlmadýysa oyuncu sayýsý hesaplanamadýðý maç bitmedi");
+            Debug.Log("Oyun bitti fakat gameoverpanel aÃ§Ã½lmadÃ½ysa oyuncu sayÃ½sÃ½ hesaplanamadÃ½Ã°Ã½ maÃ§ bitmedi");
             photonView.RPC("GameOver_RPC", RpcTarget.All);
         }
     }
@@ -259,6 +259,6 @@ public class BarrelManager : MonoBehaviourPunCallbacks
 
     private void OnDestroy()
     {
-        GeriSayým.OnGameOver -= GameOver_RPC;
+        GeriSayim.OnGameOver -= GameOver_RPC;
     }
 }
