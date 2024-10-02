@@ -52,7 +52,7 @@ public class RouletteManager : MonoBehaviourPunCallbacks
         SetPlayerProfileImage();
         SetPlayerNames();
         SetupPlayerButtons();
-        GeriSayým.OnGameOver += GameOver_RPC;
+        GeriSayim.OnGameOver += GameOver_RPC;
         SetGunToPlayerHand(currentPlayerIndex);
         UpdateButtonInteractivity();
     }
@@ -373,6 +373,6 @@ public class RouletteManager : MonoBehaviourPunCallbacks
 
     private void OnDestroy()
     {
-        GeriSayým.OnGameOver -= GameOver_RPC;
+        GeriSayim.OnGameOver -= GameOver_RPC;
     }
 }
