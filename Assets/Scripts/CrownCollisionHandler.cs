@@ -25,6 +25,7 @@ public class CrownCollisionHandler : MonoBehaviourPunCallbacks
             {
                 Player player = playerPhotonView.Owner;
                 Debug.Log("Player " + player.NickName + " triggered crown interaction.");
+
                 crownManager.OnPlayerInteractWithCrown(player);
             }
         }

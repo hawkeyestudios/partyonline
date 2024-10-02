@@ -7,11 +7,13 @@ public class MainMenuCoin : MonoBehaviour
     public Text gemText; 
     public GameObject announcementPanel;
     public Button okButton;
+    public Coin coin;
+    public Gem gem;
 
     private void Start()
     {
-        CoinManager.Instance.SetCoinText(coinText);
-        GemManager.Instance.SetGemText(gemText);
+        coinText.text = coin.currentCoins.ToString();
+        gemText.text = gem.currentGems.ToString();
 
         if (PlayerPrefs.GetInt("FirstTimeRegistration", 0) == 1)
         {

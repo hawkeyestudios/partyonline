@@ -10,7 +10,7 @@ public class CharacterButton : MonoBehaviour
     public string characterPrefabName;
     public Transform spawnPoint;
     public int characterPrice;
-    public int gemPrice; // Gem ile satýn alma fiyatý
+    public int gemPrice;
     [SerializeField] private Text buyText;
     [SerializeField] private Text gemText;
     public Button buyButton;
@@ -18,12 +18,14 @@ public class CharacterButton : MonoBehaviour
     private bool isPurchased;
     private bool isEquipped;
 
-    public Button equipButton; // Equip butonunun referansý
-    public Image tickImage; // Tik iþareti için Image bileþeni
+    public Button equipButton;
+    public Image tickImage;
     public Text uyarýText;
     private bool isWarningTextVisible = false;
 
     private ButtonManager buttonManager;
+    public Coin coin;
+    public Gem gem;
 
     public bool IsEquipped
     {
@@ -82,7 +84,7 @@ public class CharacterButton : MonoBehaviour
         }
         else
         {
-            // Check if this character is the last equipped character
+
             string lastEquippedCharacter = PlayerPrefs.GetString("LastEquippedCharacter", "");
             if (characterPrefabName == lastEquippedCharacter)
             {
@@ -105,7 +107,7 @@ public class CharacterButton : MonoBehaviour
 
     public void SpawnCharacter()
     {
-        // Önceki karakteri sil
+
         foreach (Transform child in spawnPoint)
         {
             Destroy(child.gameObject);
@@ -114,7 +116,6 @@ public class CharacterButton : MonoBehaviour
         GameObject characterPrefab = Resources.Load<GameObject>(characterPrefabName);
         if (characterPrefab != null)
         {
-            // Yeni karakteri spawn et
             GameObject characterInstance = Instantiate(characterPrefab, spawnPoint.position, spawnPoint.rotation, spawnPoint);
             characterInstance.transform.rotation = Quaternion.Euler(0, 170, 0);
             characterInstance.transform.localScale = Vector3.one * 2.5f; 
@@ -122,7 +123,6 @@ public class CharacterButton : MonoBehaviour
             buyText.text = $"{characterPrice}";
             gemText.text = $"{gemPrice}";
 
-            // Diðer butonlarý gizle
             buttonManager.UpdateActiveButton(this);
 
             isPurchased = PlayerPrefs.GetInt(characterPrefabName + "_Purchased", 0) == 1 || characterPrefabName == "Yaþlý";
@@ -147,9 +147,9 @@ public class CharacterButton : MonoBehaviour
 
     public void BuyCharacterWithCoins()
     {
-        if (CoinManager.Instance.GetCurrentCoins() >= characterPrice)
+        if (coin.currentCoins >= characterPrice)
         {
-            CoinManager.Instance.SpendCoins(characterPrice);
+            coin.SpendCoins(characterPrice);
             isPurchased = true;
             buyButton.gameObject.SetActive(false);
             gemButton.gameObject.SetActive(false);
@@ -176,9 +176,9 @@ public class CharacterButton : MonoBehaviour
     }
     public void BuyCharacterWithGems()
     {
-        if (GemManager.Instance.GetCurrentGems() >= gemPrice)
+        if (gem.currentGems >= gemPrice)
         {
-            GemManager.Instance.SpendGems(gemPrice);
+            gem.SpendGems(gemPrice);
             isPurchased = true;
             buyButton.gameObject.SetActive(false);
             gemButton.gameObject.SetActive(false);
@@ -191,7 +191,7 @@ public class CharacterButton : MonoBehaviour
                 }
             }
             SavePurchaseStatus();
-            UpdateCharacterPurchaseStatus(); // Güncelleme
+            UpdateCharacterPurchaseStatus();
         }
         else
         {
@@ -205,14 +205,14 @@ public class CharacterButton : MonoBehaviour
     }
     private IEnumerator ShowWarningTextForSeconds(float duration)
     {
-        isWarningTextVisible = true; // Uyarý metnini görünür yap
+        isWarningTextVisible = true; 
 
-        uyarýText.gameObject.SetActive(true); // Uyarý metnini göster
+        uyarýText.gameObject.SetActive(true);
 
-        yield return new WaitForSeconds(duration); // Belirtilen süre kadar bekle
+        yield return new WaitForSeconds(duration); 
 
-        uyarýText.gameObject.SetActive(false); // Uyarý metnini gizle
-        isWarningTextVisible = false; // Uyarý metni görünürlük durumunu sýfýrla
+        uyarýText.gameObject.SetActive(false);
+        isWarningTextVisible = false; 
     }
 
     private void UpdateCharacterPurchaseStatus()
@@ -224,8 +224,6 @@ public class CharacterButton : MonoBehaviour
             { characterPrefabName + "_Purchased", isPurchased ? "1" : "0" },
             { characterPrefabName + "_Equipped", isEquipped ? "1" : "0" },
             { "LastEquippedCharacter", PlayerPrefs.GetString("LastEquippedCharacter", "") },
-            { "CurrentCoins", CoinManager.Instance.GetCurrentCoins().ToString() },
-            { "CurrentGems", GemManager.Instance.GetCurrentGems().ToString() }
         }
         };
 
@@ -272,7 +270,6 @@ public class CharacterButton : MonoBehaviour
 
     private void EquipCharacter()
     {
-        // Diðer tüm karakterlerin equip durumunu sýfýrla
         foreach (var button in buttonManager.characterButtons)
         {
             if (button != this)
@@ -282,12 +279,12 @@ public class CharacterButton : MonoBehaviour
             }
         }
 
-        IsEquipped = true; // Bu karakteri seçildi olarak iþaretle
+        IsEquipped = true;
         PlayerPrefs.SetInt(characterPrefabName + "_Equipped", 1);
-        PlayerPrefs.SetString("LastEquippedCharacter", characterPrefabName); // En son ekip edilen karakter
+        PlayerPrefs.SetString("LastEquippedCharacter", characterPrefabName);
         PlayerPrefs.Save();
 
-        UpdateCharacterPurchaseStatus(); // PlayFab'de güncelle
+        UpdateCharacterPurchaseStatus();
     }
 
 

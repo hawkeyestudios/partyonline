@@ -15,7 +15,7 @@ public class MapGecisGeriSayim : MonoBehaviourPunCallbacks
     public List<GameObject> loadingPanels;
     private string mainMenu = "MainMenu";
 
-    private string[] mapNames = { "TrapPG", "GhostPG", "TntPG", "CrownPG", "SumoPG" };
+    private string[] mapNames = { "TrapPG", "GhostPG", "TntPG", "CrownPG", "SumoPG", "RoulettePG" };
 
     private bool allPlayersReady = false;
 

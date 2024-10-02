@@ -6,10 +6,12 @@ public class CharacterShop : MonoBehaviour
 {
     public Text coinText;
     public Text gemText; 
+    public Coin coin;
+    public Gem gem;
 
     private void Start()
     {
-        CoinManager.Instance.SetCoinText(coinText);
-        GemManager.Instance.SetGemText(gemText);
+        coinText.text = coin.currentCoins.ToString();
+        gemText.text = gem.currentGems.ToString();
     }
 }

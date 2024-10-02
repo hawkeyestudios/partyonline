@@ -19,36 +19,36 @@ public class SpawnManager : MonoBehaviourPunCallbacks
     private bool raceFinished = false;
 
     public Color[] playerColors = { Color.red, new Color(0.25f, 0.88f, 0.82f), Color.yellow, new Color(0.63f, 0.13f, 0.94f) };
+    public PlayerScoreData playerScoreData;
+    public LevelData levelData;
     private void Start()
     {
+        PhotonNetwork.AutomaticallySyncScene = true;
         gameOverPanel.SetActive(false);
         if (PhotonNetwork.IsMasterClient)
         {
-            StartCoroutine(SpawnPlayersForAll());
+            SpawnPlayersForAll();
         }
         SetPlayerProfileImage();
 
         GeriSayým.OnGameOver += GameOver_RPC;
         geriSayým.StartCountdown();
     }
-
-    private IEnumerator SpawnPlayersForAll()
+    private void SpawnPlayersForAll()
     {
-        foreach (Player player in PhotonNetwork.PlayerList)
+        foreach (var player in PhotonNetwork.PlayerList)
         {
-            photonView.RPC("SpawnPlayerForAll", RpcTarget.AllBuffered, player.ActorNumber);
-            yield return new WaitForSeconds(0.5f);
+            SpawnPlayerForAll(player.ActorNumber);
         }
     }
 
-    [PunRPC]
     private void SpawnPlayerForAll(int playerActorNumber)
     {
         Player player = PhotonNetwork.PlayerList.FirstOrDefault(p => p.ActorNumber == playerActorNumber);
 
-        if (player != null && player == PhotonNetwork.LocalPlayer)
+        if (player != null)
         {
-            int spawnPointIndex = player.ActorNumber % spawnPoints.Length;
+            int spawnPointIndex = (player.ActorNumber - 1) % spawnPoints.Length;
             Transform spawnPoint = spawnPoints[spawnPointIndex];
             Vector3 spawnPosition = spawnPoint.position;
             Quaternion spawnRotation = spawnPoint.rotation;
@@ -57,12 +57,12 @@ public class SpawnManager : MonoBehaviourPunCallbacks
 
             if (!string.IsNullOrEmpty(characterPrefabName))
             {
-                GameObject character = PhotonNetwork.Instantiate(characterPrefabName, spawnPosition, spawnRotation);
+                GameObject character = PhotonNetwork.Instantiate(characterPrefabName, spawnPosition, spawnRotation, 0);
 
                 if (character != null)
                 {
-                    int playerIndex = PhotonNetwork.LocalPlayer.ActorNumber - 1;
-                    Renderer circleRenderer = character.transform.Find("Circle").GetComponent<Renderer>(); 
+                    int playerIndex = player.ActorNumber - 1;
+                    Renderer circleRenderer = character.transform.Find("Circle").GetComponent<Renderer>();
                     if (circleRenderer != null && playerIndex >= 0 && playerIndex < playerColors.Length)
                     {
                         circleRenderer.material.color = playerColors[playerIndex];
@@ -104,11 +104,12 @@ public class SpawnManager : MonoBehaviourPunCallbacks
                 int playerIndex = finishOrder.IndexOf(player);
                 int reward = Mathf.Max(1000 - (playerIndex * 250), 0);
                 SetPlayerScore(player, reward);
-
+                playerScoreData.AddScore(reward);
                 photonView.RPC("UpdatePlayerUI_RPC", RpcTarget.All, player.ActorNumber, reward);
 
                 if (finishOrder.Count == PhotonNetwork.PlayerList.Length)
                 {
+                    levelData.AddXP(20);
                     raceFinished = true;
                     photonView.RPC("GameOver_RPC", RpcTarget.All);
                 }
