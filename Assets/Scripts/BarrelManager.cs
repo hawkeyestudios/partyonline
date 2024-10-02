@@ -17,7 +17,7 @@ public class BarrelManager : MonoBehaviourPunCallbacks
 
     public Text[] nickNames;
     public GameObject gameOverPanel;
-    public GeriSayým geriSayým;
+    public GeriSayim geriSayim;
 
     public Text[] gameOverScoreTexts;
     public Image[] gameOverProfileImages;
@@ -42,8 +42,8 @@ public class BarrelManager : MonoBehaviourPunCallbacks
             SpawnPlayersForAll();
         }
         SetPlayerProfileImage();
-        GeriSayým.OnGameOver += GameOver_RPC;
-        geriSayým.StartCountdown();
+        GeriSayim.OnGameOver += GameOver_RPC;
+        geriSayim.StartCountdown();
 
         StartCoroutine(StartScoreCountingAfterDelay(10f));
     }
@@ -256,6 +256,6 @@ public class BarrelManager : MonoBehaviourPunCallbacks
 
     private void OnDestroy()
     {
-        GeriSayým.OnGameOver -= GameOver_RPC;
+        GeriSayim.OnGameOver -= GameOver_RPC;
     }
 }

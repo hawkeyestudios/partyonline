@@ -17,7 +17,7 @@ public class SumoManager : MonoBehaviourPunCallbacks
 
     public Text[] nickNames;
     public GameObject gameOverPanel;
-    public GeriSayým geriSayým;
+    public GeriSayim geriSayým;
 
     public Text[] gameOverScoreTexts;
     public Image[] gameOverProfileImages;
@@ -51,7 +51,7 @@ public class SumoManager : MonoBehaviourPunCallbacks
             SpawnPlayersForAll();
         }
         SetPlayerProfileImage();
-        GeriSayým.OnGameOver += GameOver_RPC;
+        GeriSayim.OnGameOver += GameOver_RPC;
         geriSayým.StartCountdown();
 
         StartCoroutine(StartScoreCountingAfterDelay(10f));
@@ -237,7 +237,7 @@ public class SumoManager : MonoBehaviourPunCallbacks
 
     private void OnDestroy()
     {
-        GeriSayým.OnGameOver -= GameOver_RPC;
+        GeriSayim.OnGameOver -= GameOver_RPC;
         Debug.Log("SumoManager destroyed. Cleanup done.");
     }
 
