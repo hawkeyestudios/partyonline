@@ -52056,6 +52056,9 @@ MonoBehaviour:
   profilePanel: {fileID: 0}
   profilePanelAnim: {fileID: 0}
   notificationPanel: {fileID: 0}
+  notificationsAnim: {fileID: 0}
+  leaderboardPanel: {fileID: 0}
+  leaderboardAnim: {fileID: 0}
   settingsPanel: {fileID: 0}
   gamemodepanel: {fileID: 0}
   signuppanel: {fileID: 1175185237}

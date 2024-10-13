@@ -25,15 +25,13 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     private int countdownTime = 10; 
     private Coroutine countdownCoroutine;
     private bool isCountdownActive = false;
-    private string[] mapNames = { "TrapPG", "GhostPG", "TntPG", "CrownPG", "SumoPG", "RoulettePG"};
+    //private string[] allMaps = { "TrapPG", "GhostPG", "TntPG", "CrownPG", "SumoPG", "RoulettePG"};
     public List<GameObject> loadingPanels;
-    private string mainMenu = "MainMenu";
 
     public Color[] playerColors = { Color.red, new Color(0.25f, 0.88f, 0.82f), Color.yellow, new Color(0.63f, 0.13f, 0.94f) };
     private void Start()
     {
-        ClearVisitedMapRecords();
-        PhotonNetwork.AutomaticallySyncScene = true;
+        //PhotonNetwork.AutomaticallySyncScene = true;
         Debug.Log($"{PhotonNetwork.NickName}");
         ShowLastEquippedCharacter();
 
@@ -194,7 +192,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     public override void OnJoinedLobby()
     {
         Debug.Log("Joined Lobby.");
-        RoomOptions roomOptions = new RoomOptions { MaxPlayers = 1}; //Lobi kiþi sayýsý
+        RoomOptions roomOptions = new RoomOptions { MaxPlayers = 2};                            //Lobi kiþi sayýsý
         PhotonNetwork.JoinOrCreateRoom("LobbyRoom", roomOptions, TypedLobby.Default);
     }
     public override void OnJoinedRoom()
@@ -260,7 +258,8 @@ public class PhotonManager : MonoBehaviourPunCallbacks
             if (!isCountdownActive)
             {
                 leaveRoomButton.interactable = false;
-                countdownCoroutine = StartCoroutine(StartCountdown());
+                photonView.RPC("StartGame", RpcTarget.AllBuffered);
+                Debug.Log("Geri sayým baþladý");
             }
         }
     }
@@ -278,7 +277,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
 
         if (PhotonNetwork.CurrentRoom.PlayerCount < PhotonNetwork.CurrentRoom.MaxPlayers)
         {
-            if (isCountdownActive && PhotonNetwork.IsMasterClient)
+            if (isCountdownActive)
             {
                 StopCountdown();
             }
@@ -288,16 +287,26 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     IEnumerator StartCountdown()
     {
         isCountdownActive = true;
+        Debug.Log("Countdown baþladý."); 
         while (countdownTime > 0)
         {
             Debug.Log("Countdown: " + countdownTime);
-            photonView.RPC("UpdateCountdown", RpcTarget.All, countdownTime);
+            UpdateCountdown(countdownTime);
             yield return new WaitForSeconds(1f);
             countdownTime--;
         }
 
-        Debug.Log("Countdown finished, starting game..."); 
-        StartGame();
+        Debug.Log("Countdown finished, starting game...");
+
+        if (PhotonNetwork.IsMasterClient)
+        {
+            photonView.RPC("StartGameRPC", RpcTarget.All);
+        }
+    }
+    [PunRPC]
+    void StartGame()
+    {
+         StartCoroutine(StartCountdown());
     }
 
     [PunRPC]
@@ -313,7 +322,6 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         photonView.RPC("UpdateCountdown", RpcTarget.All, 0);
     }
 
-    [PunRPC]
     void UpdateCountdown(int time)
     {
         if (time > 0)
@@ -327,79 +335,30 @@ public class PhotonManager : MonoBehaviourPunCallbacks
             statusText.text = "Waiting for more players...";
         }
     }
-    void StartGame()
-    {
-         StartCoroutine(NextSceneLoading());
-    }
 
-    IEnumerator NextSceneLoading()
-    {
-        string nextMap = GetRandomUnvisitedMap();
-        if (!string.IsNullOrEmpty(nextMap))
-        {
-            photonView.RPC("LoadMapForAllPlayers", RpcTarget.All, nextMap);
-        }
-        else
-        {
-            ClearVisitedMapRecords();
-            SceneManager.LoadScene(mainMenu);
-        }
-
-        yield break;
-    }
     [PunRPC]
-    void LoadMapForAllPlayers(string mapName)
+    void StartGameRPC()
     {
-        int mapIndex = System.Array.IndexOf(mapNames, mapName);
-
-        if (mapIndex >= 0 && mapIndex < loadingPanels.Count)
+        if (PhotonNetwork.IsMasterClient)
         {
-            loadingPanels[mapIndex].SetActive(true);
-        }
+            string[] allMaps = { "TrapPG", "GhostPG", "TntPG", "CrownPG", "SumoPG", "RoulettePG" };
+            List<string> selectedMaps = allMaps.OrderBy(x => Random.Range(0, 100)).Take(4).ToList();
 
-        StartCoroutine(LoadMapAsync(mapName));
+            string selectedMapsString = string.Join(",", selectedMaps);
+            photonView.RPC("ReceiveMapSelection", RpcTarget.All, selectedMapsString);
+        }
     }
 
-    IEnumerator LoadMapAsync(string mapName)
+    [PunRPC]
+    void ReceiveMapSelection(string selectedMapsString)
     {
-        yield return new WaitForSeconds(3f);
+        List<string> selectedMaps = selectedMapsString.Split(',').ToList();
 
-        PhotonNetwork.LoadLevel(mapName);
-    }
-    string GetRandomUnvisitedMap()
-    {
-        List<string> unvisitedMaps = new List<string>();
+        PhotonNetwork.LoadLevel(selectedMaps[0]);
 
-        foreach (string mapName in mapNames)
-        {
-            if (PlayerPrefs.GetInt(mapName, 0) == 0)
-            {
-                unvisitedMaps.Add(mapName);
-            }
-        }
-
-        if (unvisitedMaps.Count > 0)
-        {
-            int randomIndex = Random.Range(0, unvisitedMaps.Count);
-            return unvisitedMaps[randomIndex];
-        }
-        else
-        {
-            return null;
-        }
-    }
-    void ClearVisitedMapRecords()
-    {
-        foreach (string mapName in mapNames)
-        {
-            PlayerPrefs.DeleteKey(mapName);
-        }
+        PlayerPrefs.SetString("SelectedMaps", string.Join(",", selectedMaps));
+        PlayerPrefs.SetInt("currentMapIndex", 0);
         PlayerPrefs.Save();
-
-        if (PhotonNetwork.InRoom)
-        {
-            PhotonNetwork.LeaveRoom();
-        }
     }
     public override void OnMasterClientSwitched(Player newMasterClient)
     {
@@ -409,7 +368,6 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         {
             Debug.Log("I am the new Master Client.");
 
-            // Tacý yeni lobi kurucusuna ata
             AssignCrownToMasterClient((GameObject)newMasterClient.TagObject);
 
             if (PhotonNetwork.CurrentRoom.PlayerCount == PhotonNetwork.CurrentRoom.MaxPlayers)
@@ -448,8 +406,9 @@ public class PhotonManager : MonoBehaviourPunCallbacks
             }
         }
     }
+
     [PunRPC]
-    void SetCrown(int crownViewID)
+    public void SetCrown(int crownViewID)
     {
         PhotonView crownPhotonView = PhotonView.Find(crownViewID);
         if (crownPhotonView != null)

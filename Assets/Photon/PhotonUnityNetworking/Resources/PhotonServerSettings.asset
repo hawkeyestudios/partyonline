@@ -91,6 +91,9 @@ MonoBehaviour:
   - PlayerKilled_RPC
   - SetGunToPlayerHand_RPC
   - SyncBulletStatus
+  - StartTurn
+  - StartGameRPC
+  - ReceiveMapSelection
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

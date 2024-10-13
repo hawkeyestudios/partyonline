@@ -1,10 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using Photon.Pun;
 using Photon.Realtime;
+using System.Linq;
 
 public class MapGecisGeriSayim : MonoBehaviourPunCallbacks
 {
@@ -13,20 +13,78 @@ public class MapGecisGeriSayim : MonoBehaviourPunCallbacks
     private bool hasLoaded = false;
 
     public List<GameObject> loadingPanels;
-    private string mainMenu = "MainMenu";
-
-    private string[] mapNames = { "TrapPG", "GhostPG", "TntPG", "CrownPG", "SumoPG", "RoulettePG" };
-
-    private bool allPlayersReady = false;
+    private Dictionary<string, GameObject> mapLoadingPanels = new Dictionary<string, GameObject>();
+    private List<string> mapList;
+    private int currentMapIndex = 0;
 
     void Start()
     {
-        SaveCurrentScene();
-        UpdateCountdownText();
+        mapLoadingPanels.Add("TrapPG", loadingPanels[0]);
+        mapLoadingPanels.Add("GhostPG", loadingPanels[1]);
+        mapLoadingPanels.Add("TntPG", loadingPanels[2]);
+        mapLoadingPanels.Add("CrownPG", loadingPanels[3]);
+        mapLoadingPanels.Add("SumoPG", loadingPanels[4]);
+        mapLoadingPanels.Add("RoulettePG", loadingPanels[5]);
 
+        string selectedMaps = PlayerPrefs.GetString("SelectedMaps");
+        mapList = selectedMaps.Split(',').ToList();
+        currentMapIndex = PlayerPrefs.GetInt("currentMapIndex", 0);
+        Debug.Log("Baþlangýç harita listesi: " + string.Join(", ", mapList) + " - currentMapIndex: " + currentMapIndex);
+
+        UpdateCountdownText();
+    }
+
+    void ShowLoadingPanel()
+    {
+        string currentMap = mapList[currentMapIndex];
+
+        if (mapLoadingPanels.ContainsKey(currentMap))
+        {
+            Debug.Log("Loading panel ekrana verildi: " + currentMap);
+            mapLoadingPanels[currentMap].SetActive(true);
+
+            StartCoroutine(LoadMapAfterDelay(currentMap));
+        }
+        else
+        {
+            Debug.LogError("Harita bulunamadý: " + currentMap);
+        }
+    }
+
+    IEnumerator LoadMapAfterDelay(string mapName)
+    {
+        yield return new WaitForSeconds(3f);
+
+        if (mapLoadingPanels.ContainsKey(mapName))
+        {
+            mapLoadingPanels[mapName].SetActive(false);
+        }
+
+        // Haritayý yükle
+        Debug.Log("Harita yükleniyor: " + mapName);
+        PhotonNetwork.LoadLevel(mapName);
+    }
+
+    public void OnLevelCompleted()
+    {
         if (PhotonNetwork.IsMasterClient)
         {
-            StartCoroutine(CheckAllPlayersReady());
+            currentMapIndex++;
+            PlayerPrefs.SetInt("currentMapIndex", currentMapIndex);
+            PlayerPrefs.Save();
+
+            Debug.Log("CurrentMapIndex güncellendi: " + currentMapIndex);
+
+            if (currentMapIndex < mapList.Count)
+            {
+                Debug.Log("Sýradaki harita: " + mapList[currentMapIndex]);
+                ShowLoadingPanel();
+            }
+            else
+            {
+                Debug.Log("Tüm haritalar tamamlandý. Ana menüye dönülüyor.");
+                ReturnToMainMenu();
+            }
         }
     }
 
@@ -37,115 +95,30 @@ public class MapGecisGeriSayim : MonoBehaviourPunCallbacks
             timeRemaining -= Time.deltaTime;
             UpdateCountdownText();
         }
-        else if (!hasLoaded && PhotonNetwork.IsMasterClient && allPlayersReady)
+        else if (!hasLoaded && PhotonNetwork.IsMasterClient)
         {
-            StartCoroutine(NextSceneLoading());
+            Debug.Log("Süre bitti, bir sonraki harita yükleniyor.");
+            OnLevelCompleted();
             hasLoaded = true;
         }
     }
 
-    void UpdateCountdownText()
+    public void ReturnToMainMenu()
     {
-        countdownText.text = Mathf.Ceil(timeRemaining).ToString() + " seconds";
-    }
-
-    IEnumerator NextSceneLoading()
-    {
-        string nextMap = GetRandomUnvisitedMap();
-        if (!string.IsNullOrEmpty(nextMap))
-        {
-            photonView.RPC("LoadMapForAllPlayers", RpcTarget.All, nextMap);
-        }
-        else
-        {
-            ClearVisitedMapRecords();
-            SceneManager.LoadScene(mainMenu);
-        }
-
-        yield break;
-    }
-
-    [PunRPC]
-    void LoadMapForAllPlayers(string mapName)
-    {
-        int mapIndex = System.Array.IndexOf(mapNames, mapName);
-
-        if (mapIndex >= 0 && mapIndex < loadingPanels.Count)
-        {
-            loadingPanels[mapIndex].SetActive(true);
-        }
-
-        StartCoroutine(LoadMapAsync(mapName));
-    }
-
-    IEnumerator LoadMapAsync(string mapName)
-    {
-        yield return new WaitForSeconds(3f);
-
-        AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(mapName);
-
-        while (!asyncLoad.isDone)
-        {
-            yield return null;
-        }
-    }
-
-    void SaveCurrentScene()
-    {
-        string currentSceneName = SceneManager.GetActiveScene().name;
-        PlayerPrefs.SetInt(currentSceneName, 1);
-        PlayerPrefs.Save();
-    }
-
-    string GetRandomUnvisitedMap()
-    {
-        List<string> unvisitedMaps = new List<string>();
-
-        foreach (string mapName in mapNames)
-        {
-            if (PlayerPrefs.GetInt(mapName, 0) == 0)
-            {
-                unvisitedMaps.Add(mapName);
-            }
-        }
-
-        if (unvisitedMaps.Count > 0)
-        {
-            int randomIndex = Random.Range(0, unvisitedMaps.Count);
-            return unvisitedMaps[randomIndex];
-        }
-        else
-        {
-            return null;
-        }
-    }
-
-    void ClearVisitedMapRecords()
-    {
-        foreach (string mapName in mapNames)
-        {
-            PlayerPrefs.DeleteKey(mapName);
-        }
-        PlayerPrefs.Save();
-
         if (PhotonNetwork.InRoom)
         {
             PhotonNetwork.LeaveRoom();
         }
     }
 
-    IEnumerator CheckAllPlayersReady()
+    public override void OnLeftRoom()
     {
-        while (!allPlayersReady)
-        {
-            yield return new WaitForSeconds(1f);
-            photonView.RPC("PlayerIsReady", RpcTarget.AllBuffered);
-        }
+        PhotonNetwork.LoadLevel("MainMenu");
+        Debug.Log("Ana menüye dönüldü.");
     }
 
-    [PunRPC]
-    void PlayerIsReady()
+    void UpdateCountdownText()
     {
-        allPlayersReady = PhotonNetwork.PlayerList.Length == PhotonNetwork.CurrentRoom.PlayerCount;
+        countdownText.text = Mathf.Ceil(timeRemaining).ToString() + " saniye";
     }
 }

@@ -147,7 +147,7 @@ public class PlayerMovement : MonoBehaviour
         }
 
         string currentSceneName = SceneManager.GetActiveScene().name;
-        if (currentSceneName != "MainMenu" && currentSceneName != "Customize")
+        if (currentSceneName != "MainMenu" && currentSceneName != "Customize" && currentSceneName != "RoulettePG")
         {
             joystick = FindObjectOfType<Joystick>();
             jumpButton = GameObject.Find("JumpButton").GetComponent<Button>();
@@ -182,7 +182,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void HandleMovement()
     {
-        if (joystick != null)
+        if (joystick != null && SceneManager.GetActiveScene().name != "MainMenu")
         {
             Vector3 moveDirection = new Vector3(joystick.Horizontal(), 0, joystick.Vertical()).normalized;
 

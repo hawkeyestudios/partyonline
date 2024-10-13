@@ -37,10 +37,7 @@ public class BarrelManager : MonoBehaviourPunCallbacks
         ResetPlayerScores();
         ResetScoreTexts();
         gameOverPanel.SetActive(false);
-        if (PhotonNetwork.IsMasterClient)
-        {
-            SpawnPlayersForAll();
-        }
+        SpawnPlayerForSelf();
         SetPlayerProfileImage();
         GeriSayým.OnGameOver += GameOver_RPC;
         geriSayým.StartCountdown();
@@ -160,52 +157,51 @@ public class BarrelManager : MonoBehaviourPunCallbacks
             photonView.RPC("GameOver_RPC", RpcTarget.All);
         }
     }
-    private void SpawnPlayersForAll()
+    private void SpawnPlayerForSelf()
     {
-        foreach (var player in PhotonNetwork.PlayerList)
+        // Photon'daki oyuncu ActorNumber'ý kullanarak bir spawn noktasý seç
+        int playerActorNumber = PhotonNetwork.LocalPlayer.ActorNumber;
+
+        // Her oyuncu kendisini instantiate eder
+        int spawnPointIndex = (playerActorNumber - 1) % spawnPoints.Length;
+        Transform spawnPoint = spawnPoints[spawnPointIndex];
+        Vector3 spawnPosition = spawnPoint.position;
+        Quaternion spawnRotation = spawnPoint.rotation;
+
+        // Karakter prefab'ini al
+        string characterPrefabName = PlayerPrefs.GetString("LastEquippedCharacter", "DefaultCharacter");
+
+        if (!string.IsNullOrEmpty(characterPrefabName))
         {
-            SpawnPlayerForAll(player.ActorNumber);
-        }
-    }
+            GameObject character = PhotonNetwork.Instantiate(characterPrefabName, spawnPosition, spawnRotation, 0);
 
-    private void SpawnPlayerForAll(int playerActorNumber)
-    {
-        Player player = PhotonNetwork.PlayerList.FirstOrDefault(p => p.ActorNumber == playerActorNumber);
-
-        if (player != null)
-        {
-            int spawnPointIndex = (player.ActorNumber - 1) % spawnPoints.Length;
-            Transform spawnPoint = spawnPoints[spawnPointIndex];
-            Vector3 spawnPosition = spawnPoint.position;
-            Quaternion spawnRotation = spawnPoint.rotation;
-
-            string characterPrefabName = PlayerPrefs.GetString("LastEquippedCharacter", "DefaultCharacter");
-
-            if (!string.IsNullOrEmpty(characterPrefabName))
+            if (character != null)
             {
-                GameObject character = PhotonNetwork.Instantiate(characterPrefabName, spawnPosition, spawnRotation, 0);
+                // Oyuncu rengini ayarla
+                Renderer circleRenderer = character.transform.Find("Circle").GetComponent<Renderer>();
+                int playerIndex = playerActorNumber - 1;
 
-                if (character != null)
+                if (circleRenderer != null && playerIndex >= 0 && playerIndex < playerColors.Length)
                 {
-                    int playerIndex = player.ActorNumber - 1;
-                    Renderer circleRenderer = character.transform.Find("Circle").GetComponent<Renderer>();
-                    if (circleRenderer != null && playerIndex >= 0 && playerIndex < playerColors.Length)
-                    {
-                        circleRenderer.material.color = playerColors[playerIndex];
-                    }
-                    Debug.Log("Character successfully spawned.");
+                    circleRenderer.material.color = playerColors[playerIndex];
                 }
-                else
-                {
-                    Debug.LogError("Failed to instantiate character.");
-                }
+
+                // Karakteri oyuncuya atanmýþ bir tag olarak sakla
+                PhotonNetwork.LocalPlayer.TagObject = character;
+
+                Debug.Log("Character successfully spawned.");
             }
             else
             {
-                Debug.LogError("Character prefab not found in PlayerPrefs.");
+                Debug.LogError("Failed to instantiate character.");
             }
         }
+        else
+        {
+            Debug.LogError("Character prefab not found in PlayerPrefs.");
+        }
     }
+
     private void SetPlayerProfileImage()
     {
         string playerImageName = PlayerPrefs.GetString("LastEquippedCharacter");
