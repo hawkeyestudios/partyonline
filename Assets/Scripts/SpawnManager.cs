@@ -13,7 +13,7 @@ public class SpawnManager : MonoBehaviourPunCallbacks
     public Text[] rewardTexts;
     public Text[] nickNames;
     public GameObject gameOverPanel;
-    public GeriSayým geriSayým;
+    public GeriSayim geriSayým;
 
     private List<Player> finishOrder = new List<Player>();
     private bool raceFinished = false;
@@ -28,7 +28,7 @@ public class SpawnManager : MonoBehaviourPunCallbacks
         SpawnPlayerForSelf();
         SetPlayerProfileImage();
 
-        GeriSayým.OnGameOver += GameOver_RPC;
+        GeriSayim.OnGameOver += GameOver_RPC;
         geriSayým.StartCountdown();
     }
     private void SpawnPlayerForSelf()
@@ -171,7 +171,7 @@ public class SpawnManager : MonoBehaviourPunCallbacks
 
     private void OnDestroy()
     {
-        GeriSayým.OnGameOver -= GameOver_RPC;
+        GeriSayim.OnGameOver -= GameOver_RPC;
     }
 
 }

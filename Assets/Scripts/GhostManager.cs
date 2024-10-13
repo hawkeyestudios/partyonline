@@ -17,7 +17,7 @@ public class GhostManager : MonoBehaviourPunCallbacks
 
     public Text[] nickNames;
     public GameObject gameOverPanel;
-    public GeriSayým geriSayým;
+    public GeriSayim geriSayim;
 
     public Text[] gameOverScoreTexts;
 
@@ -35,10 +35,13 @@ public class GhostManager : MonoBehaviourPunCallbacks
         ResetPlayerScores();
         ResetScoreTexts();
         gameOverPanel.SetActive(false);
+
         SpawnPlayerForSelf();
-        GeriSayým.OnGameOver += GameOver_RPC;
+
+        GeriSayim.OnGameOver += GameOver_RPC;
+
         SetPlayerProfileImage();
-        geriSayým.StartCountdown();
+        geriSayim.StartCountdown();
 
         StartCoroutine(StartScoreCountingAfterDelay(10f));
     }
@@ -242,6 +245,6 @@ public class GhostManager : MonoBehaviourPunCallbacks
 
     private void OnDestroy()
     {
-        GeriSayým.OnGameOver -= GameOver_RPC;
+        GeriSayim.OnGameOver -= GameOver_RPC;
     }
 }
